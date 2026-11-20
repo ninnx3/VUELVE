@@ -15,7 +15,7 @@
   --tile:#f4f0f7; --seg:#ede7ee;
   --line:#e9e1e8; --bg:#fbf8fb; --green:#547969;
   --gold:#d4ac52; --base:#7aa898; --ex:#a99bd0; --food:#e2a08c;
-  --p:#b0607f; --c:#c99a3b; --g:#7b5ea7; --warn:#c0504d;
+  --p:#c45c72; --c:#7b5ea7; --g:#d4a72c; --warn:#c0504d;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
@@ -1335,10 +1335,17 @@ function dateTitle(s){const d=parse(s);return cap(DOWL[d.getDay()])+', '+d.getDa
 function bindArrows(prev,next,fn){$('#dp').onclick=()=>{prev();fn()};$('#dn').onclick=()=>{next();fn()}}
 
 /* ---------- Diario ---------- */
+// Color del anillo: verde pastel → amarillo al acercarte → naranja muy cerca → rojo si te pasas
+function ringColor(f){
+  const S=[[0,[110,207,151]],[0.7,[110,207,151]],[0.85,[242,207,92]],[0.97,[244,154,84]],[1,[244,140,76]]];
+  if(f>1.0001)return 'rgb(226,88,98)';
+  for(let i=1;i<S.length;i++)if(f<=S[i][0]){const [a,ca]=S[i-1],[b,cb]=S[i],t=(f-a)/(b-a||1);return 'rgb('+ca.map((v,j)=>Math.round(v+(cb[j]-v)*t)).join(',')+')'}
+  return 'rgb(244,140,76)';
+}
 function ring(val,max){
-  const r=58,C=2*Math.PI*r,p=Math.min(val/max,1);
+  const r=58,C=2*Math.PI*r,p=Math.min(val/max,1),col=ringColor(max>0?val/max:0);
   return `<svg width="132" height="132"><circle cx="66" cy="66" r="${r}" fill="none" stroke="#efe9ee" stroke-width="7"/>
-  <circle cx="66" cy="66" r="${r}" fill="none" stroke="${val>max*1.05?'var(--warn)':'var(--gold)'}" stroke-width="7" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-p)}" style="transition:stroke-dashoffset .5s"/></svg>`;
+  <circle cx="66" cy="66" r="${r}" fill="none" stroke="${col}" stroke-width="7" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-p)}" style="transition:stroke-dashoffset .5s"/></svg>`;
 }
 function vDiario(){
   const u=me(),pf=u.profile;
