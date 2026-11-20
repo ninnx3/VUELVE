@@ -322,7 +322,10 @@ textarea.in{min-height:90px;resize:vertical;font-size:11px;font-family:ui-monosp
 .mealtog{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
 .mealtog button{border:1px solid var(--line);background:#fff;border-radius:14px;padding:14px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:700;font-size:12px}
 .mealtog button span{font-size:26px}
-.mealtog button.on{border-color:var(--plum);background:var(--lilac);color:var(--plum)}
+.mealtog button{position:relative}
+.mealtog button.on{border:2px solid var(--plum);background:var(--lilac);color:var(--plum)}
+.mealtog button.on::after{content:'✓';position:absolute;top:8px;right:10px;width:22px;height:22px;border-radius:50%;background:var(--plum);color:#fff;font-size:13px;display:grid;place-items:center}
+.mealtog button:not(.on){opacity:.75}
 @media(max-width:480px){.mealtog{grid-template-columns:1fr 1fr}}
 .gen{text-align:center;padding:40px 10px}
 .gen .spin{font-size:46px;display:inline-block;animation:bob 1.4s ease-in-out infinite}
@@ -2129,9 +2132,9 @@ function mpWizard(){
     ${tags(INCLUIR,'incluir')}<label class="f"><span>Otros alimentos que no pueden faltar</span><input class="in" data-tx="incluirTxt" value="${esc(pr.incluirTxt)}" placeholder="Ej. kéfir, pan de centeno"></label>
     <p class="h3" style="margin-top:24px">¿Algo que evitar?</p><p class="small muted">Alergias, intolerancias o cosas que no te gustan.</p>
     ${tags(EVITAR,'evitar','no')}<label class="f"><span>Otros</span><input class="in" data-tx="evitarTxt" value="${esc(pr.evitarTxt)}" placeholder="Ej. no me gusta el cilantro"></label>`}
-  if(s==='comidas'){ok=pr.comidas.length>0;body=`<p class="eyebrow">Paso 3 de ${tot}</p><h2 class="h2" style="margin-top:8px">¿Qué comidas <span>diseñamos?</span></h2><p class="muted" style="margin-top:6px">Elige las comidas del día que quieres tener preparadas.</p>
+  if(s==='comidas'){ok=pr.comidas.length>0;body=`<p class="eyebrow">Paso 3 de ${tot}</p><h2 class="h2" style="margin-top:8px">¿Qué comidas <span>diseñamos?</span></h2><p class="muted" style="margin-top:6px">Elige las comidas del día que quieres tener preparadas. Toca para marcar o desmarcar (✓ = incluida).</p>
     <div class="mealtog">${MEALS.map(([n,i])=>`<button class="${pr.comidas.includes(n)?'on':''}" data-ml="${n}"><span>${i}</span>${n}</button>`).join('')}</div>
-    <p class="small muted" style="margin-top:12px">Las calorías de cada día se reparten entre las comidas que elijas.</p>`}
+    <p class="small muted" style="margin-top:12px">${pr.comidas.length?`Has elegido ${pr.comidas.length} de 4. `:'<b style="color:var(--p)">Marca al menos una comida para continuar.</b> '}Las calorías de cada día se reparten entre las comidas que elijas.</p>`}
   if(s==='cheat'){const n=pr.cheatDias.length;body=`<p class="eyebrow">Paso 4 de ${tot}</p><h2 class="h2" style="margin-top:8px">¿Cuándo te das <span>un gusto?</span></h2>
     <p class="muted" style="margin-top:6px">Elige tus días de cheatmeal. Siempre dentro de tus calorías y macros.</p>
     <div class="chips">${[1,2,3,4,5,6,0].map(i=>`<button class="chip ${pr.cheatDias.includes(i)?'on':''}" data-cd="${i}">${DOW[i]}</button>`).join('')}</div>
@@ -2147,7 +2150,7 @@ function mpWizard(){
     <p class="small" style="margin-top:6px">${mpTargets(u).map(t=>t.dia.slice(0,3)+' '+fmt(t.kcal)).join(' · ')} kcal · P ${targetFor(u,today()).p} g · C ${targetFor(u,today()).c} g · G ${targetFor(u,today()).g} g</p></div>`}
   $('#view').innerHTML=`<div style="padding-top:26px"><div class="row between"><span class="eyebrow">Crear Mealprep</span><button class="btn ghost" id="mpx">Cancelar</button></div>
     <div class="pbar"><i style="width:${(MP.step+1)/tot*100}%"></i></div><div style="margin-top:20px">${body}</div>
-    <div class="row" style="margin-top:26px">${MP.step>0?'<button class="btn soft" id="mpb">←</button>':''}<button class="btn block" id="mpn" ${ok?'':'disabled'}>${MP.step===tot-1?'✨ Generar mi menú':'Siguiente →'}</button></div></div>`;
+    <div class="row" style="margin-top:26px">${MP.step>0?'<button class="btn soft" id="mpb">←</button>':''}<button class="btn block" id="mpn" ${ok?'':'style="opacity:.55"'}>${MP.step===tot-1?'✨ Generar mi menú':'Siguiente →'}</button></div></div>`;
   $$('[data-tg]').forEach(b=>b.onclick=()=>{const k=b.dataset.tg,v=b.dataset.val;pr[k]=pr[k].includes(v)?pr[k].filter(x=>x!==v):[...pr[k],v];mpWizard()});
   $$('[data-tx]').forEach(i=>i.oninput=()=>pr[i.dataset.tx]=i.value);
   $$('[data-ml]').forEach(b=>b.onclick=()=>{const v=b.dataset.ml;pr.comidas=pr.comidas.includes(v)?pr.comidas.filter(x=>x!==v):MEAL_NAMES.filter(x=>x===v||pr.comidas.includes(x));mpWizard()});
@@ -2156,7 +2159,7 @@ function mpWizard(){
   $$('[data-tm]').forEach(b=>b.onclick=()=>{pr.tiempo=b.dataset.tm;mpWizard()});
   $('#mpx').onclick=()=>{MP.screen='home';vMenu()};
   if($('#mpb'))$('#mpb').onclick=()=>{MP.step--;mpWizard();scrollTo(0,0)};
-  $('#mpn').onclick=()=>{if(MP.step<tot-1){MP.step++;mpWizard();scrollTo(0,0)}else mpGenerate()};
+  $('#mpn').onclick=()=>{if(!ok){toast(s==='comidas'?'Marca al menos una comida':'Completa este paso para seguir');return}if(MP.step<tot-1){MP.step++;mpWizard();scrollTo(0,0)}else mpGenerate()};
 }
 
 let SAMPLE=undefined;
