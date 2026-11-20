@@ -66,9 +66,9 @@ input[type=date].in::-webkit-calendar-picker-indicator{opacity:.6}
 
 /* Cards */
 .card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px;margin-top:14px}
-.tile{background:var(--tile);border-radius:16px;padding:16px}
+.tile{background:var(--tile);border-radius:16px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;gap:14px}
 .tile .lbl{font-size:12px;font-weight:700}
-.tile .big{font-size:26px;font-weight:800;letter-spacing:-1px;margin-top:18px}
+.tile .big{font-size:26px;font-weight:800;letter-spacing:-1px;margin-top:auto;line-height:1}
 .tile .big small{font-size:11px;font-weight:500;color:var(--muted);letter-spacing:0}
 
 /* Header */
@@ -1083,7 +1083,7 @@ function targetFor(u,date){
 }
 function totals(foods){return (foods||[]).reduce((a,f)=>({k:a.k+f.k,p:a.p+f.p,c:a.c+f.c,g:a.g+f.g}),{k:0,p:0,c:0,g:0})}
 const MET={Suave:3.5,Media:5.5,Alta:8};
-function exKcal(u,mov){const kg=+u.profile.peso;return (mov||[]).reduce((a,m)=>a+(m.kcal!=null?m.kcal:MET[m.int||'Media']*kg*m.min/60),0)}
+function exKcal(u,mov){return (mov||[]).reduce((a,m)=>a+exKcalM(u,m),0)}
 
 function renderApp(){
   SCREEN.busy=false;
@@ -1378,7 +1378,7 @@ function vDiario(){
     </div>
     <div class="grid2" style="margin-top:16px">
       <div class="tile"><div class="lbl">Tu objetivo</div><div class="big">${fmt(tg.kcal)}<small>kcal</small></div></div>
-      <div class="tile"><div class="lbl">${disp>=0?'Calorías disponibles':'Te has pasado'}</div><div class="big" style="${disp<0?'color:var(--warn)':''}">${fmt(Math.abs(disp))}<small>kcal</small></div></div>
+      <div class="tile"><div class="lbl">${disp>=0?'Te quedan':'Te has pasado'}</div><div class="big" style="${disp<0?'color:var(--warn)':''}">${fmt(Math.abs(disp))}<small>kcal</small></div></div>
     </div>
     <div class="energy">
       <div class="row between"><span class="h3" style="font-size:13px">Gasto diario estimado</span><b>${fmt(gasto)} kcal</b></div>
@@ -1657,30 +1657,138 @@ function maybeWelcome(){
 }
 
 /* ---------- Movimiento ---------- */
-const TIPOS=['Gimnasio / fuerza','Caminar','Correr','Bici / spinning','Yoga / pilates','Clase dirigida','Otro'];
+/* ---------- Actividades y cálculo de calorías ----------
+   Cinta, caminar y correr: ecuaciones metabólicas del ACSM (velocidad + inclinación).
+   Bici con vatios: ecuación del ACSM para cicloergómetro.
+   Resto: valores MET del Compendio de Actividades Físicas, ajustados por nivel o intensidad.
+   kcal = MET × kg × horas  ·  VO2 (ml/kg/min) → kcal/min = VO2 × kg / 1000 × 5 */
+const ACTS={
+  fuerza:{ic:'🏋️',t:'Gimnasio · fuerza',k:'fuerza'},
+  cinta:{ic:'🚶‍♀️',t:'Cinta / caminadora',k:'cinta'},
+  eliptica:{ic:'〰️',t:'Elíptica',k:'nivel',met:[4,8.5]},
+  bici:{ic:'🚴‍♀️',t:'Bici estática',k:'bici',met:[3.5,10.5]},
+  remo:{ic:'🚣‍♀️',t:'Remo',k:'remo',met:[4.8,11]},
+  escaladora:{ic:'🪜',t:'Escaladora / StairMaster',k:'nivel',met:[6,11]},
+  spinning:{ic:'🚲',t:'Spinning',k:'int',met:{Suave:6.8,Media:8.5,Alta:10.5}},
+  caminar:{ic:'🌳',t:'Caminar al aire libre',k:'aire',v:5},
+  correr:{ic:'🏃‍♀️',t:'Correr al aire libre',k:'aire',v:9},
+  hiit:{ic:'⚡',t:'HIIT / funcional',k:'int',met:{Suave:6,Media:8,Alta:10}},
+  clase:{ic:'💃',t:'Clase dirigida',k:'int',met:{Suave:4.5,Media:6.5,Alta:8.5}},
+  yoga:{ic:'🧘‍♀️',t:'Yoga / pilates',k:'int',met:{Suave:2.5,Media:3,Alta:4}},
+  otro:{ic:'✨',t:'Otra actividad',k:'int',met:{Suave:3.5,Media:5,Alta:7}}
+};
+const MAQUINAS=['Prensa de piernas','Sentadilla','Hip thrust','Peso muerto rumano','Zancadas','Extensión de cuádriceps','Curl femoral','Abductores (máquina)','Aductores (máquina)','Patada de glúteo en polea',
+  'Press banca','Press inclinado','Aperturas / pec deck','Jalón al pecho','Remo sentado en polea','Remo con mancuerna','Press de hombro','Elevaciones laterales','Face pull',
+  'Curl de bíceps','Tríceps en polea','Fondos asistidos','Dominadas asistidas','Crunch abdominal','Plancha','Elevación de piernas'];
+const MET_FUERZA={Suave:3,Media:3.5,Alta:5};
+function vo2Kcal(v,inc,min,kg){const S=v*1000/60,G=(inc||0)/100;
+  const vo2=v<7?0.1*S+1.8*S*G+3.5:0.2*S+0.9*S*G+3.5;return vo2*kg/1000*5*min}
+function movKcal(m,kg){
+  if(m.kcalMaq>0)return m.kcalMaq;
+  const A=ACTS[m.tipo],h=(m.min||0)/60;
+  if(!A)return (MET[m.int||'Media']||5.5)*kg*h; // registros antiguos
+  const lvl=(rng)=>rng[0]+(rng[1]-rng[0])*(Math.min(Math.max(m.nivel||8,1),20)-1)/19;
+  switch(A.k){
+    case 'fuerza':return MET_FUERZA[m.int||'Media']*kg*h;
+    case 'cinta':return vo2Kcal(m.vel||5,m.inc||0,m.min||0,kg);
+    case 'aire':return vo2Kcal(m.vel||A.v,0,m.min||0,kg);
+    case 'bici':return m.watts>0?(7+10.8*m.watts/kg)*kg/1000*5*(m.min||0):lvl(A.met)*kg*h;
+    case 'remo':return m.watts>0?Math.min(14,3.5+m.watts*0.042)*kg*h:lvl(A.met)*kg*h;
+    case 'nivel':return lvl(A.met)*kg*h;
+    default:return (A.met[m.int||'Media'])*kg*h;
+  }
+}
+function movDetail(m){
+  const A=ACTS[m.tipo],p=[`${m.min} min`];
+  if(A&&(A.k==='cinta'||A.k==='aire')){p.push(`${dec(m.vel||A.v||5)} km/h`);if(A.k==='cinta')p.push(`${dec(m.inc||0)}% inclinación`);p.push(`${fmt1((m.vel||A.v||5)*m.min/60)} km`)}
+  if(A&&(A.k==='nivel'||((A.k==='bici'||A.k==='remo')&&!(m.watts>0))))p.push(`nivel ${m.nivel||8}`);
+  if(m.watts>0)p.push(`${m.watts} W`);
+  if(m.int&&(!A||A.k==='int'||A.k==='fuerza'))p.push(m.int.toLowerCase());
+  if(m.kcalMaq>0)p.push('kcal de la máquina');
+  return p.join(' · ');
+}
+function exKcalM(u,m){return m.kcal!=null?m.kcal:movKcal(m,+u.profile.peso)}
 function vMov(){
   const u=me(),log=peekLog(u,UI.date),ws=weekStart(UI.date);
   const days=[...Array(7)].map((_,i)=>addDays(ws,i));
   const done=days.filter(d=>(u.logs[d]?.mov||[]).length).length,goal=u.profile.dias.length;
+  const tot=log.mov.reduce((a,m)=>a+exKcalM(u,m),0),mins=log.mov.reduce((a,m)=>a+(+m.min||0),0);
   $('#view').innerHTML=heroHTML('Movimiento','Mueve el','cuerpo.')+`
   <div class="datenav"><button class="ar" id="dp">←</button><div class="t"><b>${dateTitle(UI.date)}</b><small>${UI.date===today()?'Hoy':'Registro del día'}</small></div><button class="ar" id="dn">→</button></div>
   <div class="card"><div class="row between movwk"><div><p class="eyebrow">Esta semana</p><div style="font-size:30px;font-weight:800;letter-spacing:-1.2px;margin-top:4px">${done}<span style="font-weight:500;color:var(--accent)"> / ${goal} días</span></div></div>
     <div class="row" style="gap:5px">${days.map(d=>{const has=(u.logs[d]?.mov||[]).length,pl=u.profile.dias.includes(parse(d).getDay());return `<span style="width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:11px;font-weight:700;${has?'background:var(--plum);color:#fff':pl?'background:var(--lilac);color:var(--plum)':'background:var(--tile);color:var(--muted)'}">${DOW[parse(d).getDay()]}</span>`}).join('')}</div></div>
     <div class="minibar" style="margin-top:14px"><i style="width:${Math.min(done/goal*100||0,100)}%;background:var(--plum)"></i></div>
     <p class="tiny muted" style="margin-top:8px">Lila = días planificados · Morado = días con actividad</p></div>
-  <div class="card"><p class="eyebrow">Registrar actividad</p>
-    <label class="f"><span>Tipo</span><select class="in" id="mt">${TIPOS.map(t=>`<option>${t}</option>`).join('')}</select></label>
-    <div class="grid2"><label class="f"><span>Minutos</span><input class="in" id="mm" type="number" inputmode="numeric" placeholder="45"></label>
-    <label class="f"><span>Intensidad</span><select class="in" id="mi"><option>Suave</option><option selected>Media</option><option>Alta</option></select></label></div>
-    <label class="f"><span>Notas</span><input class="in" id="mn" placeholder="Ej. Pierna + glúteo"></label>
-    <button class="btn block" style="margin-top:16px" id="ma">Guardar actividad</button></div>
-  <div class="card"><p class="eyebrow">Actividad del día · ${fmt(exKcal(u,log.mov))} kcal estimadas</p>
-    ${log.mov.length?log.mov.map((x,i)=>`<div class="item"><div class="n"><b>${esc(x.t)}</b><small>${x.min} min · ${x.int}${x.n?' · '+esc(x.n):''}</small></div><span class="k">${fmt(exKcal(u,[x]))} kcal</span><button class="x" data-del="${i}">✕</button></div>`).join(''):'<p class="muted small" style="margin-top:8px">Aún no hay nada. ¡Hasta un paseo cuenta!</p>'}
-  </div><p class="foot">Estimación con valores MET según intensidad y tu peso.</p>`;
+  <div class="grid2" style="margin-top:14px">
+    <div class="tile"><div class="lbl">Quemadas hoy</div><div class="big">${fmt(tot)}<small> kcal</small></div></div>
+    <div class="tile"><div class="lbl">Tiempo activo</div><div class="big">${fmt(mins)}<small> min</small></div></div></div>
+  <button class="btn block" style="margin-top:14px" id="madd">+ Añadir actividad</button>
+  <div class="card"><p class="eyebrow">Actividad del día</p>
+    ${log.mov.length?log.mov.map((x,i)=>{const A=ACTS[x.tipo];return `<div class="item" style="align-items:flex-start"><span style="font-size:22px;width:30px">${A?A.ic:'🏃‍♀️'}</span><div class="n"><b>${esc(x.t)}</b><small>${esc(movDetail(x))}</small>
+      ${(x.ej||[]).length?`<small style="margin-top:4px">${x.ej.map(e=>`${esc(e.n)}${e.s?' '+e.s+'×'+(e.r||'?'):''}${e.kg?' · '+dec(e.kg)+' kg':''}`).join('<br>')}</small>`:''}${x.n?`<small style="font-style:italic">${esc(x.n)}</small>`:''}</div>
+      <span class="k">${fmt(exKcalM(u,x))} kcal</span><button class="x" data-del="${i}">✕</button></div>`}).join(''):'<p class="muted small" style="margin-top:8px">Aún no hay nada. ¡Hasta un paseo cuenta!</p>'}
+  </div><p class="foot">Calorías estimadas con fórmulas del ACSM y valores MET, según tu peso (${fmt1(+u.profile.peso)} kg). Si tu máquina marca calorías, puedes usar las suyas.</p>`;
   bindArrows(()=>UI.date=addDays(UI.date,-1),()=>UI.date=addDays(UI.date,1),vMov);
-  $('#ma').onclick=()=>{const min=num($('#mm').value);if(!min){toast('Indica los minutos');return}
-    dayLog(u,UI.date).mov.push({t:$('#mt').value,min,int:$('#mi').value,n:$('#mn').value});save();toast('Actividad guardada ✓');vMov()};
+  $('#madd').onclick=openActividad;
   $$('[data-del]').forEach(b=>b.onclick=()=>{dayLog(u,UI.date).mov.splice(+b.dataset.del,1);save();vMov()});
+}
+function openActividad(){
+  const u=me(),kg=+u.profile.peso;let st={tipo:null,min:'',int:'Media',vel:'',inc:'',nivel:8,watts:'',kcalMaq:'',n:'',ej:[]};
+  const m=modal(`<div class="top"><b id="atit">Añadir actividad</b><button class="close">✕</button></div><div id="ab"></div>`);
+  const ab=()=>m.querySelector('#ab');
+  const field=(id,label,val,ph,mode='decimal')=>`<label class="f" style="margin-top:10px"><span>${label}</span><input class="in dec" id="${id}" type="text" inputmode="${mode}" value="${esc(dec(val))}" placeholder="${ph}"></label>`;
+  const pickTipo=()=>{
+    m.querySelector('#atit').textContent='¿Qué has hecho?';
+    ab().innerHTML=`<div class="grid2" style="margin-top:14px">${Object.entries(ACTS).map(([k,a])=>`<button class="opt" data-tp="${k}" style="padding:12px;flex-direction:column;align-items:flex-start;gap:6px"><span style="font-size:24px">${a.ic}</span><b style="font-size:13px">${a.t}</b></button>`).join('')}</div>`;
+    ab().querySelectorAll('[data-tp]').forEach(b=>b.onclick=()=>{st.tipo=b.dataset.tp;if(ACTS[st.tipo].k==='aire'&&!st.vel)st.vel=ACTS[st.tipo].v;form()});
+  };
+  const read=()=>{const g=id=>{const e=ab().querySelector('#'+id);return e?num(e.value):''};
+    st.min=g('amin');st.vel=g('avel');st.inc=g('ainc');st.watts=g('awat');st.kcalMaq=g('akm');
+    const nv=ab().querySelector('#aniv');if(nv)st.nivel=+nv.value;const nn=ab().querySelector('#anot');if(nn)st.n=nn.value;
+    ab().querySelectorAll('[data-ej]').forEach(r=>{const i=+r.dataset.ej,q=s=>num(r.querySelector(s).value);st.ej[i]={...st.ej[i],s:q('.es'),r:q('.er'),kg:q('.ek')}})};
+  const preview=()=>{read();const A=ACTS[st.tipo];const k=st.min>0||st.kcalMaq>0?movKcal({...st},kg):0;
+    let extra='';
+    if((A.k==='cinta'||A.k==='aire')&&st.min>0&&st.vel>0)extra=`${fmt1(st.vel*st.min/60)} km recorridos`;
+    if(A.k==='fuerza'){const vol=st.ej.reduce((a,e)=>a+(e.s||0)*(e.r||0)*(e.kg||0),0);if(vol)extra=`Volumen total: ${fmt(vol)} kg levantados`}
+    ab().querySelector('#apv').innerHTML=`<div class="row between"><b style="font-size:26px;font-weight:800;letter-spacing:-1px">${fmt(k)} kcal</b><span class="small muted">${st.kcalMaq>0?'según la máquina':'estimadas'}</span></div>${extra?`<p class="small muted" style="margin-top:4px">${extra}</p>`:''}`};
+  const form=()=>{
+    const A=ACTS[st.tipo];m.querySelector('#atit').textContent=A.ic+' '+A.t;
+    let f=`<button class="back" id="aback">← Cambiar actividad</button>`;
+    f+=field('amin','Minutos',st.min,'Ej. 30','numeric');
+    if(A.k==='cinta')f+=`<div class="grid2">${field('avel','Velocidad (km/h)',st.vel,'Ej. 5,5')}${field('ainc','Inclinación (%)',st.inc,'Ej. 8')}</div>
+      <p class="tiny muted" style="margin-top:6px">Si tu cinta va por niveles, mira la velocidad en km/h en la pantalla.</p>`;
+    if(A.k==='aire')f+=field('avel','Ritmo medio (km/h)',st.vel,A.v===9?'Ej. 9':'Ej. 5');
+    if(A.k==='nivel'||A.k==='bici'||A.k==='remo')f+=`<label class="f" style="margin-top:10px"><span>Nivel / resistencia: <b id="anivv">${st.nivel}</b> de 20</span><input id="aniv" type="range" min="1" max="20" value="${st.nivel}" style="width:100%;accent-color:var(--plum)"></label>`;
+    if(A.k==='bici'||A.k==='remo')f+=field('awat','Vatios medios (si la máquina los muestra)',st.watts,'Opcional · ej. 120','numeric');
+    if(A.k==='int'||A.k==='fuerza')f+=`<label class="f" style="margin-top:10px"><span>Intensidad</span></label><div class="optc three">${['Suave','Media','Alta'].map(x=>`<button class="tag ${st.int===x?'on':''}" data-ai="${x}">${x}</button>`).join('')}</div>`;
+    if(A.k==='fuerza'){
+      f+=`<label class="f"><span>Máquinas y ejercicios</span></label>
+      <div id="ejl">${st.ej.map((e,i)=>`<div class="pv" data-ej="${i}" style="background:#fff;border:1px solid var(--line);margin-top:8px;padding:10px 12px">
+        <div class="row between"><b style="font-size:13px">${esc(e.n)}</b><button class="x" data-ejx="${i}">✕</button></div>
+        <div class="grid3 tiny muted" style="margin-top:6px;font-weight:700"><span>Series</span><span>Reps</span><span>kg</span></div><div class="grid3" style="margin-top:2px"><input class="in dec es" inputmode="numeric" placeholder="Series" value="${esc(dec(e.s??''))}"><input class="in dec er" inputmode="numeric" placeholder="Reps" value="${esc(dec(e.r??''))}"><input class="in dec ek" inputmode="decimal" placeholder="kg" value="${esc(dec(e.kg??''))}"></div></div>`).join('')}</div>
+      <div class="tags" style="margin-top:10px;max-height:160px;overflow:auto">${MAQUINAS.map(x=>`<button class="tag" data-mq="${esc(x)}" style="font-size:12px;padding:7px 11px">+ ${esc(x)}</button>`).join('')}</div>
+      <div class="searchrow"><input class="in" id="aotro" placeholder="Otro ejercicio o máquina"><button class="btn" id="aotrob" style="padding:10px 14px;font-size:12px">Añadir</button></div>`}
+    f+=field('akm','Calorías que marca la máquina o el reloj (opcional)',st.kcalMaq,'Si las sabes, usamos estas','numeric');
+    f+=`<label class="f" style="margin-top:10px"><span>Notas</span><input class="in" id="anot" value="${esc(st.n)}" placeholder="Ej. Pierna + glúteo"></label>
+      <div class="pv" id="apv"></div><button class="btn block" style="margin-top:14px" id="asave">Guardar actividad</button>`;
+    ab().innerHTML=f;
+    ab().querySelector('#aback').onclick=()=>{read();pickTipo()};
+    ab().querySelectorAll('input').forEach(i=>i.addEventListener('input',()=>{if(i.id==='aniv')ab().querySelector('#anivv').textContent=i.value;preview()}));
+    ab().querySelectorAll('[data-ai]').forEach(b=>b.onclick=()=>{read();st.int=b.dataset.ai;form()});
+    ab().querySelectorAll('[data-mq]').forEach(b=>b.onclick=()=>{read();st.ej.push({n:b.dataset.mq});form();const l=ab().querySelectorAll('[data-ej] .es');if(l.length)l[l.length-1].focus()});
+    ab().querySelectorAll('[data-ejx]').forEach(b=>b.onclick=()=>{read();st.ej.splice(+b.dataset.ejx,1);form()});
+    const ao=ab().querySelector('#aotrob');if(ao)ao.onclick=()=>{read();const v=ab().querySelector('#aotro').value.trim();if(v){st.ej.push({n:v});form()}};
+    ab().querySelector('#asave').onclick=()=>{read();
+      if(!(st.min>0)){toast('Indica los minutos');ab().querySelector('#amin').focus();return}
+      if(A.k==='cinta'&&!(st.vel>0)){toast('Indica la velocidad');return}
+      const e={tipo:st.tipo,t:A.t,min:st.min,...(A.k==='int'||A.k==='fuerza'?{int:st.int}:{}),...(st.vel>0?{vel:st.vel}:{}),...(st.inc>0?{inc:st.inc}:{}),
+        ...((A.k==='nivel'||A.k==='bici'||A.k==='remo')?{nivel:st.nivel}:{}),...(st.watts>0?{watts:st.watts}:{}),...(st.kcalMaq>0?{kcalMaq:st.kcalMaq}:{}),
+        ...(st.ej.length?{ej:st.ej.filter(x=>x.n)}:{}),...(st.n?{n:st.n}:{})};
+      e.kcal=Math.round(movKcal(e,kg));
+      dayLog(u,UI.date).mov.push(e);save();m.remove();toast('Actividad guardada ✓ · '+fmt(e.kcal)+' kcal');vMov()};
+    preview();
+  };
+  pickTipo();
 }
 
 /* ---------- Progreso ---------- */
