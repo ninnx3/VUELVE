@@ -42,6 +42,22 @@ nav.tabs{transform:translateZ(0)}
 .between{justify-content:space-between}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.silu{position:relative;margin-top:8px}
+.silu svg{position:absolute;left:0;top:0}
+.silu .mrow{position:absolute;left:0;right:0;height:36px;display:flex;align-items:center;justify-content:flex-end;pointer-events:none}
+.silu .mrow i{position:absolute;right:172px;top:50%;border-top:1.5px dashed var(--plum);opacity:.55}
+.silu .mrow i::before{content:'';position:absolute;left:-4px;top:-4.5px;width:7px;height:7px;border-radius:50%;background:var(--plum)}
+.silu .mrow label{pointer-events:auto;width:166px;display:flex;align-items:center;gap:6px;background:var(--bg,#fdfafc);border-radius:12px}
+.silu .mrow label span{width:64px;font-size:10.5px;font-weight:700;color:var(--plum);text-transform:uppercase;letter-spacing:.8px;text-align:right}
+.silu .mi{flex:1}
+.silu .mi{position:relative}.silu .mi .in{padding:8px 34px 8px 10px;margin:0;height:auto}.silu .mi small{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--soft);font-size:12px}
+.medgrid .stat small{display:block}
+@media(max-width:640px){.medgrid{grid-template-columns:1fr 1fr}}
+.sheet.wide{max-width:720px}
+.ingrow{display:grid;grid-template-columns:1fr 70px 78px 1fr 40px;gap:6px;margin-top:6px;align-items:center}
+.ingrow .in{padding:10px 8px;font-size:16px}
+@media(max-width:640px){.ingrow{grid-template-columns:1fr 64px 74px 40px}.ingrow [data-if=sec]{display:none}.grid4{grid-template-columns:1fr 1fr}}
 .eyebrow{font-size:9px;font-weight:800;color:var(--soft);letter-spacing:1.5px;text-transform:uppercase}
 .h1{font-size:40px;font-weight:800;letter-spacing:-2.2px;line-height:1.05}
 .h1 span,.h2 span{font-weight:500;color:var(--accent)}
@@ -597,7 +613,7 @@ const RETOS_API={
     else if(error)throw error},null)
 };
 async function logout(){
-  const d=load();UI.view='diario';UI.date=today();UI.range='dia';MP.screen='home';
+  const d=load();UI.view='diario';UI.date=today();UI.range='dia';MP.screen='home';LIB.admin=false;LIB.adminChecked=false;LIB.recetas=null;
   if(CLOUD.db){clearTimeout(CLOUD.timer);try{await flush();for(let i=0;i<20&&CLOUD.busy;i++)await new Promise(r=>setTimeout(r,100))}catch(e){}}
   if(SERVER&&SB){await SB.auth.signOut().catch(()=>{});MEM={users:{},session:null,retos:{}};CLOUD.db=null;CLOUD.last={};saveLocal()}
   else{d.session=null;save()}
@@ -1126,7 +1142,8 @@ function renderApp(){
   </div></nav>`;
   $$('nav.tabs button').forEach(b=>b.onclick=()=>{UI.view=b.dataset.v;if(b.dataset.v==='menu'&&MP.screen!=='gen')MP.screen='home';renderApp();scrollTo(0,0)});
   $('#av').onclick=e=>{e.stopPropagation();toggleDD()};
-  ({diario:vDiario,movimiento:vMov,progreso:vProgreso,plan:vPlan,espacio:vEspacio,menu:vMenu,retos:vRetos})[UI.view]();
+  ({diario:vDiario,movimiento:vMov,progreso:vProgreso,plan:vPlan,espacio:vEspacio,menu:vMenu,retos:vRetos,biblio:vBiblio})[UI.view]();
+  if(SERVER&&!LIB.adminChecked)libCheckAdmin().catch(()=>{});
 }
 
 /* ---------- Menú del avatar ---------- */
@@ -1139,6 +1156,7 @@ function toggleDD(){
     <button class="it" data-go="espacio"><span class="ic" style="background:var(--lilac)">🌿</span><div>Mi Espacio<small>Tus datos, compromiso y copias</small></div></button>
     <button class="it" data-go="invitar"><span class="ic" style="background:var(--pink)">💌</span><div>Añadir amigo a Vuelve<small>Invítale a un reto en conjunto</small></div></button>
     <button class="it" data-go="retos"><span class="ic" style="background:var(--beige)">🏆</span><div>Retos con amigos${inv.length?` <span class="pill warn" style="margin-left:4px">${inv.length} nuevo${inv.length>1?'s':''}</span>`:''}<small>Clasificación y progreso</small></div></button>
+    ${LIB.admin?`<button class="it" data-go="biblio"><span class="ic" style="background:var(--mint,#e3f4ea)">📚</span><div>Biblioteca de recetas<small>Solo administradoras</small></div></button>`:''}
     <hr>
     ${Object.keys(d.users).length>1?`<button class="it" data-go="cambiar"><span class="ic" style="background:var(--tile)">🔁</span><div>Cambiar de cuenta</div></button>`:''}
     <button class="it" data-go="salir"><span class="ic" style="background:var(--tile)">↪</span><div>Cerrar sesión</div></button>`;
@@ -1147,7 +1165,7 @@ function toggleDD(){
   const close=()=>{dd.remove();document.removeEventListener('click',close)};
   setTimeout(()=>document.addEventListener('click',close),0);
   dd.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{close();const g=b.dataset.go;
-    if(g==='espacio'||g==='retos'){UI.view=g;renderApp();scrollTo(0,0);if(g==='retos'&&SERVER)sbLoadRetos().then(()=>{if(UI.view==='retos')renderApp()})}
+    if(g==='espacio'||g==='retos'||g==='biblio'){UI.view=g;renderApp();scrollTo(0,0);if(g==='retos'&&SERVER)sbLoadRetos().then(()=>{if(UI.view==='retos')renderApp()})}
     else if(g==='invitar')openInvite();
     else if(g==='cambiar'){d.session=null;save();renderAuth('login')}
     else if(g==='salir')logout()});
@@ -1894,22 +1912,78 @@ function vProgreso(){
     <div class="legend"><span><i style="background:var(--base)"></i>Días cumplidos (±10% kcal)</span><span><i style="background:var(--ex)"></i>Días de movimiento</span><span>- - meta ${goal} días</span></div></div>
   <div class="card"><p class="eyebrow">Registros de peso</p>
     ${W.slice().reverse().map(w=>`<div class="wk"><span>${cap(DOWL[parse(w.date).getDay()])} ${parse(w.date).getDate()} ${MON[parse(w.date).getMonth()]} ${parse(w.date).getFullYear()}</span><span class="row" style="gap:4px"><b>${fmt1(w.kg)} kg</b><button class="x" data-dw="${w.date}">✕</button></span></div>`).join('')||'<p class="muted small">Sin registros.</p>'}
-  </div>`;
-  $('#ci').onclick=checkin;
+  </div>
+  ${medidasCard(u)}`;
+  $('#ci').onclick=()=>checkin(false);$('#ci2').onclick=()=>checkin(false);
+  $$('[data-dm]').forEach(b=>b.onclick=()=>{u.medidas=(u.medidas||[]).filter(x=>x.date!==b.dataset.dm);save();vProgreso()});
   $$('[data-dw]').forEach(b=>b.onclick=()=>{u.weights=u.weights.filter(w=>w.date!==b.dataset.dw);save();vProgreso()});
 }
-function checkin(){
-  const u=me();
-  const m=modal(`<div class="top"><b>Check-in</b><button class="close">✕</button></div>
-    <h3 class="h2" style="font-size:24px;margin-top:12px">¿Cómo vamos <span>esta semana?</span></h3><p class="small muted" style="margin-top:6px">Recomendado: mismo día y hora cada semana, en ayunas.</p>
-    <label class="f"><span>Fecha</span><input class="in" type="date" id="cdt" value="${today()}" max="${today()}"></label>
-    <label class="f"><span>Peso (kg)</span><input class="in dec" type="text" inputmode="decimal" id="ck" value="${dec(u.weights.at(-1)?.kg??'')}"></label>
-    <label class="row small" style="margin-top:14px;gap:8px"><input type="checkbox" id="cu" checked> Actualizar mi plan con este peso</label>
-    <button class="btn block" style="margin-top:18px" id="cs">Guardar peso</button>
-    <button class="btn soft block" style="margin-top:8px" id="cl">Ahora no, lo haré después</button>`);
-  m.querySelector('#cl').onclick=()=>m.remove();
-  m.querySelector('#cs').onclick=()=>{const kg=num(m.querySelector('#ck').value),d=m.querySelector('#cdt').value;if(!(kg>=30&&kg<=300)){toast('Peso no válido');return}
-    upsertWeight(u,d,kg);if(m.querySelector('#cu').checked&&d===u.weights.at(-1).date)u.profile.peso=kg;save();m.remove();toast('Peso guardado ✓');renderApp()};
+const MEDIDAS=[['pecho','Pecho',105,110],['cintura','Cintura',147,99],['cadera','Cadera',185,110],['muslo','Pierna',232,104]];
+const SIL_H=372;
+function siluetaHTML(prev){
+  const k=SIL_H/360;
+  const half='M80,62 C90,62 96,64 100,66 C108,68 114,72 114,82 L110,108 C108,125 100,135 99,147 C99,160 110,170 110,185 C110,210 106,235 102,260 C100,280 99,300 97,320 L95,345 L104,352 L86,352 L87,320 C87,290 86,260 84,230 C83,215 82,205 80,200 Z';
+  const arm='M114,80 C120,95 122,120 123,150 C124,175 126,195 127,210 C127,218 121,219 119,212 C117,195 115,175 113,155 C112,135 111,115 110,100 Z';
+  return `<div class="silu" style="height:${SIL_H}px">
+    <svg viewBox="0 0 160 360" width="${Math.round(160*k)}" height="${SIL_H}" aria-hidden="true">
+      <defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#efe6f3"/><stop offset="1" stop-color="#e2d3e6"/></linearGradient></defs>
+      <g fill="url(#sg)" stroke="#b79bb2" stroke-width="1.4" stroke-linejoin="round">
+        <circle cx="80" cy="34" r="20"/><rect x="73" y="50" width="14" height="16" rx="5" stroke="none"/>
+        <path d="${half}"/><path d="${half}" transform="translate(160,0) scale(-1,1)"/>
+        <path d="${arm}"/><path d="${arm}" transform="translate(160,0) scale(-1,1)"/>
+        <rect x="76" y="64" width="8" height="134" stroke="none"/>
+      </g>
+      ${MEDIDAS.map(([id,,y,x])=>id==='muslo'?`<ellipse cx="${(x+84)/2}" cy="${y}" rx="${(x-84)/2+2}" ry="4" fill="none" stroke="var(--plum)" stroke-width="1.6" stroke-dasharray="3 2.5"/>`
+        :`<ellipse cx="80" cy="${y}" rx="${x-80+2}" ry="5" fill="none" stroke="var(--plum)" stroke-width="1.6" stroke-dasharray="3 2.5"/>`).join('')}
+    </svg>
+    ${MEDIDAS.map(([id,lab,y,x])=>`<div class="mrow" style="top:${Math.round(y*k)-18}px"><i style="left:${Math.round((x+2)*k)}px"></i>
+      <label><span>${lab}</span><div class="mi"><input class="in dec" type="text" inputmode="decimal" data-med="${id}" placeholder="${prev&&prev[id]?dec(prev[id]):'—'}"><small>cm</small></div></label></div>`).join('')}
+  </div>`;
+}
+function checkinDue(u){
+  const fri=addDays(weekStart(today()),4);
+  if(today()<fri)return false;
+  if((u.weights||[]).some(w=>w.date>=fri))return false;
+  return u.ciSkip!==today();
+}
+function maybeCheckin(){const u=me();if(!u||!u.profile||!checkinDue(u))return false;checkin(true);return true}
+function checkin(auto){
+  const u=me(),M=u.medidas||[],prev=M.at(-1)||null;
+  const fri=parse(today()).getDay()===5;
+  const m=modal(`<div class="top"><b>${auto?(fri?'✨ Check-in del viernes':'✨ Te falta el check-in del viernes'):'Check-in'}</b><button class="close">✕</button></div>
+    <h3 class="h2" style="font-size:24px;margin-top:12px">¿Cómo vamos <span>esta semana?</span></h3>
+    <p class="small muted" style="margin-top:6px">Pésate en ayunas, después de ir al baño. Mide con la cinta ajustada pero sin apretar, siempre en el mismo punto.</p>
+    <div class="grid2" style="margin-top:6px"><label class="f"><span>Fecha</span><input class="in" type="date" id="cdt" value="${today()}" max="${today()}"></label>
+      <label class="f"><span>Peso (kg)</span><input class="in dec" type="text" inputmode="decimal" id="ck" placeholder="${dec(u.weights.at(-1)?.kg??'')||'Ej. 68,4'}"></label></div>
+    <label class="row small" style="margin-top:10px;gap:8px"><input type="checkbox" id="cu" checked> Actualizar mi plan con este peso</label>
+    <p class="eyebrow" style="margin-top:18px">Medidas <span class="muted" style="text-transform:none;letter-spacing:0">(opcional)</span></p>
+    ${siluetaHTML(prev)}
+    ${prev?`<p class="tiny muted" style="margin-top:4px">En gris, tus últimas medidas (${parse(prev.date).getDate()} ${MON[parse(prev.date).getMonth()]}).</p>`:''}
+    <div class="err" id="cerr"></div>
+    <button class="btn block" style="margin-top:14px" id="cs">Guardar check-in</button>
+    <button class="btn soft block" style="margin-top:8px" id="cl">${auto?'Recuérdamelo mañana':'Ahora no'}</button>`);
+  m.querySelector('#cl').onclick=()=>{if(auto){u.ciSkip=today();save()}m.remove()};
+  m.querySelector('.close').addEventListener('click',()=>{if(auto){u.ciSkip=today();save()}});
+  m.querySelector('#cs').onclick=()=>{
+    const kgS=m.querySelector('#ck').value.trim(),kg=num(kgS),d=m.querySelector('#cdt').value,med={};let bad='';
+    m.querySelectorAll('[data-med]').forEach(i=>{const v=num(i.value);if(i.value.trim()==='')return;if(!(v>=20&&v<=200))bad='Revisa las medidas (entre 20 y 200 cm).';else med[i.dataset.med]=v});
+    if(kgS&&!(kg>=30&&kg<=300))bad='Peso no válido.';
+    if(!kgS&&!Object.keys(med).length)bad='Escribe tu peso o alguna medida.';
+    if(bad){m.querySelector('#cerr').textContent=bad;return}
+    if(kgS){upsertWeight(u,d,kg);if(m.querySelector('#cu').checked&&d===u.weights.at(-1).date)u.profile.peso=kg}
+    if(Object.keys(med).length){u.medidas=(u.medidas||[]).filter(x=>x.date!==d);u.medidas.push({date:d,...med});u.medidas.sort((a,b)=>a.date.localeCompare(b.date))}
+    save();m.remove();toast('Check-in guardado ✓');renderApp()};
+}
+function medidasCard(u){
+  const M=u.medidas||[];
+  if(!M.length)return `<div class="card"><div class="row between"><p class="eyebrow">Medidas</p><button class="btn soft sm" id="ci2">📏 Añadir</button></div><p class="muted small" style="margin-top:10px">Cada viernes te recordaremos pesarte y medirte. Las medidas enseñan cambios que la báscula no ve.</p></div>`;
+  const firstOf=id=>M.find(x=>x[id]!=null),lastOf=id=>[...M].reverse().find(x=>x[id]!=null);
+  return `<div class="card"><div class="row between"><p class="eyebrow">Medidas</p><button class="btn soft sm" id="ci2">📏 Añadir</button></div>
+    <div class="grid4 medgrid" style="margin-top:12px">${MEDIDAS.map(([id,lab])=>{const a=firstOf(id),b=lastOf(id);if(!b)return `<div class="stat"><b>—</b><small>${lab}</small></div>`;
+      const df=a&&a!==b?Math.round((b[id]-a[id])*10)/10:null;
+      return `<div class="stat"><b>${fmt1(b[id])}<span style="font-size:12px;font-weight:600"> cm</span></b><small>${lab}</small>${df!=null?`<small style="color:${df<=0?'var(--green)':'#a86a2d'};font-weight:700">${df>0?'+':''}${dec(df)} cm</small>`:''}</div>`}).join('')}</div>
+    <div style="margin-top:12px">${M.slice().reverse().slice(0,6).map(x=>`<div class="wk"><span>${parse(x.date).getDate()} ${MON[parse(x.date).getMonth()]} ${parse(x.date).getFullYear()}</span><span class="small">${MEDIDAS.filter(([id])=>x[id]!=null).map(([id,lab])=>`${lab.slice(0,3)}. ${dec(x[id])}`).join(' · ')} <button class="x" data-dm="${x.date}" title="Borrar">✕</button></span></div>`).join('')}</div>
+    ${M.length>1?'<p class="tiny muted" style="margin-top:8px">Cambio desde tu primera medida.</p>':''}</div>`;
 }
 
 /* ---------- Mi plan ---------- */
@@ -2050,7 +2124,7 @@ function vMenu(){
     $('#view').innerHTML=heroHTML('Menú','Tu menú,','a tu gusto.')+`
     <div class="card" style="padding:0;overflow:hidden"><div style="height:260px">${ILLU}</div>
       <div style="padding:22px"><div class="h3" style="font-size:20px">Crear Mealprep</div>
-      <p class="muted" style="margin-top:6px">Cuéntanos qué te gusta, qué quieres incluir y cuándo te das un capricho. La IA diseña tu semana de lunes a domingo ajustada a tus ${fmt(targetFor(u,today()).kcal)} kcal y tus macros, con recetas, tiempos y lista de la compra.</p>
+      <p class="muted" style="margin-top:6px">Cuéntanos qué te gusta, qué quieres incluir y cuándo te das un capricho. ${IN_CLAUDE?'La IA diseña':'Diseñamos'} tu semana de lunes a domingo ajustada a tus ${fmt(targetFor(u,today()).kcal)} kcal y tus macros, con recetas, tiempos y lista de la compra.</p>
       <button class="btn block" style="margin-top:18px" id="mpnew">✨ Crear Mealprep</button></div></div>
     <div class="grid3" style="margin-top:14px"><div class="stat"><b>7</b><small>días</small></div><div class="stat"><b>±5%</b><small>de tus kcal</small></div><div class="stat"><b>🛒</b><small>lista de la compra</small></div></div>`;
     $('#mpnew').onclick=()=>{MP.prefs=mpDefaults(u);MP.step=0;MP.screen='wizard';vMenu();scrollTo(0,0)};
@@ -2082,7 +2156,9 @@ function vMenu(){
     ${rows.map(row=>`<div class="rh"><span>${mealIc(row)}</span>${row}</div>${plan.semana.map(s=>row==='Capricho'?(s.capricho?dish(s.capricho,'Capricho'):'<div class="dish empty">·</div>'):dish(s.comidas[row],row)).join('')}`).join('')}
   </div></div>
   <p class="tiny muted" style="margin-top:6px">Desliza para ver toda la semana · Toca un plato para ver la receta · Verde = día dentro de ±5% de tus calorías.</p>`}
-  <p class="foot">Menú generado con IA a partir de tus preferencias. Revisa ingredientes si tienes alergias.</p>`;
+  ${plan.fuente!=='biblioteca'&&IN_CLAUDE?'<button class="btn ghost sm" id="mpexp" style="margin-top:14px">📋 Copiar recetas para la biblioteca</button>':''}
+  <p class="foot">${plan.fuente==='biblioteca'?'Menú creado con recetas de Vuelve, con cantidades ajustadas a tus calorías.':'Menú generado con IA a partir de tus preferencias.'} Revisa ingredientes si tienes alergias.</p>`;
+  if($('#mpexp'))$('#mpexp').onclick=async()=>{try{await navigator.clipboard.writeText(JSON.stringify({recetas:plan.recetas}));toast('Copiado. Pégalo en Biblioteca → Importar ✓')}catch(e){modal(`<div class="top"><b>Recetas en JSON</b><button class="close">✕</button></div><textarea class="in" style="min-height:240px;font-family:monospace;font-size:11px;margin-top:10px" readonly>${esc(JSON.stringify({recetas:plan.recetas}))}</textarea>`)}};
   $('#mpre').onclick=()=>{MP.prefs=JSON.parse(JSON.stringify(pr));MP.step=0;MP.screen='wizard';vMenu();scrollTo(0,0)};
   $$('[data-rec]').forEach(b=>b.onclick=()=>openRecipe(R_(b.dataset.rec)));
   $$('.mpdays [data-day]').forEach(b=>b.onclick=()=>{MP.day=+b.dataset.day;vMenu()});
@@ -2106,7 +2182,7 @@ function openRecipe(r){
     ${r.descripcion?`<p class="muted small" style="margin-top:6px">${esc(r.descripcion)}</p>`:''}
     <div class="plan" style="margin-top:14px"><div class="kc" style="font-size:32px">${r.kcal}<small> kcal / ración</small></div>
       <div class="mm"><div><b style="color:var(--p)">${r.p}g</b><small>Proteínas</small></div><div><b style="color:var(--c)">${r.c}g</b><small>Carbohidratos</small></div><div><b style="color:var(--g)">${r.g}g</b><small>Grasas</small></div></div></div>
-    <div class="chips2"><span>⏱️ Prep. ${r.prep_min} min</span><span>🔥 Cocción ${r.coccion_min} min</span>${r.raciones_lote?`<span>🥡 Lote de ${r.raciones_lote} raciones</span>`:''}</div>
+    <div class="chips2"><span>⏱️ Prep. ${r.prep_min} min</span><span>🔥 Cocción ${r.coccion_min} min</span>${r.raciones_lote?`<span>🥡 Lote de ${r.raciones_lote} ración${r.raciones_lote>1?"es":""}</span>`:''}</div>
     <p class="eyebrow" style="margin-top:20px">Ingredientes · 1 ración</p>
     <ul class="ing">${r.ingredientes.map(i=>`<li>${esc(i.item)}<span>${esc(i.cantidad)}</span></li>`).join('')}</ul>
     <p class="eyebrow" style="margin-top:20px">Instrucciones</p>
@@ -2162,6 +2238,185 @@ function mpWizard(){
   $('#mpn').onclick=()=>{if(!ok){toast(s==='comidas'?'Marca al menos una comida':'Completa este paso para seguir');return}if(MP.step<tot-1){MP.step++;mpWizard();scrollTo(0,0)}else mpGenerate()};
 }
 
+/* =========================================================
+   BIBLIOTECA DE RECETAS (creadas por el equipo de Vuelve)
+   ========================================================= */
+const LIB={recetas:null,admin:false,adminChecked:false};
+const SECCIONES=['Frutería','Carne y pescado','Lácteos y huevos','Panadería','Despensa','Congelados'];
+const LIB_TIPOS=['Desayuno','Comida','Cena','Snack','Capricho','Cheatmeal'];
+const SEC_KW=[['Congelados',/congelad|edamame|frutos rojos|guisantes/],['Carne y pescado',/pollo|pavo|ternera|cerdo|salm[oó]n|merluza|gamba|langostino|lomo|carne|pescado|bacalao|jam[oó]n|dorada|lubina|sepia|calamar/],
+  ['Lácteos y huevos',/huevo|clara|leche|yogur|skyr|queso|mozzarella|mantequilla|k[eé]fir|tofu|nata|reques[oó]n/],['Panadería',/\bpan\b|pan |tortilla de trigo|wrap|pita|brioche|biscote/],
+  ['Frutería',/tomate(?! triturado)|cebolla|pimiento|\bajo|lechuga|espinaca|pl[aá]tano|manzana|fresa|lim[oó]n|lima|patata|boniato|zanahoria|calabac|pepino|br[oó]coli|aguacate|fruta|naranja|pera|champi|esp[aá]rrago|berenjena|r[uú]cula|kiwi|mango|pi[ñn]a|uva|ar[aá]ndano|perejil|cilantro|jengibre|puerro|apio|coliflor|calabaza/]];
+const guessSec=s=>{s=(s||'').toLowerCase();for(const [k,re] of SEC_KW)if(re.test(s))return k;return 'Despensa'};
+const LIB_UNI=['g','ml','ud','cda','cdita','al gusto'];
+async function libLoad(force){
+  if(LIB.recetas&&!force)return LIB.recetas;
+  if(SERVER&&SB){const {data,error}=await SB.from('recetas').select('*').order('created_at');if(error)throw error;LIB.recetas=data||[]}
+  else LIB.recetas=LIB_SEED.map((r,i)=>({id:'seed'+i,...r}));
+  return LIB.recetas;
+}
+async function libCheckAdmin(){
+  if(LIB.adminChecked)return LIB.admin;
+  if(SERVER&&SB&&SBUID){const {data}=await SB.from('admins').select('user_id').eq('user_id',SBUID).maybeSingle();LIB.admin=!!data}
+  LIB.adminChecked=true;return LIB.admin;
+}
+const libQty=(q,u)=>{if(q==null||u==='al gusto')return 'al gusto';
+  const v=u==='ud'?Math.max(.5,Math.round(q*2)/2):u==='g'||u==='ml'?(q>=40?Math.round(q/5)*5:Math.max(1,Math.round(q))):Math.max(.5,Math.round(q*2)/2);
+  return `${String(v).replace('.',',')} ${u==='ud'?(v===1?'ud':'uds'):u}`};
+const libNum=s=>{const m=String(s||'').replace(',','.').match(/(\d+(?:\.\d+)?)\s*(kg|g|gr|ml|l|uds?|unidad(?:es)?|cda|cdita|cucharada|cucharadita)?/i);
+  if(!m)return {cantidad:null,unidad:'al gusto'};let q=+m[1],u=(m[2]||'ud').toLowerCase();
+  if(u==='kg'){q*=1000;u='g'}else if(u==='l'){q*=1000;u='ml'}else if(u==='gr')u='g';else if(/^u|unidad/.test(u))u='ud';else if(u==='cucharada')u='cda';else if(u==='cucharadita')u='cdita';
+  return {cantidad:q,unidad:u}};
+
+// Escala una receta de la biblioteca a unas calorías concretas
+function libScale(r,kcal,id){
+  const f=r.kcal>0?kcal/r.kcal:1;
+  return {id,libId:r.id,tipo:r.tipo==='Cheatmeal'?r.tipo:r.tipo,nombre:r.nombre,emoji:r.emoji,descripcion:r.descripcion,
+    kcal:Math.round(r.kcal*f),p:Math.round(r.p*f),c:Math.round(r.c*f),g:Math.round(r.g*f),prep_min:r.prep_min,coccion_min:r.coccion_min,raciones_lote:r.raciones_lote,
+    ingredientes:(r.ingredientes||[]).map(i=>({item:i.item,cantidad:libQty(i.cantidad==null?null:i.cantidad*f,i.unidad),_q:i.cantidad==null?null:i.cantidad*f,_u:i.unidad,_s:i.sec||'Despensa'})),
+    pasos:r.pasos||[],conservacion:r.conservacion,consejo:r.consejo,cheat:r.tipo==='Cheatmeal'||r.tipo==='Capricho',factor:f};
+}
+const CHEAT_MAP={Pizza:['pizza'],Hamburguesa:['hamburguesa'],'Tortitas con sirope':['tortitas'],Chocolate:['chocolate'],Brownie:['chocolate'],Galletas:['galleta'],Helado:['yogur','helado'],'Tarta de queso':['yogur','tarta'],Croissant:['tortitas'],'Patatas fritas':['hamburguesa','patatas'],Nachos:['nachos','burrito'],Sushi:['sushi','salmón']};
+function mpFromLibrary(u,pr,lib){
+  const T=mpTargets(u),evit=new Set(pr.evitar),txtEv=(pr.evitarTxt||'').toLowerCase().split(/[,;\n]| y /).map(s=>s.trim()).filter(s=>s.length>2);
+  const incl=[...pr.incluir,...(pr.incluirTxt||'').split(/[,;\n]/)].map(s=>s.trim().toLowerCase()).filter(Boolean);
+  const okR=r=>r.publicada!==false&&!(r.alergenos||[]).some(a=>evit.has(a))&&!txtEv.some(w=>(r.nombre+' '+(r.ingredientes||[]).map(i=>i.item).join(' ')).toLowerCase().includes(w))
+    &&(!(r.enfoques||[]).length||r.enfoques.includes(+u.profile.enfoque));
+  const pool=lib.filter(okR);
+  const avgP=T.reduce((a,t)=>a+t.p*4/t.kcal,0)/7;
+  const score=r=>{const txt=(r.nombre+' '+(r.ingredientes||[]).map(i=>i.item).join(' ')).toLowerCase();
+    return (r.etiquetas||[]).filter(t=>pr.gustos.includes(t)).length*3+incl.filter(w=>txt.includes(w.split(' ')[0].replace(/s$/,''))).length*2
+      -Math.abs((r.kcal?r.p*4/r.kcal:0)-avgP)*12+Math.random()*2.2};
+  const nRec=pr.sesiones>=3?3:pr.sesiones<=1?1:2;
+  const pick={},faltan=[];
+  for(const tipo of pr.comidas){const c=pool.filter(r=>r.tipo===tipo).map(r=>[score(r),r]).sort((a,b)=>b[0]-a[0]).map(x=>x[1]);
+    if(!c.length){faltan.push(tipo);continue}pick[tipo]=c.slice(0,nRec)}
+  if(faltan.length)throw Object.assign(new Error('faltan'),{faltan});
+  // Qué receta toca cada día (bloques seguidos, pensados para cocinar en lote)
+  const blocks=n=>n===1?[0,0,0,0,0,0,0]:n===2?[0,0,0,0,1,1,1]:[0,0,0,1,1,2,2];
+  const cheatN=pr.cheatDias.length,mode=cheatN===0?'ninguno':cheatN>=5?'capricho':'cheatmeal';
+  const favWords=[...pr.cheatFav.flatMap(f=>CHEAT_MAP[f]||[f.toLowerCase()]),...(pr.cheatTxt||'').toLowerCase().split(/[,;\n ]/).filter(w=>w.length>3)];
+  const favFirst=arr=>arr.map(r=>[favWords.some(w=>r.nombre.toLowerCase().includes(w))?1:0,Math.random(),r]).sort((a,b)=>b[0]-a[0]||b[1]-a[1]).map(x=>x[2]);
+  const caps=favFirst(pool.filter(r=>r.tipo==='Capricho')),cheats=favFirst(pool.filter(r=>r.tipo==='Cheatmeal'));
+  const SH={Desayuno:.25,Comida:.35,Cena:.30,Snack:.10};
+  const recetas=[],byKey={},semana=[];
+  const use=(r,kcal)=>{kcal=Math.round(kcal/10)*10;const key=r.id+'@'+kcal;if(!byKey[key]){byKey[key]='r'+(recetas.length+1);recetas.push(libScale(r,kcal,byKey[key]))}return byKey[key]};
+  T.forEach((t,i)=>{const cheatDay=pr.cheatDias.includes((i+1)%7);let kcal=t.kcal,capricho=null;const comidas={};
+    let cheatSlot=null,cheatRec=null;
+    if(cheatDay&&mode==='capricho'&&caps.length){const r=caps[0];const ck=Math.min(r.kcal,Math.round(kcal*.1));capricho=use(r,ck);kcal-=ck}
+    if(cheatDay&&mode==='cheatmeal'){cheatRec=cheats[0]||caps[0]||null;cheatSlot=['Cena','Comida','Desayuno','Snack'].find(x=>pr.comidas.includes(x))}
+    const tot=pr.comidas.reduce((a,c)=>a+SH[c],0);
+    for(const c of pr.comidas){const share=SH[c]/tot;
+      if(cheatRec&&c===cheatSlot){
+        if(cheatRec.tipo==='Capricho'){const ck=Math.min(cheatRec.kcal,Math.round(t.kcal*.1));capricho=use(cheatRec,ck);comidas[c]=use(pick[c][blocks(pick[c].length)[i]],kcal*share-ck)}
+        else comidas[c]=use(cheatRec,Math.min(cheatRec.kcal*1.15,kcal*Math.min(.55,share*1.4)))}
+      else{const base=cheatRec&&cheatRec.tipo!=='Capricho'&&cheatSlot?kcal*(1-Math.min(.55,SH[cheatSlot]/tot*1.4))*(SH[c]/(tot-SH[cheatSlot])):kcal*share;
+        const r=pick[c][blocks(pick[c].length)[i]];comidas[c]=use(r,base)}}
+    // si la comida trampa no llega al hueco, se reparte el resto entre las demás
+    if(cheatRec&&cheatRec.tipo!=='Capricho'&&cheatSlot){const got=Object.values(comidas).reduce((a,id)=>a+recetas.find(x=>x.id===id).kcal,0)+(capricho?recetas.find(x=>x.id===capricho).kcal:0);
+      const diff=t.kcal-got;if(Math.abs(diff)>t.kcal*.03){const others=pr.comidas.filter(c=>c!==cheatSlot);const sum=others.reduce((a,c)=>a+recetas.find(x=>x.id===comidas[c]).kcal,0);
+        for(const c of others){const r0=recetas.find(x=>x.id===comidas[c]);const lr=lib.find(x=>x.id===r0.libId);comidas[c]=use(lr,r0.kcal+diff*(r0.kcal/sum))}}}
+    semana.push({dia:t.dia,comidas,capricho})});
+  // Solo quedan las recetas que se usan
+  const used=new Set(semana.flatMap(s=>[...Object.values(s.comidas),...(s.capricho?[s.capricho]:[])]));
+  const rs=recetas.filter(r=>used.has(r.id));
+  // Lista de la compra: suma de ingredientes de todos los días
+  const agg={};semana.forEach(s=>[...Object.values(s.comidas),...(s.capricho?[s.capricho]:[])].forEach(id=>{const r=rs.find(x=>x.id===id);
+    r.ingredientes.forEach(i=>{if(i._q==null)return;const k=i.item+'|'+i._u;(agg[k]=agg[k]||{item:i.item,u:i._u,s:i._s,q:0}).q+=i._q})}));
+  const extras=new Set();rs.forEach(r=>r.ingredientes.forEach(i=>{if(i._q==null)extras.add(i.item)}));
+  const lista=SECCIONES.map(sec=>({seccion:sec,items:Object.values(agg).filter(a=>a.s===sec).sort((a,b)=>a.item.localeCompare(b.item)).map(a=>{
+    const q=a.u==='ud'?Math.ceil(a.q):a.u==='g'||a.u==='ml'?(a.q>=1000?Math.round(a.q/50)*50:Math.ceil(a.q/10)*10):Math.ceil(a.q);
+    return `${a.item} · ${q>=1000&&(a.u==='g'||a.u==='ml')?String(q/1000).replace('.',',')+(a.u==='g'?' kg':' l'):q+' '+(a.u==='ud'?(q===1?'ud':'uds'):a.u)}`})})).filter(s=>s.items.length);
+  if(extras.size)lista.push({seccion:'Especias y aliños',items:[...extras].sort()});
+  // Consejos de batch cooking
+  const base=[...new Set(rs.filter(r=>r.tipo!=='Capricho'&&r.tipo!=='Cheatmeal').map(r=>r.libId))].map(id=>lib.find(x=>x.id===id));
+  const ses=nRec===1?[base]:[0,1,2].slice(0,nRec).map(b=>base.filter(r=>pr.comidas.some(c=>pick[c][b]&&pick[c][b].id===r.id)));
+  const dias=nRec===1?['el domingo']:nRec===2?['el domingo (para lunes–jueves)','el jueves (para viernes–domingo)']:['el domingo (lunes–miércoles)','el miércoles (jueves–viernes)','el viernes (sábado–domingo)'];
+  const notas=ses.map((g,k)=>g.length?`Cocina ${dias[k]}: ${g.map(r=>r.nombre).join(', ')}.`:'').filter(Boolean).join(' ')+' Las cantidades de cada receta ya están ajustadas a tus calorías: guárdalas en táperes de una ración.';
+  return {recetas:rs.map(r=>{const {factor,...x}=r;x.ingredientes=x.ingredientes.map(({item,cantidad})=>({item,cantidad}));return x}),semana,lista_compra:lista,notas,fuente:'biblioteca'};
+}
+
+// Panel de la biblioteca (solo administradoras)
+const LIBUI={filtro:'Todas',q:''};
+async function vBiblio(){
+  $('#view').innerHTML=heroHTML('Administración','Biblioteca','de recetas.')+'<p class="muted">Cargando…</p>';
+  let rs;try{rs=await libLoad(true)}catch(e){$('#view').innerHTML=heroHTML('Administración','Biblioteca','de recetas.')+`<div class="card"><p class="muted">${esc(sbErr(e))}</p></div>`;return}
+  if(UI.view!=='biblio')return;
+  const cnt=t=>rs.filter(r=>t==='Todas'||r.tipo===t).length;
+  const list=rs.filter(r=>(LIBUI.filtro==='Todas'||r.tipo===LIBUI.filtro)&&(!LIBUI.q||r.nombre.toLowerCase().includes(LIBUI.q.toLowerCase())));
+  $('#view').innerHTML=heroHTML('Administración','Biblioteca','de recetas.',`<button class="btn" id="lbnew">+ Nueva receta</button>`)+`
+  <div class="strip"><span>${rs.filter(r=>r.publicada).length} publicadas · ${rs.filter(r=>!r.publicada).length} borradores</span><small>Solo tú ves esta sección</small></div>
+  <p class="small muted" style="margin-top:12px">Cuando alguien crea su Mealprep, Vuelve elige recetas publicadas que encajan con sus gustos y alergias y ajusta las cantidades a sus calorías. Escribe cada receta para <b>1 ración</b>.</p>
+  <div class="tags" style="margin-top:12px">${['Todas',...LIB_TIPOS].map(t=>`<button class="tag ${LIBUI.filtro===t?'on':''}" data-lf="${t}">${t} · ${cnt(t)}</button>`).join('')}</div>
+  <input class="in" id="lbq" placeholder="Buscar receta…" value="${esc(LIBUI.q)}" style="margin-top:10px">
+  <div class="card" style="margin-top:12px;padding:6px 14px">${list.length?list.map(r=>`<div class="rcard" data-le="${r.id}" style="cursor:pointer"><div class="row"><span style="font-size:26px">${esc(r.emoji)}</span><div><b>${esc(r.nombre)}</b><small>${esc(r.tipo)} · ${r.kcal} kcal · P ${r.p} · C ${r.c} · G ${r.g}</small></div></div><span class="pill ${r.publicada?'':'warn'}">${r.publicada?'Publicada':'Borrador'}</span></div>`).join(''):'<p class="muted" style="padding:14px 0">No hay recetas aquí todavía.</p>'}</div>
+  <div class="card" style="margin-top:14px"><div class="h3">Importar recetas</div><p class="small muted" style="margin-top:4px">Pega el JSON de un menú creado con IA (botón “Copiar recetas para la biblioteca” del Menú en la versión de Claude). Entran como borradores para que las revises.</p>
+  <textarea class="in" id="lbimp" style="min-height:80px;font-family:monospace;font-size:12px;margin-top:10px" placeholder='{"recetas":[...]}'></textarea><button class="btn soft block" style="margin-top:10px" id="lbimpb">Importar como borradores</button></div>`;
+  $$('[data-lf]').forEach(b=>b.onclick=()=>{LIBUI.filtro=b.dataset.lf;vBiblio()});
+  $('#lbq').oninput=e=>{LIBUI.q=e.target.value;clearTimeout(LIBUI.t);LIBUI.t=setTimeout(()=>{vBiblio().then(()=>{const q=$('#lbq');if(q){q.focus();q.setSelectionRange(q.value.length,q.value.length)}})},350)};
+  $('#lbnew').onclick=()=>libEditor(null);
+  $$('[data-le]').forEach(b=>b.onclick=()=>libEditor(rs.find(r=>r.id===b.dataset.le)));
+  $('#lbimpb').onclick=async()=>{let j;try{j=JSON.parse($('#lbimp').value)}catch(e){toast('El texto no es un JSON válido');return}
+    const arr=(Array.isArray(j)?j:j.recetas||[]).filter(r=>r&&r.nombre);if(!arr.length){toast('No he encontrado recetas');return}
+    const rows=arr.map(r=>({tipo:LIB_TIPOS.includes(r.tipo)?r.tipo:(r.cheat?'Cheatmeal':'Comida'),nombre:String(r.nombre).slice(0,120),emoji:r.emoji||'🍽️',descripcion:r.descripcion||'',
+      kcal:Math.round(+r.kcal||0),p:Math.round(+r.p||0),c:Math.round(+r.c||0),g:Math.round(+r.g||0),prep_min:+r.prep_min||0,coccion_min:+r.coccion_min||0,raciones_lote:+r.raciones_lote||4,
+      ingredientes:(r.ingredientes||[]).map(i=>typeof i.cantidad==='number'?i:{item:i.item,...libNum(i.cantidad),sec:guessSec(i.item)}),pasos:r.pasos||[],conservacion:r.conservacion||'',consejo:r.consejo||'',
+      alergenos:r.alergenos||[],etiquetas:r.etiquetas||[],enfoques:[],publicada:false}));
+    const {error}=await SB.from('recetas').insert(rows);if(error){toast(sbErr(error));return}
+    toast(`${rows.length} receta${rows.length>1?'s':''} importada${rows.length>1?'s':''} como borrador ✓`);LIBUI.filtro='Todas';vBiblio()};
+}
+function libEditor(r){
+  const nuevo=!r;r=r?JSON.parse(JSON.stringify(r)):{tipo:'Comida',nombre:'',emoji:'🍽️',descripcion:'',kcal:0,p:0,c:0,g:0,prep_min:10,coccion_min:15,raciones_lote:4,ingredientes:[{item:'',cantidad:null,unidad:'g',sec:'Despensa'}],pasos:[],conservacion:'',consejo:'',alergenos:[],etiquetas:[],enfoques:[],publicada:false};
+  const ingRow=(i,k)=>`<div class="ingrow" data-ir="${k}"><input class="in" data-if="item" placeholder="Ingrediente" value="${esc(i.item||'')}"><input class="in dec" data-if="cantidad" type="text" inputmode="decimal" placeholder="Cant." value="${i.cantidad==null?'':esc(dec(i.cantidad))}">
+    <select class="in" data-if="unidad">${LIB_UNI.map(x=>`<option ${i.unidad===x?'selected':''}>${x}</option>`).join('')}</select><select class="in" data-if="sec">${SECCIONES.map(x=>`<option ${i.sec===x?'selected':''}>${x}</option>`).join('')}</select><button class="btn ghost sm" data-irm="${k}">✕</button></div>`;
+  const chips=(arr,key)=>`<div class="tags">${arr.map(t=>`<button type="button" class="tag ${(r[key]||[]).map(String).includes(String(t))?'on':''} ${key==='alergenos'?'no':''}" data-ck="${key}" data-cv="${esc(String(t))}">${key==='enfoques'?t+' · '+ENFOQUES[t].t:esc(String(t))}</button>`).join('')}</div>`;
+  const m=modal(`<div class="top"><b>${nuevo?'Nueva receta':'Editar receta'}</b><button class="close">✕</button></div>
+    <div class="grid2" style="margin-top:12px;grid-template-columns:80px 1fr"><label class="f"><span>Emoji</span><input class="in" id="le_emoji" value="${esc(r.emoji)}" style="text-align:center;font-size:22px"></label>
+      <label class="f"><span>Nombre</span><input class="in" id="le_nombre" value="${esc(r.nombre)}" placeholder="Ej. Pollo al limón con arroz"></label></div>
+    <label class="f"><span>Tipo de comida</span><select class="in" id="le_tipo">${LIB_TIPOS.map(t=>`<option ${r.tipo===t?'selected':''}>${t}</option>`).join('')}</select></label>
+    <label class="f"><span>Descripción corta</span><input class="in" id="le_desc" value="${esc(r.descripcion)}" placeholder="Una frase apetecible"></label>
+    <p class="eyebrow" style="margin-top:16px">Ingredientes · 1 ración</p><div id="le_ings">${r.ingredientes.map(ingRow).join('')}</div>
+    <button class="btn soft sm" id="le_addi" style="margin-top:8px">+ Ingrediente</button>
+    <p class="eyebrow" style="margin-top:16px">Macros por ración</p>
+    <div class="grid4"><label class="f"><span>kcal</span><input class="in dec" type="text" inputmode="decimal" id="le_kcal" value="${r.kcal}"></label><label class="f"><span>Prot. g</span><input class="in dec" type="text" inputmode="decimal" id="le_p" value="${r.p}"></label>
+      <label class="f"><span>Carb. g</span><input class="in dec" type="text" inputmode="decimal" id="le_c" value="${r.c}"></label><label class="f"><span>Grasa g</span><input class="in dec" type="text" inputmode="decimal" id="le_g" value="${r.g}"></label></div>
+    <p class="tiny muted" id="le_chk"></p>
+    <div class="grid3"><label class="f"><span>Prep. min</span><input class="in" type="number" id="le_prep" value="${r.prep_min}"></label><label class="f"><span>Cocción min</span><input class="in" type="number" id="le_cocc" value="${r.coccion_min}"></label><label class="f"><span>Raciones lote</span><input class="in" type="number" id="le_lote" value="${r.raciones_lote}"></label></div>
+    <label class="f"><span>Pasos (uno por línea)</span><textarea class="in" id="le_pasos" style="min-height:110px;font-family:inherit;font-size:14px">${esc((r.pasos||[]).join('\n'))}</textarea></label>
+    <label class="f"><span>Conservación</span><input class="in" id="le_cons" value="${esc(r.conservacion)}"></label>
+    <label class="f"><span>Consejo</span><input class="in" id="le_cons2" value="${esc(r.consejo)}"></label>
+    <p class="eyebrow" style="margin-top:16px">Contiene (alérgenos / evitar)</p>${chips(EVITAR,'alergenos')}
+    <p class="eyebrow" style="margin-top:16px">Estilo</p>${chips(GUSTOS,'etiquetas')}
+    <p class="eyebrow" style="margin-top:16px">Solo para estos enfoques <span class="muted" style="text-transform:none;letter-spacing:0">(ninguno = todos)</span></p>${chips([1,2,3,4,5,6],'enfoques')}
+    <label class="wk" style="justify-content:flex-start;gap:10px;margin-top:16px;cursor:pointer"><input type="checkbox" id="le_pub" ${r.publicada?'checked':''}> <b>Publicada</b> <span class="small muted">(visible para todas)</span></label>
+    <div class="err" id="le_err"></div>
+    <div class="grid2" style="margin-top:12px">${nuevo?'<span></span>':'<button class="btn ghost" id="le_del" style="color:var(--p)">Borrar</button>'}<button class="btn" id="le_save">Guardar</button></div>`,'wide');
+  const chk=()=>{const k=num(m.querySelector('#le_kcal').value)||0,p=num(m.querySelector('#le_p').value)||0,c=num(m.querySelector('#le_c').value)||0,g=num(m.querySelector('#le_g').value)||0,calc=Math.round(p*4+c*4+g*9);
+    m.querySelector('#le_chk').innerHTML=calc?`Con esos macros salen ${calc} kcal${Math.abs(calc-k)>k*.08?` · <b style="color:#a86a2d">revisa: no cuadra con ${k} kcal</b> <button class="btn ghost sm" id="le_fix">Usar ${calc}</button>`:' ✓'}`:'';
+    const fx=m.querySelector('#le_fix');if(fx)fx.onclick=()=>{m.querySelector('#le_kcal').value=calc;chk()}};
+  ['#le_kcal','#le_p','#le_c','#le_g'].forEach(s=>m.querySelector(s).addEventListener('input',chk));chk();
+  const readIngs=()=>[...m.querySelectorAll('[data-ir]')].map(row=>{const g=f=>row.querySelector(`[data-if=${f}]`).value;const u=g('unidad');const q=num(g('cantidad'));
+    const it=g('item').trim(),sc=g('sec');return {item:it,cantidad:u==='al gusto'||q===''?null:q,unidad:u==='al gusto'||q===''?'al gusto':u,sec:sc==='Despensa'?guessSec(it):sc}}).filter(i=>i.item);
+  const bindRm=()=>m.querySelectorAll('[data-irm]').forEach(b=>b.onclick=()=>b.closest('[data-ir]').remove());bindRm();
+  m.querySelector('#le_addi').onclick=()=>{const w=document.createElement('div');w.innerHTML=ingRow({unidad:'g',sec:'Despensa'},Date.now());m.querySelector('#le_ings').appendChild(w.firstElementChild);bindRm()};
+  m.querySelectorAll('[data-ck]').forEach(b=>b.onclick=()=>{const k=b.dataset.ck,v=k==='enfoques'?+b.dataset.cv:b.dataset.cv;r[k]=r[k]||[];
+    r[k]=r[k].map(String).includes(String(v))?r[k].filter(x=>String(x)!==String(v)):[...r[k],v];b.classList.toggle('on')});
+  m.querySelector('#le_save').onclick=async()=>{const v=s=>m.querySelector(s).value;
+    const row={tipo:v('#le_tipo'),nombre:v('#le_nombre').trim(),emoji:v('#le_emoji').trim()||'🍽️',descripcion:v('#le_desc').trim(),kcal:Math.round(num(v('#le_kcal'))||0),p:Math.round(num(v('#le_p'))||0),c:Math.round(num(v('#le_c'))||0),g:Math.round(num(v('#le_g'))||0),
+      prep_min:+v('#le_prep')||0,coccion_min:+v('#le_cocc')||0,raciones_lote:+v('#le_lote')||1,ingredientes:readIngs(),pasos:v('#le_pasos').split('\n').map(s=>s.trim()).filter(Boolean),
+      conservacion:v('#le_cons').trim(),consejo:v('#le_cons2').trim(),alergenos:r.alergenos||[],etiquetas:r.etiquetas||[],enfoques:(r.enfoques||[]).map(Number),publicada:m.querySelector('#le_pub').checked};
+    const err=!row.nombre?'Escribe el nombre.':!row.kcal?'Escribe las calorías por ración.':!row.ingredientes.length?'Añade al menos un ingrediente.':row.ingredientes.some(i=>i.cantidad==null&&i.unidad!=='al gusto')?'Revisa las cantidades.':'';
+    if(err){m.querySelector('#le_err').textContent=err;return}
+    const q=nuevo?SB.from('recetas').insert(row):SB.from('recetas').update(row).eq('id',r.id);
+    const {error}=await q;if(error){m.querySelector('#le_err').textContent=sbErr(error);return}
+    m.remove();toast('Receta guardada ✓');vBiblio()};
+  if(m.querySelector('#le_del'))m.querySelector('#le_del').onclick=async()=>{
+    const b=m.querySelector('#le_del');if(!b.dataset.ok){b.dataset.ok=1;b.textContent='¿Seguro? Toca otra vez';return}
+    const {error}=await SB.from('recetas').delete().eq('id',r.id);if(error){toast(sbErr(error));return}m.remove();toast('Receta borrada');vBiblio()};
+}
+
+const LIB_SEED=[{"tipo":"Desayuno","nombre":"Overnight oats de skyr y frutos rojos","emoji":"🫐","descripcion":"Cremosos, fríos y listos al despertar.","kcal":430,"p":29,"c":54,"g":9,"prep_min":5,"coccion_min":0,"raciones_lote":4,"ingredientes":[{"item":"Copos de avena","cantidad":50,"unidad":"g","sec":"Despensa"},{"item":"Yogur tipo skyr natural","cantidad":150,"unidad":"g","sec":"Lácteos y huevos"},{"item":"Leche semidesnatada","cantidad":100,"unidad":"g","sec":"Lácteos y huevos"},{"item":"Frutos rojos","cantidad":80,"unidad":"g","sec":"Congelados"},{"item":"Semillas de chía","cantidad":10,"unidad":"g","sec":"Despensa"},{"item":"Miel","cantidad":5,"unidad":"g","sec":"Despensa"},{"item":"Canela","cantidad":null,"unidad":"al gusto","sec":"Despensa"}],"pasos":["Mezcla en un tarro la avena, la chía, la canela, el skyr y la leche.","Añade la miel y remueve bien.","Cubre con los frutos rojos, tapa y deja en la nevera toda la noche."],"conservacion":"3 días en la nevera en táper hermético.","consejo":"Prepara 4 tarros a la vez el domingo.","alergenos":["Lactosa","Gluten"],"etiquetas":["Dulce para desayunar","Alta en proteína","Rápida (<20 min)"],"enfoques":[]},{"tipo":"Desayuno","nombre":"Tortilla de claras con espinacas y tostada","emoji":"🍳","descripcion":"Desayuno salado, ligero y muy proteico.","kcal":346,"p":30,"c":25,"g":13,"prep_min":5,"coccion_min":6,"raciones_lote":1,"ingredientes":[{"item":"Huevo","cantidad":1,"unidad":"ud","sec":"Lácteos y huevos"},{"item":"Claras de huevo","cantidad":150,"unidad":"g","sec":"Lácteos y huevos"},{"item":"Espinacas","cantidad":50,"unidad":"g","sec":"Frutería"},{"item":"Pan integral","cantidad":50,"unidad":"g","sec":"Panadería"},{"item":"Tomate","cantidad":50,"unidad":"g","sec":"Frutería"},{"item":"Aceite de oliva virgen extra","cantidad":5,"unidad":"g","sec":"Despensa"},{"item":"Sal y pimienta","cantidad":null,"unidad":"al gusto","sec":"Despensa"}],"pasos":["Saltea las espinacas 1 minuto con unas gotas de aceite.","Bate el huevo con las claras, sal y pimienta y viértelo en la sartén.","Cuaja a fuego medio y dobla la tortilla.","Sirve con el pan tostado con tomate rallado y el resto del aceite."],"conservacion":"Mejor recién hecha. Las claras se pueden dejar batidas 2 días en la nevera.","consejo":"Cuece las espinacas de toda la semana en un solo lote.","alergenos":["Huevo","Gluten"],"etiquetas":["Casera española","Alta en proteína","Rápida (<20 min)"],"enfoques":[]},{"tipo":"Desayuno","nombre":"Tostadas de aguacate y huevo","emoji":"🥑","descripcion":"Un clásico que nunca falla.","kcal":394,"p":21,"c":28,"g":20,"prep_min":5,"coccion_min":7,"raciones_lote":1,"ingredientes":[{"item":"Pan integral","cantidad":60,"unidad":"g","sec":"Panadería"},{"item":"Aguacate","cantidad":50,"unidad":"g","sec":"Frutería"},{"item":"Huevo","cantidad":2,"unidad":"ud","sec":"Lácteos y huevos"},{"item":"Tomate","cantidad":40,"unidad":"g","sec":"Frutería"},{"item":"Sal, pimienta y escamas de chile","cantidad":null,"unidad":"al gusto","sec":"Despensa"}],"pasos":["Tuesta el pan.","Machaca el aguacate con sal y pimienta y úntalo.","Cuece los huevos 7 minutos (o haz huevos a la plancha).","Coloca el tomate en rodajas y los huevos encima."],"conservacion":"Cuece varios huevos a la vez: aguantan 5 días en la nevera con cáscara.","consejo":"Rocía el aguacate con limón para que no se oscurezca.","alergenos":["Huevo","Gluten"],"etiquetas":["Mediterránea","Rápida (<20 min)"],"enfoques":[]},{"tipo":"Desayuno","nombre":"Tortitas de avena y plátano","emoji":"🥞","descripcion":"Esponjosas, dulces y sin azúcar añadido.","kcal":403,"p":32,"c":47,"g":9,"prep_min":5,"coccion_min":10,"raciones_lote":4,"ingredientes":[{"item":"Copos de avena","cantidad":40,"unidad":"g","sec":"Despensa"},{"item":"Huevo","cantidad":1,"unidad":"ud","sec":"Lácteos y huevos"},{"item":"Claras de huevo","cantidad":100,"unidad":"g","sec":"Lácteos y huevos"},{"item":"Plátano","cantidad":60,"unidad":"g","sec":"Frutería"},{"item":"Queso fresco batido 0%","cantidad":100,"unidad":"g","sec":"Lácteos y huevos"},{"item":"Frutos rojos","cantidad":50,"unidad":"g","sec":"Congelados"},{"item":"Canela","cantidad":null,"unidad":"al gusto","sec":"Despensa"}],"pasos":["Tritura la avena, el huevo, las claras, el plátano y la canela.","Haz 4–5 tortitas en una sartén antiadherente a fuego medio.","Sirve con el queso fresco batido y los frutos rojos."],"conservacion":"Las tortitas aguantan 3 días en la nevera o 1 mes congeladas.","consejo":"Haz el doble de masa y congela las tortitas separadas con papel.","alergenos":["Huevo","Gluten","Lactosa"],"etiquetas":["Dulce para desayunar","Alta en proteína"],"enfoques":[]},{"tipo":"Desayuno","nombre":"Bowl de skyr, plátano y crema de cacahuete","emoji":"🍌","descripcion":"Cremoso, saciante y listo en 2 minutos.","kcal":379,"p":29,"c":45,"g":10,"prep_min":3,"coccion_min":0,"raciones_lote":1,"ingredientes":[{"item":"Yogur tipo skyr natural","cantidad":200,"unidad":"g","sec":"Lácteos y huevos"},{"item":"Plátano","cantidad":100,"unidad":"g","sec":"Frutería"},{"item":"Crema de cacahuete 100%","cantidad":15,"unidad":"g","sec":"Despensa"},{"item":"Copos de avena","cantidad":20,"unidad":"g","sec":"Despensa"},{"item":"Canela","cantidad":null,"unidad":"al gusto","sec":"Despensa"}],"pasos":["Pon el skyr en un bol.","Añade el plátano en rodajas y la avena.","Termina con la crema de cacahuete y canela."],"conservacion":"Montar al momento.","consejo":"La avena tostada en sartén 2 minutos le da un toque crujiente.","alergenos":["Lactosa","Frutos secos","Gluten"],"etiquetas":["Dulce para desayunar","Alta en proteína","Rápida (<20 min)"],"enfoques":[]},{"tipo":"Desayuno","nombre":"Tostada de pavo, queso fresco y tomate","emoji":"🥪","descripcion":"El desayuno de bar, versión casera.","kcal":353,"p":26,"c":34,"g":11,"prep_min":5,"coccion_min":2,"raciones_lote":1,"ingredientes":[{"item":"Pan integral","cantidad":70,"unidad":"g","sec":"Panadería"},{"item":"Fiambre de pechuga de pavo","cantidad":60,"unidad":"g","sec":"Carne y pescado"},{"item":"Queso fresco light","cantidad":60,"unidad":"g","sec":"Lácteos y huevos"},{"item":"Tomate","cantidad":60,"unidad":"g","sec":"Frutería"},{"item":"Aceite de oliva virgen extra","cantidad":5,"unidad":"g","sec":"Despensa"},{"item":"Orégano","cantidad":null,"unidad":"al gusto","sec":"Despensa"}],"pasos":["Tuesta el pan y riégalo con el aceite.","Añade el tomate en rodajas, el queso y el pavo.","Termina con orégano."],"conservacion":"Montar al momento.","consejo":"Usa pan de calidad: se nota mucho.","alergenos":["Gluten","Lactosa"],"etiquetas":["Casera española","Mediterránea","Rápida (<20 min)"],"enfoques":[]},{"tipo":"Comida","nombre":"Pollo al curry con arroz basmati","emoji":"🍛","descripcion":"Suave, aromático y perfecto para hacer en lote.","kcal":593,"p":48,"c":67,"g":13,"prep_min":15,"coccion_min":25,"raciones_lote":4,"ingredientes":[{"item":"Pechuga de pollo","cantidad":150,"unidad":"g","sec":"Carne y pescado"},{"item":"Arroz basmati","cantidad":70,"unidad":"g","sec":"Despensa"},{"item":"Cebolla","cantidad":50,"unidad":"g","sec":"Frutería"},{"item":"Pimiento","cantidad":60,"unidad":"g","sec":"Frutería"},{"item":"Tomate triturado","cantidad":80,"unidad":"g","sec":"Despensa"},{"item":"Yogur tipo skyr natural","cantidad":50,"unidad":"g","sec":"Lácteos y huevos"},{"item":"Aceite de oliva virgen extra","cantidad":10,"unidad":"g","sec":"Despensa"},{"item":"Curry en polvo, ajo y jengibre","cantidad":null,"unidad":"al gusto","sec":"Despensa"}],"pasos":["Cuece el arroz.","Sofríe cebolla, ajo y pimiento con el aceite 5 minutos.","Añade el pollo en dados y dóralo.","Incorpora el curry y el tomate y cocina 10 minutos.","Fuera del fuego, añade el skyr y remueve."],"conservacion":"4 días en la nevera o 2 meses congelado.","consejo":"Congela el curry y el arroz por separado.","alergenos":["Lactosa"],"etiquetas":["Asiática","Alta en proteína","Sin horno"],"enfoques":[]},{"tipo":"Comida","nombre":"Bowl de quinoa, salmón y aguacate","emoji":"🥗","descripcion":"Colorido, fresco y lleno de grasas buenas.","kcal":614,"p":40,"c":45,"g":29,"prep_min":10,"coccion_min":15,"raciones_lote":3,"ingredientes":[{"item":"Salmón","cantidad":120,"unidad":"g","sec":"Carne y pescado"},{"item":"Quinoa","cantidad":60,"unidad":"g","sec":"Despensa"},{"item":"Aguacate","cantidad":50,"unidad":"g","sec":"Frutería"},{"item":"Pepino","cantidad":60,"unidad":"g","sec":"Frutería"},{"item":"Edamame","cantidad":50,"unidad":"g","sec":"Congelados"},{"item":"Salsa de soja baja en sal","cantidad":10,"unidad":"g","sec":"Despensa"},{"item":"Sésamo y lima","cantidad":null,"unidad":"al gusto","sec":"Despensa"}],"pasos":["Cuece la quinoa 12 minutos y escurre.","Hornea o haz a la plancha el salmón.","Monta el bol con quinoa, salmón, edamame, pepino y aguacate.","Aliña con soja, lima y sésamo."],"conservacion":"Quinoa y salmón 3 días en la nevera; corta el aguacate al momento.","consejo":"Hornea todo el salmón de la semana en una bandeja.","alergenos":["Pescado","Gluten"],"etiquetas":["Asiática","Bowls y ensaladas","Alta en proteína"],"enfoques":[]},{"tipo":"Comida","nombre":"Lentejas estofadas con verduras","emoji":"🍲","descripcion":"Cuchara de toda la vida, ligera y saciante.","kcal":509,"p":26,"c":76,"g":11,"prep_min":10,"coccion_min":25,"raciones_lote":4,"ingredientes":[{"item":"Lentejas cocidas","cantidad":250,"unidad":"g","sec":"Despensa"},{"item":"Patata","cantidad":80,"unidad":"g","sec":"Frutería"},{"item":"Zanahoria","cantidad":60,"unidad":"g","sec":"Frutería"},{"item":"Cebolla","cantidad":40,"unidad":"g","sec":"Frutería"},{"item":"Pimiento","cantidad":40,"unidad":"g","sec":"Frutería"},{"item":"Tomate triturado","cantidad":60,"unidad":"g","sec":"Despensa"},{"item":"Aceite de oliva virgen extra","cantidad":10,"unidad":"g","sec":"Despensa"},{"item":"Pimentón, comino y laurel","cantidad":null,"unidad":"al gusto","sec":"Despensa"}],"pasos":["Sofríe cebolla, pimiento y zanahoria con el aceite.","Añade el pimentón, el tomate y la patata en dados.","Cubre con agua, añade laurel y cuece 15 minutos.","Incorpora las lentejas y cuece 5 minutos más."],"conservacion":"4 días en la nevera o 2 meses congelado.","consejo":"Están más ricas al día siguiente.","alergenos":[],"etiquetas":["Casera española","Cuchara y guisos","Vegana","Vegetariana"],"enfoques":[]},{"tipo":"Comida","nombre":"Pasta integral boloñesa de ternera","emoji":"🍝","descripcion":"La boloñesa de casa con más proteína.","kcal":557,"p":41,"c":60,"g":16,"prep_min":10,"coccion_min":25,"raciones_lote":4,"ingredientes":[{"item":"Pasta integral","cantidad":70,"unidad":"g","sec":"Despensa"},{"item":"Ternera picada magra 5%","cantidad":120,"unidad":"g","sec":"Carne y pescado"},{"item":"Tomate triturado","cantidad":150,"unidad":"g","sec":"Despensa"},{"item":"Cebolla","cantidad":40,"unidad":"g","sec":"Frutería"},{"item":"Zanahoria","cantidad":40,"unidad":"g","sec":"Frutería"},{"item":"Aceite de oliva virgen extra","cantidad":5,"unidad":"g","sec":"Despensa"},{"item":"Queso parmesano","cantidad":10,"unidad":"g","sec":"Lácteos y huevos"},{"item":"Orégano y albahaca","cantidad":null,"unidad":"al gusto","sec":"Despensa"}],"pasos":["Sofríe cebolla y zanahoria picadas.","Añade la carne y dórala.","Incorpora el tomate y las hierbas y cuece 15 minutos.","Cuece la pasta y mezcla. Sirve con parmesano."],"conservacion":"4 días en la nevera o 2 meses congelado.","consejo":"Congela la salsa en raciones.","alergenos":["Gluten","Carne roja","Lactosa"],"etiquetas":["Italiana","Alta en proteína"],"enfoques":[]},{"tipo":"Comida","nombre":"Burrito bowl de pavo","emoji":"🌯","descripcion":"Todo el sabor mexicano en un bol.","kcal":605,"p":48,"c":77,"g":9,"prep_min":10,"coccion_min":20,"raciones_lote":4,"ingredientes":[{"item":"Pechuga de pavo","cantidad":140,"unidad":"g","sec":"Carne y pescado"},{"item":"Arroz basmati","cantidad":60,"unidad":"g","sec":"Despensa"},{"item":"Alubias negras cocidas","cantidad":100,"unidad":"g","sec":"Despensa"},{"item":"Maíz dulce","cantidad":50,"unidad":"g","sec":"Despensa"},{"item":"Tomate","cantidad":60,"unidad":"g","sec":"Frutería"},{"item":"Aguacate","cantidad":40,"unidad":"g","sec":"Frutería"},{"item":"Comino, pimentón y lima","cantidad":null,"unidad":"al gusto","sec":"Despensa"}],"pasos":["Cuece el arroz.","Corta el pavo en tiras y saltéalo con comino y pimentón.","Calienta las alubias.","Monta el bol con todo y termina con aguacate, tomate y lima."],"conservacion":"4 días en la nevera (aguacate al momento).","consejo":"Añade cilantro y un poco de jalapeño si te gusta picante.","alergenos":[],"etiquetas":["Mexicana","Bowls y ensaladas","Alta en proteína"],"enfoques":[]},{"tipo":"Comida","nombre":"Garbanzos con espinacas y huevo","emoji":"🥘","descripcion":"Plato de cuchara rápido con bote de garbanzos.","kcal":569,"p":32,"c":45,"g":26,"prep_min":10,"coccion_min":15,"raciones_lote":4,"ingredientes":[{"item":"Garbanzos cocidos","cantidad":200,"unidad":"g","sec":"Despensa"},{"item":"Espinacas","cantidad":100,"unidad":"g","sec":"Frutería"},{"item":"Huevo","cantidad":2,"unidad":"ud","sec":"Lácteos y huevos"},{"item":"Tomate triturado","cantidad":80,"unidad":"g","sec":"Despensa"},{"item":"Cebolla","cantidad":40,"unidad":"g","sec":"Frutería"},{"item":"Aceite de oliva virgen extra","cantidad":10,"unidad":"g","sec":"Despensa"},{"item":"Ajo, comino y pimentón","cantidad":null,"unidad":"al gusto","sec":"Despensa"}],"pasos":["Sofríe ajo y cebolla con el aceite.","Añade especias, tomate y espinacas.","Incorpora los garbanzos y cuece 8 minutos.","Sirve con los huevos cocidos o escalfados."],"conservacion":"3 días en la nevera en táper hermético.","consejo":"Cuece los huevos aparte y añádelos al servir.","alergenos":["Huevo"],"etiquetas":["Casera española","Cuchara y guisos","Vegetariana"],"enfoques":[]},{"tipo":"Comida","nombre":"Ensalada de pasta con atún","emoji":"🥗","descripcion":"Fresquita y lista en 15 minutos.","kcal":530,"p":37,"c":58,"g":16,"prep_min":10,"coccion_min":10,"raciones_lote":3,"ingredientes":[{"item":"Pasta integral","cantidad":70,"unidad":"g","sec":"Despensa"},{"item":"Atún al natural (escurrido)","cantidad":100,"unidad":"g","sec":"Despensa"},{"item":"Tomate","cantidad":100,"unidad":"g","sec":"Frutería"},{"item":"Maíz dulce","cantidad":40,"unidad":"g","sec":"Despensa"},{"item":"Pepino","cantidad":60,"unidad":"g","sec":"Frutería"},{"item":"Aceitunas","cantidad":20,"unidad":"g","sec":"Despensa"},{"item":"Aceite de oliva virgen extra","cantidad":10,"unidad":"g","sec":"Despensa"}],"pasos":["Cuece la pasta, escúrrela y enfríala.","Mezcla con el resto de ingredientes troceados.","Aliña con el aceite, sal y vinagre al gusto."],"conservacion":"3 días en la nevera en táper hermético.","consejo":"Aliña justo antes de comer.","alergenos":["Gluten","Pescado"],"etiquetas":["Mediterránea","Bowls y ensaladas","Rápida (<20 min)","Sin horno"],"enfoques":[]},{"tipo":"Cena","nombre":"Merluza al horno con patatas y verduras","emoji":"🐟","descripcion":"Cena ligera de bandeja única.","kcal":372,"p":35,"c":31,"g":12,"prep_min":10,"coccion_min":40,"raciones_lote":3,"ingredientes":[{"item":"Merluza","cantidad":180,"unidad":"g","sec":"Carne y pescado"},{"item":"Patata","cantidad":150,"unidad":"g","sec":"Frutería"},{"item":"Calabacín","cantidad":100,"unidad":"g","sec":"Frutería"},{"item":"Pimiento","cantidad":60,"unidad":"g","sec":"Frutería"},{"item":"Aceite de oliva virgen extra","cantidad":10,"unidad":"g","sec":"Despensa"},{"item":"Limón, ajo y perejil","cantidad":null,"unidad":"al gusto","sec":"Despensa"}],"pasos":["Hornea las patatas en rodajas con la mitad del aceite 20 minutos a 200 °C.","Añade calabacín y pimiento y 10 minutos más.","Coloca la merluza encima con ajo, perejil y limón.","Hornea 10–12 minutos."],"conservacion":"3 días en la nevera en táper hermético.","consejo":"Puedes usar merluza congelada.","alergenos":["Pescado"],"etiquetas":["Mediterránea","Casera española"],"enfoques":[]},{"tipo":"Cena","nombre":"Salteado de pollo, brócoli y fideos de arroz","emoji":"🥡","descripcion":"Wok rápido con sabor asiático.","kcal":470,"p":40,"c":48,"g":11,"prep_min":10,"coccion_min":12,"raciones_lote":3,"ingredientes":[{"item":"Pechuga de pollo","cantidad":140,"unidad":"g","sec":"Carne y pescado"},{"item":"Fideos de arroz","cantidad":50,"unidad":"g","sec":"Despensa"},{"item":"Brócoli","cantidad":120,"unidad":"g","sec":"Frutería"},{"item":"Pimiento","cantidad":60,"unidad":"g","sec":"Frutería"},{"item":"Salsa de soja baja en sal","cantidad":15,"unidad":"g","sec":"Despensa"},{"item":"Aceite de oliva virgen extra","cantidad":8,"unidad":"g","sec":"Despensa"},{"item":"Jengibre y ajo","cantidad":null,"unidad":"al gusto","sec":"Despensa"}],"pasos":["Hidrata los fideos según el paquete.","Saltea el pollo con el aceite hasta dorar.","Añade brócoli, pimiento, ajo y jengibre 4 minutos.","Incorpora los fideos y la soja y saltea 1 minuto."],"conservacion":"3 días en la nevera en táper hermético.","consejo":"Corta todas las verduras de la semana de una vez.","alergenos":["Gluten"],"etiquetas":["Asiática","Sin horno","Rápida (<20 min)"],"enfoques":[]},{"tipo":"Cena","nombre":"Tortilla de calabacín con ensalada","emoji":"🍳","descripcion":"Jugosa, ligera y muy de casa.","kcal":462,"p":37,"c":23,"g":23,"prep_min":10,"coccion_min":12,"raciones_lote":2,"ingredientes":[{"item":"Huevo","cantidad":2,"unidad":"ud","sec":"Lácteos y huevos"},{"item":"Claras de huevo","cantidad":100,"unidad":"g","sec":"Lácteos y huevos"},{"item":"Calabacín","cantidad":150,"unidad":"g","sec":"Frutería"},{"item":"Queso fresco light","cantidad":50,"unidad":"g","sec":"Lácteos y huevos"},{"item":"Lechuga","cantidad":80,"unidad":"g","sec":"Frutería"},{"item":"Tomate","cantidad":80,"unidad":"g","sec":"Frutería"},{"item":"Aceite de oliva virgen extra","cantidad":8,"unidad":"g","sec":"Despensa"},{"item":"Pan integral","cantidad":30,"unidad":"g","sec":"Panadería"}],"pasos":["Saltea el calabacín en dados con la mitad del aceite.","Bate huevos y claras, añade el calabacín y el queso.","Cuaja la tortilla por ambos lados.","Sirve con ensalada aliñada con el resto del aceite y el pan."],"conservacion":"2 días en la nevera.","consejo":"Está muy rica también fría.","alergenos":["Huevo","Lactosa","Gluten"],"etiquetas":["Casera española","Vegetariana","Rápida (<20 min)"],"enfoques":[]},{"tipo":"Cena","nombre":"Salmón con boniato asado y espárragos","emoji":"🍠","descripcion":"Horno y listo: dulce, salado y saciante.","kcal":457,"p":31,"c":32,"g":22,"prep_min":10,"coccion_min":32,"raciones_lote":3,"ingredientes":[{"item":"Salmón","cantidad":130,"unidad":"g","sec":"Carne y pescado"},{"item":"Boniato","cantidad":150,"unidad":"g","sec":"Frutería"},{"item":"Espárragos verdes","cantidad":120,"unidad":"g","sec":"Frutería"},{"item":"Aceite de oliva virgen extra","cantidad":5,"unidad":"g","sec":"Despensa"},{"item":"Pimentón y romero","cantidad":null,"unidad":"al gusto","sec":"Despensa"}],"pasos":["Hornea el boniato en dados con pimentón 20 minutos a 200 °C.","Añade los espárragos y el salmón.","Hornea 12 minutos más."],"conservacion":"3 días en la nevera en táper hermético.","consejo":"Asa todo el boniato de la semana de una vez.","alergenos":["Pescado"],"etiquetas":["Mediterránea","Alta en proteína"],"enfoques":[]},{"tipo":"Cena","nombre":"Pavo a la plancha con cuscús y verduras","emoji":"🥙","descripcion":"Aires árabes en 15 minutos.","kcal":467,"p":43,"c":44,"g":13,"prep_min":10,"coccion_min":12,"raciones_lote":4,"ingredientes":[{"item":"Pechuga de pavo","cantidad":150,"unidad":"g","sec":"Carne y pescado"},{"item":"Cuscús","cantidad":50,"unidad":"g","sec":"Despensa"},{"item":"Calabacín","cantidad":80,"unidad":"g","sec":"Frutería"},{"item":"Pimiento","cantidad":60,"unidad":"g","sec":"Frutería"},{"item":"Cebolla","cantidad":30,"unidad":"g","sec":"Frutería"},{"item":"Aceite de oliva virgen extra","cantidad":10,"unidad":"g","sec":"Despensa"},{"item":"Comino, canela y menta","cantidad":null,"unidad":"al gusto","sec":"Despensa"}],"pasos":["Hidrata el cuscús con el mismo peso de agua caliente 5 minutos.","Saltea las verduras con especias.","Haz el pavo a la plancha.","Mezcla el cuscús con las verduras y sirve con el pavo."],"conservacion":"4 días en la nevera o 2 meses congelado.","consejo":"Añade menta fresca al servir.","alergenos":["Gluten"],"etiquetas":["Árabe / Libanesa","Rápida (<20 min)"],"enfoques":[]},{"tipo":"Cena","nombre":"Wraps de pollo y hummus","emoji":"🌯","descripcion":"Cena para comer con las manos.","kcal":509,"p":41,"c":48,"g":15,"prep_min":10,"coccion_min":10,"raciones_lote":3,"ingredientes":[{"item":"Tortilla de trigo integral","cantidad":2,"unidad":"ud","sec":"Panadería"},{"item":"Pechuga de pollo","cantidad":130,"unidad":"g","sec":"Carne y pescado"},{"item":"Hummus","cantidad":40,"unidad":"g","sec":"Despensa"},{"item":"Lechuga","cantidad":40,"unidad":"g","sec":"Frutería"},{"item":"Tomate","cantidad":60,"unidad":"g","sec":"Frutería"},{"item":"Pepino","cantidad":40,"unidad":"g","sec":"Frutería"},{"item":"Pimentón y comino","cantidad":null,"unidad":"al gusto","sec":"Despensa"}],"pasos":["Haz el pollo a la plancha con especias y córtalo en tiras.","Unta las tortillas con hummus.","Rellena con pollo, lechuga, tomate y pepino y enrolla."],"conservacion":"Pollo 3 días en la nevera; monta el wrap al momento.","consejo":"Calienta las tortillas 20 segundos en sartén.","alergenos":["Gluten"],"etiquetas":["Árabe / Libanesa","Rápida (<20 min)","Sin horno"],"enfoques":[]},{"tipo":"Cena","nombre":"Tofu salteado con verduras y arroz integral","emoji":"🥢","descripcion":"Opción vegetal llena de proteína.","kcal":586,"p":36,"c":51,"g":25,"prep_min":10,"coccion_min":25,"raciones_lote":3,"ingredientes":[{"item":"Tofu firme","cantidad":180,"unidad":"g","sec":"Lácteos y huevos"},{"item":"Arroz integral","cantidad":50,"unidad":"g","sec":"Despensa"},{"item":"Brócoli","cantidad":100,"unidad":"g","sec":"Frutería"},{"item":"Pimiento","cantidad":60,"unidad":"g","sec":"Frutería"},{"item":"Zanahoria","cantidad":50,"unidad":"g","sec":"Frutería"},{"item":"Salsa de soja baja en sal","cantidad":15,"unidad":"g","sec":"Despensa"},{"item":"Aceite de oliva virgen extra","cantidad":8,"unidad":"g","sec":"Despensa"},{"item":"Jengibre y sésamo","cantidad":null,"unidad":"al gusto","sec":"Despensa"}],"pasos":["Cuece el arroz.","Prensa y corta el tofu en dados; dóralo con el aceite.","Saltea las verduras con jengibre.","Mezcla todo con la soja y sirve sobre el arroz con sésamo."],"conservacion":"3 días en la nevera en táper hermético.","consejo":"Seca bien el tofu para que quede crujiente.","alergenos":["Gluten"],"etiquetas":["Vegana","Vegetariana","Asiática","Sin horno"],"enfoques":[]},{"tipo":"Snack","nombre":"Skyr con fresas y almendras","emoji":"🍓","descripcion":"Merienda dulce y proteica.","kcal":229,"p":23,"c":14,"g":8,"prep_min":3,"coccion_min":0,"raciones_lote":1,"ingredientes":[{"item":"Yogur tipo skyr natural","cantidad":170,"unidad":"g","sec":"Lácteos y huevos"},{"item":"Fresas","cantidad":100,"unidad":"g","sec":"Frutería"},{"item":"Almendras","cantidad":15,"unidad":"g","sec":"Despensa"}],"pasos":["Pon el skyr en un bol.","Añade las fresas troceadas y las almendras."],"conservacion":"Montar al momento.","consejo":"Cambia las fresas por la fruta de temporada.","alergenos":["Lactosa","Frutos secos"],"etiquetas":["Alta en proteína","Rápida (<20 min)","Dulce para desayunar"],"enfoques":[]},{"tipo":"Snack","nombre":"Manzana con crema de cacahuete","emoji":"🍎","descripcion":"Crujiente y saciante.","kcal":184,"p":4,"c":24,"g":8,"prep_min":2,"coccion_min":0,"raciones_lote":1,"ingredientes":[{"item":"Manzana","cantidad":180,"unidad":"g","sec":"Frutería"},{"item":"Crema de cacahuete 100%","cantidad":15,"unidad":"g","sec":"Despensa"},{"item":"Canela","cantidad":null,"unidad":"al gusto","sec":"Despensa"}],"pasos":["Corta la manzana en gajos.","Acompaña con la crema de cacahuete y canela."],"conservacion":"Montar al momento.","consejo":"Ideal para llevar al trabajo.","alergenos":["Frutos secos"],"etiquetas":["Vegana","Rápida (<20 min)"],"enfoques":[]},{"tipo":"Snack","nombre":"Hummus con crudités","emoji":"🥕","descripcion":"Para picar sin culpa.","kcal":214,"p":6,"c":18,"g":12,"prep_min":5,"coccion_min":0,"raciones_lote":4,"ingredientes":[{"item":"Hummus","cantidad":60,"unidad":"g","sec":"Despensa"},{"item":"Zanahoria","cantidad":80,"unidad":"g","sec":"Frutería"},{"item":"Pepino","cantidad":80,"unidad":"g","sec":"Frutería"},{"item":"Pimiento","cantidad":60,"unidad":"g","sec":"Frutería"}],"pasos":["Corta las verduras en bastones.","Sirve con el hummus."],"conservacion":"Bastones 4 días en la nevera en agua.","consejo":"Corta las crudités de toda la semana el domingo.","alergenos":[],"etiquetas":["Vegana","Vegetariana","Árabe / Libanesa","Rápida (<20 min)"],"enfoques":[]},{"tipo":"Snack","nombre":"Tostada de atún y tomate","emoji":"🐟","descripcion":"Salada, rápida y proteica.","kcal":180,"p":17,"c":16,"g":5,"prep_min":3,"coccion_min":2,"raciones_lote":1,"ingredientes":[{"item":"Pan integral","cantidad":35,"unidad":"g","sec":"Panadería"},{"item":"Atún al natural (escurrido)","cantidad":52,"unidad":"g","sec":"Despensa"},{"item":"Tomate","cantidad":50,"unidad":"g","sec":"Frutería"},{"item":"Aceite de oliva virgen extra","cantidad":3,"unidad":"g","sec":"Despensa"}],"pasos":["Tuesta el pan.","Añade el tomate rallado, el atún y unas gotas de aceite."],"conservacion":"Montar al momento.","consejo":"Añade orégano o pimienta.","alergenos":["Gluten","Pescado"],"etiquetas":["Mediterránea","Alta en proteína","Rápida (<20 min)"],"enfoques":[]},{"tipo":"Snack","nombre":"Queso batido con cacao y plátano","emoji":"🍌","descripcion":"Sabe a postre de chocolate.","kcal":163,"p":18,"c":21,"g":1,"prep_min":3,"coccion_min":0,"raciones_lote":1,"ingredientes":[{"item":"Queso fresco batido 0%","cantidad":200,"unidad":"g","sec":"Lácteos y huevos"},{"item":"Plátano","cantidad":60,"unidad":"g","sec":"Frutería"},{"item":"Cacao puro en polvo","cantidad":5,"unidad":"g","sec":"Despensa"}],"pasos":["Mezcla el queso batido con el cacao.","Añade el plátano en rodajas."],"conservacion":"Montar al momento.","consejo":"Endulza con canela si lo necesitas.","alergenos":["Lactosa"],"etiquetas":["Dulce para desayunar","Alta en proteína","Rápida (<20 min)"],"enfoques":[]},{"tipo":"Capricho","nombre":"Onzas de chocolate negro 85%","emoji":"🍫","descripcion":"Tu capricho diario, dentro de tus macros.","kcal":118,"p":2,"c":4,"g":10,"prep_min":0,"coccion_min":0,"raciones_lote":1,"ingredientes":[{"item":"Chocolate negro 85%","cantidad":20,"unidad":"g","sec":"Despensa"}],"pasos":["Disfrútalo despacio, mejor con un café o una infusión."],"conservacion":"En un lugar fresco y seco.","consejo":"Dos onzas bastan para quitar el antojo.","alergenos":[],"etiquetas":["Dulce para desayunar"],"enfoques":[]},{"tipo":"Capricho","nombre":"Yogur con chocolate y frutos rojos","emoji":"🍨","descripcion":"Postre cremoso con chocolate.","kcal":163,"p":15,"c":12,"g":6,"prep_min":3,"coccion_min":0,"raciones_lote":1,"ingredientes":[{"item":"Yogur tipo skyr natural","cantidad":125,"unidad":"g","sec":"Lácteos y huevos"},{"item":"Chocolate negro 85%","cantidad":10,"unidad":"g","sec":"Despensa"},{"item":"Frutos rojos","cantidad":50,"unidad":"g","sec":"Congelados"}],"pasos":["Pon el yogur en un bol con los frutos rojos.","Ralla o trocea el chocolate por encima."],"conservacion":"Montar al momento.","consejo":"Congela el bol 15 minutos: parece helado.","alergenos":["Lactosa"],"etiquetas":["Dulce para desayunar"],"enfoques":[]},{"tipo":"Capricho","nombre":"Galletas de avena y chocolate","emoji":"🍪","descripcion":"Dos galletas caseras sin azúcar añadido.","kcal":166,"p":4,"c":23,"g":6,"prep_min":5,"coccion_min":12,"raciones_lote":6,"ingredientes":[{"item":"Copos de avena","cantidad":25,"unidad":"g","sec":"Despensa"},{"item":"Plátano","cantidad":30,"unidad":"g","sec":"Frutería"},{"item":"Chocolate negro 85%","cantidad":8,"unidad":"g","sec":"Despensa"}],"pasos":["Machaca el plátano y mézclalo con la avena y el chocolate troceado.","Forma 2 galletas y hornea 12 minutos a 180 °C."],"conservacion":"5 días en un recipiente cerrado.","consejo":"Haz una bandeja para toda la semana.","alergenos":["Gluten"],"etiquetas":["Dulce para desayunar"],"enfoques":[]},{"tipo":"Cheatmeal","nombre":"Pizza casera margarita con pavo","emoji":"🍕","descripcion":"Tu pizza del finde, hecha en casa.","kcal":599,"p":30,"c":65,"g":24,"prep_min":10,"coccion_min":12,"raciones_lote":1,"ingredientes":[{"item":"Masa de pizza fresca","cantidad":120,"unidad":"g","sec":"Lácteos y huevos"},{"item":"Tomate triturado","cantidad":60,"unidad":"g","sec":"Despensa"},{"item":"Mozzarella","cantidad":70,"unidad":"g","sec":"Lácteos y huevos"},{"item":"Fiambre de pechuga de pavo","cantidad":40,"unidad":"g","sec":"Carne y pescado"},{"item":"Aceite de oliva virgen extra","cantidad":5,"unidad":"g","sec":"Despensa"},{"item":"Orégano y albahaca","cantidad":null,"unidad":"al gusto","sec":"Despensa"}],"pasos":["Precalienta el horno a 230 °C.","Extiende la masa y cubre con tomate y orégano.","Añade mozzarella y pavo.","Hornea 10–12 minutos y termina con albahaca y el aceite."],"conservacion":"Mejor recién hecha.","consejo":"Hornea en la parte baja para que la base quede crujiente.","alergenos":["Gluten","Lactosa"],"etiquetas":["Italiana"],"enfoques":[]},{"tipo":"Cheatmeal","nombre":"Hamburguesa casera con patatas al horno","emoji":"🍔","descripcion":"Hamburguesa de verdad, sin fritura.","kcal":682,"p":47,"c":64,"g":27,"prep_min":10,"coccion_min":30,"raciones_lote":1,"ingredientes":[{"item":"Pan de hamburguesa brioche","cantidad":1,"unidad":"ud","sec":"Panadería"},{"item":"Ternera picada magra 5%","cantidad":150,"unidad":"g","sec":"Carne y pescado"},{"item":"Queso cheddar","cantidad":20,"unidad":"g","sec":"Lácteos y huevos"},{"item":"Lechuga","cantidad":20,"unidad":"g","sec":"Frutería"},{"item":"Tomate","cantidad":40,"unidad":"g","sec":"Frutería"},{"item":"Cebolla","cantidad":20,"unidad":"g","sec":"Frutería"},{"item":"Patata","cantidad":150,"unidad":"g","sec":"Frutería"},{"item":"Aceite de oliva virgen extra","cantidad":8,"unidad":"g","sec":"Despensa"}],"pasos":["Corta las patatas en gajos, alíñalas con el aceite y hornea 25 minutos a 210 °C.","Forma la hamburguesa con la carne salpimentada.","Hazla a la plancha 3–4 minutos por lado y funde el queso encima.","Monta con pan, lechuga, tomate y cebolla."],"conservacion":"Mejor recién hecha.","consejo":"Tuesta el pan en la plancha 30 segundos.","alergenos":["Gluten","Lactosa","Carne roja","Cebolla cruda"],"etiquetas":["Casera española"],"enfoques":[]},{"tipo":"Cheatmeal","nombre":"Tortitas con sirope y frutos rojos","emoji":"🥞","descripcion":"Brunch de domingo con todo.","kcal":488,"p":19,"c":66,"g":15,"prep_min":5,"coccion_min":12,"raciones_lote":1,"ingredientes":[{"item":"Copos de avena","cantidad":60,"unidad":"g","sec":"Despensa"},{"item":"Huevo","cantidad":1,"unidad":"ud","sec":"Lácteos y huevos"},{"item":"Leche semidesnatada","cantidad":100,"unidad":"g","sec":"Lácteos y huevos"},{"item":"Mantequilla","cantidad":5,"unidad":"g","sec":"Lácteos y huevos"},{"item":"Sirope de arce","cantidad":25,"unidad":"g","sec":"Despensa"},{"item":"Frutos rojos","cantidad":80,"unidad":"g","sec":"Congelados"}],"pasos":["Tritura avena, huevo y leche.","Haz las tortitas en sartén con un poco de mantequilla.","Sirve con el sirope y los frutos rojos."],"conservacion":"Aguantan 2 días en la nevera.","consejo":"Añade canela a la masa.","alergenos":["Gluten","Huevo","Lactosa"],"etiquetas":["Dulce para desayunar"],"enfoques":[]}];
+
 let SAMPLE=undefined;
 async function getSample(){
   if(SAMPLE!==undefined)return SAMPLE;
@@ -2172,8 +2427,15 @@ async function getSample(){
 async function mpGenerate(){
   const u=me(),pr=MP.prefs;
   MP.screen='gen';MP.err='';MP.progress='Pensando en tu semana…';mpGenView();
-  const sample=await getSample();
-  if(!sample){MP.err='La generación con IA no está disponible en esta versión. En la web publicada en vuestro dominio hay que conectar un servicio de IA desde vuestro servidor.';mpGenView();return}
+  const sample=IN_CLAUDE?await getSample():null;
+  if(!sample){ // Menú con las recetas de la biblioteca de Vuelve
+    try{MP.progress='Eligiendo recetas de la biblioteca de Vuelve…';const p=$('#mpprog');if(p)p.textContent=MP.progress;
+      const lib=await libLoad(true);await new Promise(r=>setTimeout(r,700));
+      const plan=mpValidate(mpFromLibrary(u,pr,lib),pr);
+      u.mealprep={prefs:JSON.parse(JSON.stringify(pr)),plan,creado:today()};save();
+      MP.screen='home';if(UI.view==='menu')vMenu();toast('¡Tu menú está listo! 🎉');
+    }catch(e){console.warn(e);MP.err=e.faltan?`Todavía no hay recetas de ${e.faltan.join(' y ').toLowerCase()} que encajen con lo que quieres evitar. Prueba a quitar alguna restricción o esa comida.`:SERVER?sbErr(e):'No se pudo crear el menú. Vuelve a intentarlo.';if(UI.view==='menu')mpGenView()}
+    return}
   MP.ctl=new AbortController();
   try{
     const raw=await sample.json(mpPrompt(u,pr),{signal:MP.ctl.signal,modelTier:'default',cache:false,onText:({text})=>{
@@ -2194,7 +2456,7 @@ function mpGenView(){
   $('#view').innerHTML=`<div class="card gen" style="margin-top:30px">${MP.err?`<div style="font-size:44px">😕</div><div class="h3" style="margin-top:10px">No hemos podido crear tu menú</div><p class="small muted" style="margin-top:6px">${esc(MP.err)}</p>
     <div class="grid2" style="margin-top:18px"><button class="btn soft" id="mpbk">← Ajustar preferencias</button><button class="btn" id="mprt">Reintentar</button></div>`
     :`<div class="spin">🥗</div><div class="h3" style="margin-top:14px;font-size:20px">Creando tu Mealprep…</div><p class="small muted" style="margin-top:6px" id="mpprog">${esc(MP.progress)}</p>
-    <p class="tiny muted" style="margin-top:14px">Suele tardar entre 30 segundos y 2 minutos. Ajustamos cada día a tus calorías y macros.</p><button class="btn ghost" style="margin-top:18px" id="mpst">Detener</button>`}</div>`;
+    <p class="tiny muted" style="margin-top:14px">${IN_CLAUDE?"Suele tardar entre 30 segundos y 2 minutos.":"Solo tarda unos segundos."} Ajustamos cada día a tus calorías y macros.</p><button class="btn ghost" style="margin-top:18px" id="mpst">Detener</button>`}</div>`;
   if($('#mpst'))$('#mpst').onclick=()=>MP.ctl&&MP.ctl.abort();
   if($('#mpbk'))$('#mpbk').onclick=()=>{MP.screen='wizard';mpWizard()};
   if($('#mprt'))$('#mprt').onclick=mpGenerate;
@@ -2207,7 +2469,7 @@ function route(){
   if(!u)return renderAuth();
   if(!u.profile)return startOnboarding(false);
   renderApp();
-  maybeWelcome();
+  if(!maybeCheckin())maybeWelcome();
 }
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.edgrasa');if(!b)return;e.preventDefault();
   const u=me();if(!u||!u.profile)return;
