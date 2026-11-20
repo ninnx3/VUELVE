@@ -390,8 +390,17 @@ textarea.in{min-height:90px;resize:vertical;font-size:11px;font-family:ui-monosp
    disponible; si no, este navegador (localStorage).
    ========================================================= */
 
+/* ---------- Modo servidor (Supabase) ----------
+   Rellena estas dos claves con los datos de tu proyecto (Project Settings → API).
+   La "anon public key" es pública y puede ir en la web. NUNCA pongas aquí la service_role. */
+const SUPABASE_URL='';
+const SUPABASE_KEY='';
+const IN_CLAUDE=!!(window.claude&&window.claude.use)||/claude\.ai|claudeusercontent/.test(location.hostname);
+const SERVER=!!(SUPABASE_URL&&SUPABASE_KEY)&&!IN_CLAUDE&&location.protocol!=='file:';
+let SB=null,SBUID=null;const RES={};
+
 /* ---------- Almacenamiento local ---------- */
-const KEY='vuelve_proto_v1';
+const KEY=SERVER?'vuelve_srv_v1':'vuelve_proto_v1';
 let MEM=null;
 function load(){
   if(MEM) return MEM;
@@ -407,10 +416,11 @@ function me(){const d=load();return d.session?d.users[d.session]:null}
 const CLOUD={db:null,uid:null,state:'local',last:{},timer:null,busy:false,again:false};
 const SYNC_TXT={local:'● Guardado en este navegador',saving:'● Guardando…',cloud:'● Guardado en la nube',error:'● Error al guardar en la nube'};
 function setSync(s){CLOUD.state=s;const e=document.getElementById('sync');if(e){e.textContent=SYNC_TXT[s];e.className=s}
-  const a=document.getElementById('authsync');if(a)a.textContent=CLOUD.db?'Se guardan en la nube, ligadas a tu sesión de Claude.':'Se guardan en este navegador.'}
+  const a=document.getElementById('authsync');if(a)a.textContent=authNote()}
+function authNote(){return SERVER?'Tu cuenta funciona en cualquier móvil u ordenador.':CLOUD.db?'Se guardan en la nube, ligadas a tu sesión de Claude.':'Se guardan en este navegador.'}
 const ekey=e=>e.replace(/[^a-zA-Z0-9_\-.~:@+]/g,'_');
 function toDocs(){
-  const d=load(),docs={},accounts={session:d.session,users:{},retos:d.retos||{}};
+  const d=load(),docs={},accounts={session:d.session,users:{},retos:SERVER?{}:(d.retos||{})};
   for(const [em,u] of Object.entries(d.users)){
     const {logs,mealprep,...rest}=u;accounts.users[em]=rest;
     if(mealprep)docs['mp~'+ekey(em)]={email:em,json:JSON.stringify(mealprep)};
@@ -434,20 +444,24 @@ async function flush(){
   if(CLOUD.busy){CLOUD.again=true;return}
   CLOUD.busy=true;
   try{
-    const docs=toDocs(),col=CLOUD.db.collection('data/users/'+CLOUD.uid);
+    const docs=toDocs(),col=SERVER?null:CLOUD.db.collection('data/users/'+CLOUD.uid);
+    const put=async(id,body)=>{if(SERVER){const {error}=await SB.from('user_docs').upsert({user_id:SBUID,id,body,updated_at:new Date().toISOString()});if(error)throw error}else await col.doc(id).set(body)};
+    const del=async id=>{if(SERVER){const {error}=await SB.from('user_docs').delete().eq('user_id',SBUID).eq('id',id);if(error)throw error}else await col.doc(id).delete()};
     let wrote=false;
     for(const [id,body] of Object.entries(docs)){
       const s=JSON.stringify(body);if(CLOUD.last[id]===s)continue;
       if(!wrote){setSync('saving');wrote=true}
-      await col.doc(id).set(body);CLOUD.last[id]=s;
+      await put(id,body);CLOUD.last[id]=s;
     }
-    for(const id of Object.keys(CLOUD.last))if(!docs[id]){await col.doc(id).delete();delete CLOUD.last[id]}
+    for(const id of Object.keys(CLOUD.last))if(!docs[id]){await del(id);delete CLOUD.last[id]}
+    if(SERVER)await sbPushResumen();
     setSync('cloud');
   }catch(e){console.warn('Vuelve cloud',e);setSync('error')}
   CLOUD.busy=false;
   if(CLOUD.again){CLOUD.again=false;flush()}
 }
 async function initCloud(){
+  if(SERVER)return;
   for(let i=0;i<30&&!(window.claude&&window.claude.use);i++)await new Promise(r=>setTimeout(r,100));
   if(!(window.claude&&window.claude.use))return;
   try{
@@ -472,6 +486,106 @@ async function initCloud(){
     MEM=remote;saveLocal();setSync('cloud');flush();
     if(!SCREEN.busy)route();
   }catch(e){console.warn('Vuelve cloud init',e);setSync('local')}
+}
+
+/* =========================================================
+   SERVIDOR · cuentas, guardado y retos con Supabase
+   ========================================================= */
+function loadSBLib(){return new Promise((ok,ko)=>{if(window.supabase)return ok();const s=document.createElement('script');
+  s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';s.onload=ok;s.onerror=()=>ko(new Error('No se pudo cargar Supabase'));document.head.appendChild(s)})}
+function sbErr(e){const m=(e&&e.message)||String(e);
+  if(/Invalid login credentials/i.test(m))return 'Email o contraseña incorrectos.';
+  if(/already registered|already exists/i.test(m))return 'Ya existe una cuenta con ese email. Inicia sesión.';
+  if(/Email not confirmed/i.test(m))return 'Confirma tu email: te hemos enviado un enlace. Revisa también el spam.';
+  if(/Password should be at least/i.test(m))return 'La contraseña debe tener al menos 6 caracteres.';
+  if(/rate limit|too many/i.test(m))return 'Demasiados intentos seguidos. Espera un minuto y vuelve a intentarlo.';
+  if(/Failed to fetch|NetworkError/i.test(m))return 'Sin conexión con el servidor. Revisa tu internet.';
+  return m}
+async function initServer(){
+  await loadSBLib();
+  SB=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'vuelve_auth'}});
+  SB.auth.onAuthStateChange(ev=>{if(ev==='PASSWORD_RECOVERY')setTimeout(openNewPassword,300)});
+  const {data:{session}}=await SB.auth.getSession();
+  if(session){try{await sbLoadUser(session.user)}catch(e){console.warn(e);toast(sbErr(e))}}
+  else{MEM={users:{},session:null,retos:{}};saveLocal()}
+}
+async function sbLoadUser(user){
+  SBUID=user.id;const email=(user.email||'').toLowerCase();
+  const {data,error}=await SB.from('user_docs').select('id,body');if(error)throw error;
+  CLOUD.last={};let u=null,mp=null;const logs={};
+  for(const row of data){CLOUD.last[row.id]=JSON.stringify(row.body);
+    if(row.id==='accounts'){try{u=Object.values(JSON.parse(row.body.json).users)[0]||null}catch(e){}}
+    else if(row.id.startsWith('log~'))Object.assign(logs,JSON.parse(row.body.json));
+    else if(row.id.startsWith('mp~'))mp=JSON.parse(row.body.json)}
+  if(u){u.logs=logs;if(mp)u.mealprep=mp}
+  else{ // Primera vez en el servidor: si este navegador tiene una cuenta de prueba con el mismo email, se trae sus datos.
+    let old=null;try{old=JSON.parse(localStorage.getItem('vuelve_proto_v1'))?.users?.[email]||null}catch(e){}
+    u=old?JSON.parse(JSON.stringify(old)):{email,nombre:user.user_metadata?.nombre||email.split('@')[0],creada:today(),profile:null,logs:{},weights:[],favs:[],custom:[],off:[]};
+    if(old)setTimeout(()=>toast('Hemos traído tus datos de prueba a tu cuenta ✓'),800)}
+  delete u.pass;u.email=email;u.logs=u.logs||{};u.weights=u.weights||[];u.favs=u.favs||[];u.custom=u.custom||[];
+  MEM={users:{[email]:u},session:email,retos:{}};saveLocal();
+  CLOUD.db='sb';CLOUD.res={};setSync('cloud');
+  await sbLoadRetos();flush();
+}
+async function sbPushResumen(){
+  const u=me();if(!u||!u.profile)return;CLOUD.res=CLOUD.res||{};const rows=[];
+  for(const d of Object.keys(u.logs)){const c=dayStatus(u,d)==='ok',m=!!(u.logs[d].mov||[]).length,k=(c?1:0)+(m?2:0);
+    if(CLOUD.res[d]!==k)rows.push({user_id:SBUID,fecha:d,cumplido:c,movimiento:m})}
+  if(!rows.length)return;
+  const {error}=await SB.from('dia_resumen').upsert(rows);if(error)throw error;
+  rows.forEach(r=>CLOUD.res[r.fecha]=(r.cumplido?1:0)+(r.movimiento?2:0));
+}
+async function sbLoadRetos(){
+  if(!SERVER||!SB)return;
+  const {data:rs,error}=await SB.from('retos').select('*,reto_miembros(*)');
+  if(error){console.warn('retos',error);return}
+  const d=load();d.retos={};const uids=new Set();let minIni=null;
+  for(const r of rs||[]){const ms=r.reto_miembros||[];
+    d.retos[r.id]={id:r.id,nombre:r.nombre,tipo:r.tipo,inicio:r.inicio,dias:r.dias,owner:r.owner_email,
+      miembros:ms.filter(x=>x.estado==='miembro').map(x=>x.email),
+      invitados:ms.filter(x=>x.email!==r.owner_email).map(x=>x.email),
+      rechazados:ms.filter(x=>x.estado==='rechazado').map(x=>x.email),
+      nombres:Object.fromEntries(ms.filter(x=>x.nombre).map(x=>[x.email,x.nombre])),
+      uids:Object.fromEntries(ms.filter(x=>x.user_id).map(x=>[x.email,x.user_id]))};
+    ms.forEach(x=>{if(x.user_id&&x.user_id!==SBUID&&x.estado==='miembro')uids.add(x.user_id)});
+    if(!minIni||r.inicio<minIni)minIni=r.inicio}
+  for(const k in RES)delete RES[k];
+  if(uids.size){const {data:res}=await SB.from('dia_resumen').select('user_id,fecha,cumplido,movimiento').in('user_id',[...uids]).gte('fecha',minIni);
+    (res||[]).forEach(x=>{(RES[x.user_id]=RES[x.user_id]||{})[x.fecha]={c:x.cumplido,m:x.movimiento}})}
+  saveLocal();
+}
+async function sbRun(fn,ok){
+  try{const r=await fn();if(r&&r.error)throw r.error;await sbLoadRetos();if(ok)toast(ok);renderApp();return true}
+  catch(e){console.warn(e);toast(sbErr(e));return false}
+}
+const RETOS_API={
+  async crear(r,u){
+    const {data,error}=await SB.from('retos').insert({owner_email:u.email,nombre:r.nombre,tipo:r.tipo,inicio:r.inicio,dias:r.dias}).select().single();
+    if(error)throw error;
+    const rows=[{reto_id:data.id,email:u.email,user_id:SBUID,nombre:u.nombre,estado:'miembro'},...r.invitados.map(e=>({reto_id:data.id,email:e,estado:'invitado'}))];
+    const {error:e2}=await SB.from('reto_miembros').insert(rows);if(e2)throw e2;
+    r.id=data.id;await sbLoadRetos();return r},
+  aceptar:(id,u)=>sbRun(()=>SB.from('reto_miembros').update({estado:'miembro',user_id:SBUID,nombre:u.nombre}).eq('reto_id',id).eq('email',u.email),'¡Te has unido al reto! 💜'),
+  rechazar:(id,u)=>sbRun(()=>SB.from('reto_miembros').update({estado:'rechazado'}).eq('reto_id',id).eq('email',u.email)),
+  salir:(id,u)=>sbRun(()=>SB.from('reto_miembros').delete().eq('reto_id',id).eq('email',u.email),'Has salido del reto'),
+  editar:(r,quitar)=>sbRun(async()=>{const {error}=await SB.from('retos').update({nombre:r.nombre,tipo:r.tipo,inicio:r.inicio,dias:r.dias}).eq('id',r.id);if(error)throw error;
+    if(quitar.length){const {error:e2}=await SB.from('reto_miembros').delete().eq('reto_id',r.id).in('email',quitar);if(e2)throw e2}},'Reto actualizado ✓'),
+  borrar:id=>sbRun(()=>SB.from('retos').delete().eq('id',id),'Reto eliminado'),
+  invitar:(id,email)=>sbRun(()=>SB.from('reto_miembros').upsert({reto_id:id,email,estado:'invitado'}),null)
+};
+async function logout(){
+  const d=load();UI.view='diario';UI.date=today();UI.range='dia';MP.screen='home';
+  if(SERVER&&SB){await SB.auth.signOut().catch(()=>{});MEM={users:{},session:null,retos:{}};CLOUD.db=null;CLOUD.last={};saveLocal()}
+  else{d.session=null;save()}
+  route();
+}
+function openNewPassword(){
+  const m=modal(`<div class="top"><b>Nueva contraseña</b><button class="close">✕</button></div>
+    <label class="f"><span>Escribe tu nueva contraseña</span><input class="in" type="password" id="np" minlength="6" autocomplete="new-password" placeholder="Mínimo 6 caracteres"></label>
+    <div class="err" id="ne"></div><button class="btn block" id="ns">Guardar contraseña</button>`);
+  m.querySelector('#ns').onclick=async()=>{const p=m.querySelector('#np').value;if(p.length<6){m.querySelector('#ne').textContent='Mínimo 6 caracteres.';return}
+    const {error}=await SB.auth.updateUser({password:p});if(error){m.querySelector('#ne').textContent=sbErr(error);return}
+    m.remove();toast('Contraseña cambiada ✓')};
 }
 
 async function hash(s){
@@ -745,18 +859,43 @@ function renderAuth(mode='registro',prefill=''){
       <form id="af">
         ${mode==='registro'?`<label class="f"><span>Nombre</span><input class="in" name="nombre" required autocomplete="given-name" placeholder="¿Cómo te llamas?"></label>`:''}
         <label class="f"><span>Email</span><input class="in" type="email" name="email" required autocomplete="email" placeholder="tu@email.com" value="${esc(prefill)}"></label>
-        <label class="f"><span>Contraseña</span><input class="in" type="password" name="pass" required minlength="4" autocomplete="${mode==='registro'?'new-password':'current-password'}" placeholder="Mínimo 4 caracteres"></label>
+        <label class="f"><span>Contraseña</span><input class="in" type="password" name="pass" required minlength="${SERVER?6:4}" autocomplete="${mode==='registro'?'new-password':'current-password'}" placeholder="Mínimo ${SERVER?6:4} caracteres"></label>
         <div class="err" id="aerr"></div>
-        <button class="btn block" style="margin-top:4px">${mode==='registro'?'Crear cuenta y empezar →':'Entrar →'}</button>
+        <button class="btn block" style="margin-top:4px" id="asub">${mode==='registro'?'Crear cuenta y empezar →':'Entrar →'}</button>
+        ${SERVER&&mode==='login'?'<p style="text-align:center;margin-top:14px"><a href="#" id="forgot" class="small" style="font-weight:600">¿Has olvidado tu contraseña?</a></p>':''}
       </form>
-      <div class="note">🧪 <b>Modo prueba.</b> Puedes crear tantas cuentas falsas como quieras. <span id="authsync">${CLOUD.db?'Se guardan en la nube, ligadas a tu sesión de Claude.':'Se guardan en este navegador.'}</span></div>
+      <div class="note">${SERVER?'🔒 ':'🧪 <b>Modo prueba.</b> Puedes crear tantas cuentas falsas como quieras. '}<span id="authsync">${authNote()}</span></div>
     </div>
   </div>`;
   $$('.seg button').forEach(b=>b.onclick=()=>renderAuth(b.dataset.m));
+  if($('#forgot'))$('#forgot').onclick=async e=>{e.preventDefault();const email=$('[name=email]').value.trim().toLowerCase();
+    if(!email){$('#aerr').textContent='Escribe tu email arriba y vuelve a pulsar.';return}
+    const {error}=await SB.auth.resetPasswordForEmail(email,{redirectTo:APP_URL});
+    $('#aerr').textContent='';toast(error?sbErr(error):'Te hemos enviado un email para cambiar la contraseña')};
   $('#af').onsubmit=async e=>{
     e.preventDefault();
     const f=new FormData(e.target),email=f.get('email').trim().toLowerCase(),pass=f.get('pass');
     const d=load(),err=$('#aerr');
+    if(SERVER){
+      const btn=$('#asub');btn.disabled=true;err.textContent='';
+      try{
+        if(mode==='registro'){
+          const {data,error}=await SB.auth.signUp({email,password:pass,options:{data:{nombre:f.get('nombre').trim()},emailRedirectTo:APP_URL}});
+          if(error)throw error;
+          if(!data.session){$('.box').innerHTML=`<div class="logo">${LOGO}<div><b>VUELVE</b><small>Un día a la vez</small></div></div>
+            <div style="font-size:48px;margin-top:36px">💌</div><h1 class="h1" style="margin-top:8px">Revisa tu <span>email.</span></h1>
+            <p class="muted" style="margin-top:10px">Te hemos enviado un enlace a <b>${esc(email)}</b> para confirmar tu cuenta. Ábrelo desde este mismo móvil. Si no llega, mira en spam.</p>
+            <button class="btn soft block" style="margin-top:20px" id="back">Ya lo he confirmado → Iniciar sesión</button>`;
+            $('#back').onclick=()=>renderAuth('login',email);return}
+          await sbLoadUser(data.user);
+        }else{
+          const {data,error}=await SB.auth.signInWithPassword({email,password:pass});if(error)throw error;
+          await sbLoadUser(data.user);
+        }
+        route();
+      }catch(x){err.textContent=sbErr(x);btn.disabled=false}
+      return;
+    }
     if(mode==='registro'){
       if(d.users[email]){err.textContent='Ya existe una cuenta con ese email. Inicia sesión.';return}
       d.users[email]={email,nombre:f.get('nombre').trim(),pass:await hash(pass),creada:today(),profile:null,logs:{},weights:[],favs:[],custom:[],off:[]};
@@ -964,10 +1103,10 @@ function toggleDD(){
   const close=()=>{dd.remove();document.removeEventListener('click',close)};
   setTimeout(()=>document.addEventListener('click',close),0);
   dd.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{close();const g=b.dataset.go;
-    if(g==='espacio'||g==='retos'){UI.view=g;renderApp();scrollTo(0,0)}
+    if(g==='espacio'||g==='retos'){UI.view=g;renderApp();scrollTo(0,0);if(g==='retos'&&SERVER)sbLoadRetos().then(()=>{if(UI.view==='retos')renderApp()})}
     else if(g==='invitar')openInvite();
     else if(g==='cambiar'){d.session=null;save();renderAuth('login')}
-    else if(g==='salir'){d.session=null;save();route()}});
+    else if(g==='salir')logout()});
 }
 
 /* =========================================================
@@ -985,9 +1124,10 @@ function pendingInvites(u){return Object.values(load().retos||{}).filter(r=>r.in
 function retoFin(r){return addDays(r.inicio,r.dias-1)}
 const diasEntre=(a,b)=>Math.round((parse(b)-parse(a))/864e5)+1;
 function retoScore(r,email){
-  const u=load().users[email];if(!u||!u.profile)return {pts:0,kcal:0,mov:0};
-  let kcal=0,mov=0;const end=retoFin(r)<today()?retoFin(r):today();
-  for(let d=r.inicio;d<=end;d=addDays(d,1)){if(dayStatus(u,d)==='ok')kcal++;if((u.logs[d]?.mov||[]).length)mov++}
+  const u=load().users[email];let kcal=0,mov=0;const end=retoFin(r)<today()?retoFin(r):today();
+  if(!u||!u.profile){const rs=SERVER&&r.uids?RES[r.uids[email]]:null;if(!rs)return {pts:0,kcal:0,mov:0};
+    for(const [f,x] of Object.entries(rs))if(f>=r.inicio&&f<=end){if(x.c)kcal++;if(x.m)mov++}}
+  else for(let d=r.inicio;d<=end;d=addDays(d,1)){if(dayStatus(u,d)==='ok')kcal++;if((u.logs[d]?.mov||[]).length)mov++}
   const pts=r.tipo==='kcal'?kcal:r.tipo==='mov'?mov:kcal+mov;
   return {pts,kcal,mov};
 }
@@ -1043,12 +1183,14 @@ function openInvite(){
         const dias=ndias();
         d.retos=d.retos||{};const id='r'+Date.now();
         reto={id,nombre,tipo,dias,inicio,owner:u.email,miembros:[u.email],invitados:emails.slice(),rechazados:[],creado:today()};
+        if(SERVER){const b=ib.querySelector('#ic');b.disabled=true;b.textContent='Creando…';
+          RETOS_API.crear(reto,u).then(()=>{step='send';draw()}).catch(x=>{b.disabled=false;b.textContent='Crear reto e invitar →';ib.querySelector('#ierr').textContent=sbErr(x)});return}
         d.retos[id]=reto;save();step='send';draw();
       };
     }else{
       const txt=inviteText(u,reto),subj=`${u.nombre} te invita a un reto en Vuelve 💜`;
       const mailto='mailto:'+reto.invitados.map(encodeURIComponent).join(',')+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(txt);
-      const enApp=reto.invitados.filter(e=>d.users[e]);
+      const enApp=SERVER?[]:reto.invitados.filter(e=>d.users[e]);
       ib.innerHTML=`<div style="text-align:center;margin-top:12px;font-size:40px">🏆</div>
       <h3 class="h2" style="font-size:24px;text-align:center;margin-top:6px">Reto <span>creado.</span></h3>
       <p class="small muted" style="text-align:center;margin-top:6px">Ahora envía la invitación a ${reto.invitados.map(esc).join(', ')}</p>
@@ -1067,10 +1209,10 @@ function openInvite(){
 }
 function vRetos(){
   const u=me(),d=load(),inv=pendingInvites(u),mine=retosOf(u).sort((a,b)=>b.inicio.localeCompare(a.inicio));
-  const ini=n=>esc(((d.users[n]?.nombre||n)[0]||'?').toUpperCase());
+  const ini=n=>esc(((d.users[n]?.nombre||Object.values(d.retos||{}).map(r=>r.nombres?.[n]).find(Boolean)||n)[0]||'?').toUpperCase());
   $('#view').innerHTML=heroHTML('Retos con amigos','Juntas,','un día a la vez.',`<button class="btn" id="nr">+ Nuevo reto</button>`)+`
   ${inv.map(r=>`<div class="card" style="border-color:var(--accent);background:#fffafc"><p class="eyebrow">Invitación nueva</p>
-    <div class="h3" style="margin-top:6px">${esc(d.users[r.owner]?.nombre||r.owner)} te invita a «${esc(r.nombre)}»</div>
+    <div class="h3" style="margin-top:6px">${esc(d.users[r.owner]?.nombre||r.nombres?.[r.owner]||r.owner)} te invita a «${esc(r.nombre)}»</div>
     <p class="small muted" style="margin-top:4px">${RETO_TIPOS[r.tipo].ic} ${RETO_TIPOS[r.tipo].t} · ${r.dias} días desde el ${fmtD(r.inicio)}</p>
     <div class="grid2" style="margin-top:14px"><button class="btn" data-acc="${r.id}">Unirme al reto</button><button class="btn soft" data-rej="${r.id}">Ahora no</button></div></div>`).join('')}
   ${mine.length?mine.map(r=>{
@@ -1082,15 +1224,15 @@ function vRetos(){
       <p class="small muted">${RETO_TIPOS[r.tipo].ic} ${RETO_TIPOS[r.tipo].t} · ${fmtD(r.inicio)} – ${fmtD(retoFin(r))} · ${r.dias} días</p>
       <div class="row" style="gap:6px;flex-wrap:wrap;margin-top:12px">${r.owner===u.email?`<button class="btn ghost" data-edr="${r.id}">✎ Editar reto</button><button class="btn ghost" data-inv="${r.id}">+ Invitar</button>`:`<button class="btn ghost" data-leave="${r.id}">Salir del reto</button>`}</div>
       <div style="margin-top:10px">${sc.map((s,i)=>`<div class="lb"><span class="pos">${i===0&&s.pts>0?'🥇':i===1&&s.pts>0?'🥈':i===2&&s.pts>0?'🥉':i+1}</span><span class="av">${ini(s.e)}</span>
-        <div style="flex:1;min-width:0"><b style="font-size:13px">${esc(d.users[s.e]?.nombre||s.e)}${s.e===u.email?' (tú)':''}</b><div class="tiny muted">${r.tipo!=='mov'?s.kcal+' días en objetivo':''}${r.tipo==='ambos'?' · ':''}${r.tipo!=='kcal'?s.mov+' días de movimiento':''}</div>
+        <div style="flex:1;min-width:0"><b style="font-size:13px">${esc(d.users[s.e]?.nombre||r.nombres?.[s.e]||s.e)}${s.e===u.email?' (tú)':''}</b><div class="tiny muted">${r.tipo!=='mov'?s.kcal+' días en objetivo':''}${r.tipo==='ambos'?' · ':''}${r.tipo!=='kcal'?s.mov+' días de movimiento':''}</div>
         <div class="bar"><i style="width:${Math.min(s.pts/max*100,100)}%"></i></div></div><span class="pts">${s.pts}</span></div>`).join('')}
       ${all.filter(e=>!r.miembros.includes(e)).map(e=>`<div class="lb" style="opacity:.55"><span class="pos">·</span><span class="av">${esc(e[0].toUpperCase())}</span><div style="flex:1"><b style="font-size:13px">${esc(e)}</b><div class="tiny muted">Invitación pendiente</div></div></div>`).join('')}
       </div></div>`}).join(''):`<div class="card" style="text-align:center;padding:36px 22px"><div style="font-size:44px">🤝</div><div class="h3" style="margin-top:8px">Aún no tienes retos</div>
       <p class="small muted" style="margin-top:6px">Invita a una amiga y motivaos juntas. La constancia se contagia.</p><button class="btn" style="margin-top:16px" id="nr2">Añadir amigo a Vuelve</button></div>`}
   <p class="foot">Los puntos se calculan con lo que cada persona registra en su diario.</p>`;
   $('#nr').onclick=openInvite;if($('#nr2'))$('#nr2').onclick=openInvite;
-  $$('[data-acc]').forEach(b=>b.onclick=()=>{const r=d.retos[b.dataset.acc];r.miembros.push(u.email);save();toast('¡Te has unido al reto! 💜');renderApp()});
-  $$('[data-rej]').forEach(b=>b.onclick=()=>{const r=d.retos[b.dataset.rej];(r.rechazados=r.rechazados||[]).push(u.email);save();renderApp()});
+  $$('[data-acc]').forEach(b=>b.onclick=()=>{if(SERVER)return RETOS_API.aceptar(b.dataset.acc,u);const r=d.retos[b.dataset.acc];r.miembros.push(u.email);save();toast('¡Te has unido al reto! 💜');renderApp()});
+  $$('[data-rej]').forEach(b=>b.onclick=()=>{if(SERVER)return RETOS_API.rechazar(b.dataset.rej,u);const r=d.retos[b.dataset.rej];(r.rechazados=r.rechazados||[]).push(u.email);save();renderApp()});
   $$('[data-inv]').forEach(b=>b.onclick=()=>reinvite(d.retos[b.dataset.inv]));
   $$('[data-edr]').forEach(b=>b.onclick=()=>editReto(d.retos[b.dataset.edr]));
   $$('[data-leave]').forEach(b=>b.onclick=()=>{const r=d.retos[b.dataset.leave];
@@ -1098,7 +1240,7 @@ function vRetos(){
       <p class="small muted" style="margin-top:8px">Dejarás de aparecer en la clasificación. Tus registros del diario no se borran.</p>
       <button class="btn danger block" style="margin-top:18px" id="y">Sí, salir</button><button class="btn soft block" style="margin-top:8px" id="n">Cancelar</button>`);
     m.querySelector('#n').onclick=()=>m.remove();
-    m.querySelector('#y').onclick=()=>{r.miembros=r.miembros.filter(e=>e!==u.email);r.invitados=r.invitados.filter(e=>e!==u.email);save();m.remove();toast('Has salido del reto');renderApp()}});
+    m.querySelector('#y').onclick=()=>{if(SERVER){m.remove();return RETOS_API.salir(r.id,u)}r.miembros=r.miembros.filter(e=>e!==u.email);r.invitados=r.invitados.filter(e=>e!==u.email);save();m.remove();toast('Has salido del reto');renderApp()}});
 }
 function editReto(r){
   const d=load(),u=me();
@@ -1116,7 +1258,7 @@ function editReto(r){
         <label class="f" style="margin-top:0"><span class="small muted" style="font-weight:600">Termina el</span><input class="in" type="date" id="ef" value="${st.fin}" min="${st.inicio}"></label></div>
       <p class="small" style="margin-top:8px;font-weight:600">${n>0?n+' días':'La fecha de fin debe ser posterior al inicio'}</p>
       <label class="f"><span>Participantes</span></label>
-      ${gente.length?gente.map(e=>`<div class="wk"><span>${esc(d.users[e]?.nombre||e)} <span class="tiny muted">${r.miembros.includes(e)?'participa':'invitación pendiente'}</span></span><button class="btn ghost" data-q="${esc(e)}">Quitar</button></div>`).join(''):'<p class="small muted">Solo estás tú. Invita a alguien desde el botón «+ Invitar».</p>'}
+      ${gente.length?gente.map(e=>`<div class="wk"><span>${esc(d.users[e]?.nombre||r.nombres?.[e]||e)} <span class="tiny muted">${r.miembros.includes(e)?'participa':'invitación pendiente'}</span></span><button class="btn ghost" data-q="${esc(e)}">Quitar</button></div>`).join(''):'<p class="small muted">Solo estás tú. Invita a alguien desde el botón «+ Invitar».</p>'}
       <div class="err" id="ee"></div>
       <button class="btn block" style="margin-top:6px" id="es">Guardar cambios</button>
       <button class="btn ghost block" style="margin-top:10px;color:var(--warn)" id="ed">🗑 Eliminar reto</button>`;
@@ -1127,6 +1269,7 @@ function editReto(r){
     m.querySelector('#es').onclick=()=>{keep();const n=diasEntre(st.inicio,st.fin);
       if(!(n>0)){m.querySelector('#ee').textContent='La fecha de fin debe ser igual o posterior a la de inicio.';return}
       if(n>366){m.querySelector('#ee').textContent='El reto puede durar como máximo un año.';return}
+      if(SERVER){m.remove();return RETOS_API.editar({id:r.id,nombre:st.nombre.trim()||r.nombre,tipo:st.tipo,inicio:st.inicio,dias:n},st.quitar)}
       r.nombre=st.nombre.trim()||r.nombre;r.tipo=st.tipo;r.inicio=st.inicio;r.dias=n;
       r.miembros=r.miembros.filter(e=>!st.quitar.includes(e));r.invitados=r.invitados.filter(e=>!st.quitar.includes(e));
       save();m.remove();toast('Reto actualizado ✓');renderApp()};
@@ -1136,7 +1279,7 @@ function editReto(r){
         <p class="small muted" style="margin-top:8px">Desaparecerá para todas las participantes. No se puede deshacer. Los diarios de cada persona no se tocan.</p>
         <button class="btn danger block" style="margin-top:18px" id="y">Sí, eliminar</button><button class="btn soft block" style="margin-top:8px" id="n">Cancelar</button>`;
       m.querySelector('.close').onclick=()=>m.remove();m.querySelector('#n').onclick=()=>m.remove();
-      m.querySelector('#y').onclick=()=>{delete d.retos[r.id];save();m.remove();toast('Reto eliminado');renderApp()}};
+      m.querySelector('#y').onclick=()=>{if(SERVER){m.remove();return RETOS_API.borrar(r.id)}delete d.retos[r.id];save();m.remove();toast('Reto eliminado');renderApp()}};
   };
   draw();
 }
@@ -1147,7 +1290,7 @@ function reinvite(r){
     <button class="btn block" id="ok">Invitar</button>`);
   m.querySelector('#ok').onclick=()=>{const v=m.querySelector('#em').value.trim().toLowerCase();
     if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){m.querySelector('#ierr').textContent='Ese email no parece válido.';return}
-    if(!r.invitados.includes(v))r.invitados.push(v);r.rechazados=(r.rechazados||[]).filter(x=>x!==v);save();
+    if(SERVER)RETOS_API.invitar(r.id,v);else{if(!r.invitados.includes(v))r.invitados.push(v);r.rechazados=(r.rechazados||[]).filter(x=>x!==v);save()}
     const txt=inviteText(u,r),subj=`${u.nombre} te invita a un reto en Vuelve 💜`;
     m.querySelector('.sheet').innerHTML=`<div class="top"><b>Invitación lista</b><button class="close">✕</button></div><div class="mailbox">${esc(txt)}</div>
       <a class="btn block" style="margin-top:14px;text-decoration:none" target="_blank" rel="noopener" href="mailto:${encodeURIComponent(v)}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(txt)}">✉️ Abrir en mi correo</a>
@@ -1600,17 +1743,19 @@ function vEspacio(){
   <div class="card"><p class="eyebrow">Compartir y guardar</p>
     <p class="small muted" style="margin-top:8px">${CLOUD.db?'✓ Tus registros se guardan automáticamente en la nube.':'Tus registros se guardan en este navegador. Haz una copia de vez en cuando.'}</p>
     <div class="grid2" style="margin-top:12px"><button class="btn soft sm" id="ex">Descargar copia</button><button class="btn soft sm" id="im">Importar copia</button></div></div>
-  <div class="card"><p class="eyebrow">Cuentas de prueba</p>
-    ${Object.values(d.users).map(x=>`<div class="wk"><span><b>${esc(x.nombre)}</b> <span class="small muted">${esc(x.email)}</span></span>${x.email===u.email?'<span class="pill">activa</span>':`<button class="btn ghost" data-sw="${esc(x.email)}">Cambiar</button>`}</div>`).join('')}
-    <div class="grid2" style="margin-top:14px"><button class="btn ghost" id="lo">Cerrar sesión</button><button class="btn ghost" style="color:var(--warn)" id="dl">Borrar esta cuenta</button></div>
+  ${SERVER?`<div class="card"><p class="eyebrow">Tu cuenta</p><div class="wk"><span><b>${esc(u.nombre)}</b> <span class="small muted">${esc(u.email)}</span></span><span class="pill ok">en la nube</span></div>
+    <div class="grid2" style="margin-top:14px"><button class="btn ghost" id="lo">Cerrar sesión</button><button class="btn ghost" style="color:var(--warn)" id="dl">Borrar mi cuenta</button></div></div>`:''}
+  <div class="card ${SERVER?'hidden':''}"><p class="eyebrow">Cuentas de prueba</p>
+    ${SERVER?'':Object.values(d.users).map(x=>`<div class="wk"><span><b>${esc(x.nombre)}</b> <span class="small muted">${esc(x.email)}</span></span>${x.email===u.email?'<span class="pill">activa</span>':`<button class="btn ghost" data-sw="${esc(x.email)}">Cambiar</button>`}</div>`).join('')}
+    <div class="grid2" style="margin-top:14px">${SERVER?'':'<button class="btn ghost" id="lo">Cerrar sesión</button><button class="btn ghost" style="color:var(--warn)" id="dl">Borrar esta cuenta</button>'}</div>
   </div>
   <p class="foot">Vuelve por encima de perfección. Cada registro cuenta.</p>`;
   $('#ed').onclick=()=>startOnboarding(true);
-  $('#lo').onclick=()=>{d.session=null;save();route()};
+  $('#lo').onclick=logout;
   $$('[data-sw]').forEach(b=>b.onclick=()=>{d.session=null;save();renderAuth('login',b.dataset.sw)});
   $('#dl').onclick=()=>{const m=modal(`<div class="top"><b>Borrar cuenta</b><button class="close">✕</button></div><h3 class="h2" style="font-size:24px;margin-top:12px">¿Borrar <span>esta cuenta?</span></h3><p class="muted" style="margin-top:8px">Se eliminarán todos los registros de ${esc(u.email)}. No se puede deshacer.</p>
     <button class="btn danger block" style="margin-top:18px" id="yes">Sí, borrar</button><button class="btn soft block" style="margin-top:8px" id="no">Cancelar</button>`);
-    m.querySelector('#no').onclick=()=>m.remove();m.querySelector('#yes').onclick=()=>{delete d.users[u.email];d.session=null;save();m.remove();route()}};
+    m.querySelector('#no').onclick=()=>m.remove();m.querySelector('#yes').onclick=async()=>{if(SERVER){const {error}=await SB.rpc('borrar_mi_cuenta');if(error){toast(sbErr(error));return}m.remove();return logout()}delete d.users[u.email];d.session=null;save();m.remove();route()}};
   $('#ex').onclick=()=>{const {pass,...rest}=u;const txt=JSON.stringify(rest);
     const m=modal(`<div class="top"><b>Tu copia</b><button class="close">✕</button></div><p class="small muted" style="margin-top:8px">Guárdala en una nota o un archivo de texto.</p><textarea class="in" readonly style="margin-top:12px">${esc(txt)}</textarea><button class="btn block" style="margin-top:12px" id="cp">Copiar al portapapeles</button>`);
     m.querySelector('#cp').onclick=async()=>{try{await navigator.clipboard.writeText(txt);toast('Copiado ✓')}catch(e){m.querySelector('textarea').select();toast('Selecciona y copia manualmente')}}};
@@ -1855,8 +2000,9 @@ function route(){
 }
 let LAST_MOB=innerWidth<=640;
 addEventListener('resize',()=>{const m=innerWidth<=640;if(m!==LAST_MOB){LAST_MOB=m;if(me()?.profile&&!SCREEN.busy&&$('#view'))renderApp()}});
-route();
-initCloud();
+if(SERVER){$('#root').innerHTML='<div style="min-height:100vh;display:grid;place-items:center"><div style="text-align:center"><div class="logo" style="justify-content:center">'+LOGO+'</div><p class="small muted" style="margin-top:14px">Cargando…</p></div></div>';
+  initServer().catch(e=>{console.warn(e);toast(sbErr(e))}).finally(route)}
+else{route();initCloud()}
 </script>
 </body>
 </html>
