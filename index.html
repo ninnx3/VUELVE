@@ -117,6 +117,7 @@ nav.tabs button:not(.on){color:var(--muted)}
 .ring .ctr b{font-size:34px;font-weight:700;letter-spacing:-1.3px;line-height:1;display:block}
 .ring .ctr small{font-size:10px;color:var(--muted)}
 .mac3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.mac3>div{background:var(--tile);border-radius:12px;padding:12px 6px 10px}
 .mac3 b{font-size:21px;font-weight:800;letter-spacing:-.8px}
 .mac3 b small{font-size:13px;font-weight:500;color:var(--muted);letter-spacing:0}
 .mac3 .l{font-size:12px;color:var(--muted)}
@@ -1042,13 +1043,14 @@ function planCard(m,titulo){
 function calcTable(r,pf){
   return `<table class="calc">
     <tr><td>IMC</td><td>${fmt1(r.imc)}</td></tr>
-    <tr><td>% grasa (${r.grasaFuente})</td><td>${fmt1(r.grasa)} %</td></tr>
-    <tr><td>Base para los gramos</td><td><span class="pill ${r.estado==='Obesidad'?'warn':'ok'}">${r.estado==='Obesidad'?'Peso ajustado':'Peso real'}</span></td></tr>
-    <tr><td>Peso de cálculo para macros</td><td>${fmt1(r.pc)} kg${r.estado==='Obesidad'?' <span class="tiny muted">(altura − 100)</span>':''}</td></tr>
+    <tr><td>% grasa (${r.grasaFuente}) <button class="edgrasa" style="color:var(--plum);font-weight:700;font-size:12px;text-decoration:underline">${r.grasaFuente==='estimada'?'¿Lo tienes medido?':'Cambiar'}</button></td><td>${fmt1(r.grasa)} %</td></tr>
+    <tr><td>Tu peso (para las calorías)</td><td>${fmt1(+pf.peso)} kg</td></tr>
+    <tr><td>Peso de referencia para proteína y grasa</td><td>${fmt1(r.pc)} kg${r.estado==='Obesidad'?' <span class="tiny muted">(altura − 100)</span>':''}</td></tr>
     <tr><td>Metabolismo basal (TMB)</td><td>${fmt(r.tmb)} kcal</td></tr>
     <tr><td>Mantenimiento (TMB × ${String(pf.actividad).replace('.',',')})</td><td>${fmt(r.get)} kcal</td></tr>
   </table>
-  <p class="tiny muted" style="margin-top:10px">Mifflin-St Jeor. Si tu % de grasa supera el ${pf.sexo==='Mujer'?'30':'25'}% o tu IMC es mayor de 30, los gramos se calculan sobre (altura − 100) para no sobreestimar.</p>`;
+  ${r.estado==='Obesidad'?`<div class="tip" style="background:var(--lilac);color:var(--plum)">ℹ️ <b>¿Por qué ${fmt1(r.pc)} kg y no ${fmt1(+pf.peso)} kg?</b> Cuando el % de grasa supera el ${pf.sexo==='Mujer'?'30':'25'}% (o el IMC pasa de 30), la proteína y la grasa se calculan sobre "altura − 100" para no pedirte más gramos de los que tu músculo necesita. Tus calorías sí usan tu peso real.${r.grasaFuente==='estimada'?' Tu % de grasa es una <b>estimación</b> por IMC: si te has medido (báscula de bioimpedancia, DEXA…), ponlo y el cálculo será más preciso.':''}</div>`:''}
+  <p class="tiny muted" style="margin-top:10px">Metabolismo basal con la fórmula Mifflin-St Jeor.</p>`;
 }
 function renderResult(){
   SCREEN.busy=true;
@@ -1363,9 +1365,9 @@ function vDiario(){
     <div class="sum">
       <div class="ring">${ring(tt.k,tg.kcal)}<div class="ctr"><div><b>${fmt(tt.k)}</b><small>kcal consumidas</small></div></div></div>
       <div class="mac3">
-        <div><b>${fmt1(tt.p)}g<small>/${tg.p}g</small></b><div class="l">Proteínas</div>${mb(tt.p,tg.p,'var(--p)')}</div>
-        <div><b>${fmt1(tt.c)}g<small>/${tg.c}g</small></b><div class="l">Carbohidratos</div>${mb(tt.c,tg.c,'var(--c)')}</div>
-        <div><b>${fmt1(tt.g)}g<small>/${tg.g}g</small></b><div class="l">Grasas</div>${mb(tt.g,tg.g,'var(--g)')}</div>
+        <div><b style="color:var(--p)">${fmt1(tt.p)}g<small>/${tg.p}g</small></b><div class="l">Proteínas</div>${mb(tt.p,tg.p,'var(--p)')}</div>
+        <div><b style="color:var(--c)">${fmt1(tt.c)}g<small>/${tg.c}g</small></b><div class="l">Carbohidratos</div>${mb(tt.c,tg.c,'var(--c)')}</div>
+        <div><b style="color:var(--g)">${fmt1(tt.g)}g<small>/${tg.g}g</small></b><div class="l">Grasas</div>${mb(tt.g,tg.g,'var(--g)')}</div>
       </div>
     </div>
     ${pf.enfoque==6?`<div class="daytype"><button data-t="entreno" class="${isTrainDay(u,UI.date)?'on':''}">🏋️ Día de entreno</button><button data-t="descanso" class="${!isTrainDay(u,UI.date)?'on':''}">🛋️ Día de descanso</button></div>`:''}
@@ -1700,13 +1702,15 @@ function movKcal(m,kg){
 }
 function movDetail(m){
   const A=ACTS[m.tipo],p=[`${m.min} min`];
-  if(A&&(A.k==='cinta'||A.k==='aire')){p.push(`${dec(m.vel||A.v||5)} km/h`);if(A.k==='cinta')p.push(`${dec(m.inc||0)}% inclinación`);p.push(`${fmt1((m.vel||A.v||5)*m.min/60)} km`)}
+  if(A&&(A.k==='cinta'||A.k==='aire')){const v=m.vel||A.v||5;p.push(`${fmt1(v*m.min/60)} km`,`${dec(Math.round(v*10)/10)} km/h`);if(A.k==='aire')p.push(`${pace(v)} min/km`);if(A.k==='cinta')p.push(`${dec(m.inc||0)}% inclinación`)}
+  if(m.km>0&&A&&!(A.k==='cinta'||A.k==='aire'))p.push(`${fmt1(m.km)} km`,`${fmt1(m.km/(m.min/60))} km/h`);
   if(A&&(A.k==='nivel'||((A.k==='bici'||A.k==='remo')&&!(m.watts>0))))p.push(`nivel ${m.nivel||8}`);
   if(m.watts>0)p.push(`${m.watts} W`);
   if(m.int&&(!A||A.k==='int'||A.k==='fuerza'))p.push(m.int.toLowerCase());
   if(m.kcalMaq>0)p.push('kcal de la máquina');
   return p.join(' · ');
 }
+function pace(v){const s=Math.round(3600/v);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
 function exKcalM(u,m){return m.kcal!=null?m.kcal:movKcal(m,+u.profile.peso)}
 function vMov(){
   const u=me(),log=peekLog(u,UI.date),ws=weekStart(UI.date);
@@ -1733,7 +1737,7 @@ function vMov(){
   $$('[data-del]').forEach(b=>b.onclick=()=>{dayLog(u,UI.date).mov.splice(+b.dataset.del,1);save();vMov()});
 }
 function openActividad(){
-  const u=me(),kg=+u.profile.peso;let st={tipo:null,min:'',int:'Media',vel:'',inc:'',nivel:8,watts:'',kcalMaq:'',n:'',ej:[]};
+  const u=me(),kg=+u.profile.peso;let st={tipo:null,min:'',int:'Media',vel:'',inc:'',km:'',nivel:8,watts:'',kcalMaq:'',n:'',ej:[]};
   const m=modal(`<div class="top"><b id="atit">Añadir actividad</b><button class="close">✕</button></div><div id="ab"></div>`);
   const ab=()=>m.querySelector('#ab');
   const field=(id,label,val,ph,mode='decimal')=>`<label class="f" style="margin-top:10px"><span>${label}</span><input class="in dec" id="${id}" type="text" inputmode="${mode}" value="${esc(dec(val))}" placeholder="${ph}"></label>`;
@@ -1743,21 +1747,24 @@ function openActividad(){
     ab().querySelectorAll('[data-tp]').forEach(b=>b.onclick=()=>{st.tipo=b.dataset.tp;if(ACTS[st.tipo].k==='aire'&&!st.vel)st.vel=ACTS[st.tipo].v;form()});
   };
   const read=()=>{const g=id=>{const e=ab().querySelector('#'+id);return e?num(e.value):''};
-    st.min=g('amin');st.vel=g('avel');st.inc=g('ainc');st.watts=g('awat');st.kcalMaq=g('akm');
+    st.min=g('amin');st.vel=g('avel');st.inc=g('ainc');st.watts=g('awat');st.kcalMaq=g('akm');st.km=g('akmd');
     const nv=ab().querySelector('#aniv');if(nv)st.nivel=+nv.value;const nn=ab().querySelector('#anot');if(nn)st.n=nn.value;
     ab().querySelectorAll('[data-ej]').forEach(r=>{const i=+r.dataset.ej,q=s=>num(r.querySelector(s).value);st.ej[i]={...st.ej[i],s:q('.es'),r:q('.er'),kg:q('.ek')}})};
   const preview=()=>{read();const A=ACTS[st.tipo];const k=st.min>0||st.kcalMaq>0?movKcal({...st},kg):0;
     let extra='';
-    if((A.k==='cinta'||A.k==='aire')&&st.min>0&&st.vel>0)extra=`${fmt1(st.vel*st.min/60)} km recorridos`;
+    if((A.k==='cinta'||A.k==='aire')&&st.min>0&&st.vel>0)extra=`${fmt1(st.vel*st.min/60)} km · ${dec(Math.round(st.vel*10)/10)} km/h · ritmo ${pace(st.vel)} min/km`;
+    if((A.k==='nivel'||A.k==='bici'||A.k==='remo')&&st.min>0&&st.km>0)extra=`${fmt1(st.km)} km · ${fmt1(st.km/(st.min/60))} km/h de media`;
     if(A.k==='fuerza'){const vol=st.ej.reduce((a,e)=>a+(e.s||0)*(e.r||0)*(e.kg||0),0);if(vol)extra=`Volumen total: ${fmt(vol)} kg levantados`}
     ab().querySelector('#apv').innerHTML=`<div class="row between"><b style="font-size:26px;font-weight:800;letter-spacing:-1px">${fmt(k)} kcal</b><span class="small muted">${st.kcalMaq>0?'según la máquina':'estimadas'}</span></div>${extra?`<p class="small muted" style="margin-top:4px">${extra}</p>`:''}`};
   const form=()=>{
     const A=ACTS[st.tipo];m.querySelector('#atit').textContent=A.ic+' '+A.t;
     let f=`<button class="back" id="aback">← Cambiar actividad</button>`;
     f+=field('amin','Minutos',st.min,'Ej. 30','numeric');
-    if(A.k==='cinta')f+=`<div class="grid2">${field('avel','Velocidad (km/h)',st.vel,'Ej. 5,5')}${field('ainc','Inclinación (%)',st.inc,'Ej. 8')}</div>
+    if(A.k==='cinta')f+=`<div class="grid2">${field('avel','Velocidad (km/h)',st.vel,'Ej. 5,5')}${field('akmd','Distancia (km)',st.km,'Ej. 2,8')}</div>${field('ainc','Inclinación (%)',st.inc,'Ej. 8')}
       <p class="tiny muted" style="margin-top:6px">Si tu cinta va por niveles, mira la velocidad en km/h en la pantalla.</p>`;
-    if(A.k==='aire')f+=field('avel','Ritmo medio (km/h)',st.vel,A.v===9?'Ej. 9':'Ej. 5');
+    if(A.k==='aire')f+=`<div class="grid2">${field('avel','Velocidad media (km/h)',st.vel,A.v===9?'Ej. 9':'Ej. 5')}${field('akmd','Distancia (km)',st.km,A.v===9?'Ej. 5':'Ej. 3')}</div>
+      <p class="tiny muted" style="margin-top:6px">Rellena la velocidad o la distancia: calculamos la otra con los minutos.</p>`;
+    if(A.k==='nivel'||A.k==='bici'||A.k==='remo')f+=field('akmd','Distancia (km) · opcional',st.km,'Si la máquina la muestra');
     if(A.k==='nivel'||A.k==='bici'||A.k==='remo')f+=`<label class="f" style="margin-top:10px"><span>Nivel / resistencia: <b id="anivv">${st.nivel}</b> de 20</span><input id="aniv" type="range" min="1" max="20" value="${st.nivel}" style="width:100%;accent-color:var(--plum)"></label>`;
     if(A.k==='bici'||A.k==='remo')f+=field('awat','Vatios medios (si la máquina los muestra)',st.watts,'Opcional · ej. 120','numeric');
     if(A.k==='int'||A.k==='fuerza')f+=`<label class="f" style="margin-top:10px"><span>Intensidad</span></label><div class="optc three">${['Suave','Media','Alta'].map(x=>`<button class="tag ${st.int===x?'on':''}" data-ai="${x}">${x}</button>`).join('')}</div>`;
@@ -1773,7 +1780,14 @@ function openActividad(){
       <div class="pv" id="apv"></div><button class="btn block" style="margin-top:14px" id="asave">Guardar actividad</button>`;
     ab().innerHTML=f;
     ab().querySelector('#aback').onclick=()=>{read();pickTipo()};
-    ab().querySelectorAll('input').forEach(i=>i.addEventListener('input',()=>{if(i.id==='aniv')ab().querySelector('#anivv').textContent=i.value;preview()}));
+    // Velocidad ↔ distancia: se calcula la que NO has escrito tú (y se recalcula si cambias los minutos).
+    const manual=new Set();
+    const sync=src=>{const g=id=>{const e=ab().querySelector('#'+id);return e?num(e.value):''},set=(id,v)=>{const e=ab().querySelector('#'+id);if(e)e.value=v>0?dec(Math.round(v*10)/10):''};
+      if(!(A.k==='cinta'||A.k==='aire'))return;const mi=g('amin');if(!(mi>0))return;
+      if(src==='akmd'||src==='avel'){manual.add(src);manual.delete(src==='akmd'?'avel':'akmd');if(!(g(src)>0))return}
+      if(manual.has('akmd')&&g('akmd')>0)set('avel',g('akmd')/(mi/60));
+      else if(g('avel')>0)set('akmd',g('avel')*mi/60)};
+    ab().querySelectorAll('input').forEach(i=>i.addEventListener('input',()=>{if(i.id==='aniv')ab().querySelector('#anivv').textContent=i.value;sync(i.id);preview()}));
     ab().querySelectorAll('[data-ai]').forEach(b=>b.onclick=()=>{read();st.int=b.dataset.ai;form()});
     ab().querySelectorAll('[data-mq]').forEach(b=>b.onclick=()=>{read();st.ej.push({n:b.dataset.mq});form();const l=ab().querySelectorAll('[data-ej] .es');if(l.length)l[l.length-1].focus()});
     ab().querySelectorAll('[data-ejx]').forEach(b=>b.onclick=()=>{read();st.ej.splice(+b.dataset.ejx,1);form()});
@@ -1781,7 +1795,7 @@ function openActividad(){
     ab().querySelector('#asave').onclick=()=>{read();
       if(!(st.min>0)){toast('Indica los minutos');ab().querySelector('#amin').focus();return}
       if(A.k==='cinta'&&!(st.vel>0)){toast('Indica la velocidad');return}
-      const e={tipo:st.tipo,t:A.t,min:st.min,...(A.k==='int'||A.k==='fuerza'?{int:st.int}:{}),...(st.vel>0?{vel:st.vel}:{}),...(st.inc>0?{inc:st.inc}:{}),
+      const e={tipo:st.tipo,t:A.t,min:st.min,...(A.k==='int'||A.k==='fuerza'?{int:st.int}:{}),...(st.vel>0?{vel:st.vel}:{}),...(st.inc>0?{inc:st.inc}:{}),...(st.km>0&&!(A.k==='cinta'||A.k==='aire')?{km:st.km}:{}),
         ...((A.k==='nivel'||A.k==='bici'||A.k==='remo')?{nivel:st.nivel}:{}),...(st.watts>0?{watts:st.watts}:{}),...(st.kcalMaq>0?{kcalMaq:st.kcalMaq}:{}),
         ...(st.ej.length?{ej:st.ej.filter(x=>x.n)}:{}),...(st.n?{n:st.n}:{})};
       e.kcal=Math.round(movKcal(e,kg));
@@ -2144,6 +2158,16 @@ function route(){
   renderApp();
   maybeWelcome();
 }
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.edgrasa');if(!b)return;e.preventDefault();
+  const u=me();if(!u||!u.profile)return;
+  const m=modal(`<div class="top"><b>% de grasa corporal</b><button class="close">✕</button></div>
+    <p class="small muted" style="margin-top:10px">Si te has medido con báscula de bioimpedancia, DEXA o pliegues, escríbelo. Déjalo vacío para volver a la estimación por IMC.</p>
+    <label class="f"><span>% de grasa</span><input class="in dec" id="gx" type="text" inputmode="decimal" value="${esc(dec(u.profile.grasa??''))}" placeholder="Ej. 31,5"></label>
+    <div class="err" id="ge"></div><button class="btn block" id="gs">Guardar</button>`);
+  m.querySelector('#gs').onclick=()=>{const v=num(m.querySelector('#gx').value);
+    if(v!==''&&!(v>=3&&v<=70)){m.querySelector('#ge').textContent='Escribe un valor entre 3 y 70.';return}
+    u.profile.grasa=v===''?null:v;save();m.remove();toast('Actualizado ✓');renderApp()};
+});
 let LAST_MOB=innerWidth<=640;
 addEventListener('resize',()=>{const m=innerWidth<=640;if(m!==LAST_MOB){LAST_MOB=m;if(me()?.profile&&!SCREEN.busy&&$('#view'))renderApp()}});
 if(SERVER){$('#root').innerHTML='<div style="min-height:100vh;display:grid;place-items:center"><div style="text-align:center"><div class="logo" style="justify-content:center">'+LOGO+'</div><p class="small muted" style="margin-top:14px">Cargando…</p></div></div>';
