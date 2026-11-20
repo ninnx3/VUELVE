@@ -43,6 +43,12 @@ nav.tabs{transform:translateZ(0)}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.confetti{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:200}
+.celebra{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%) scale(1);z-index:201;background:#fff;border-radius:24px;padding:22px 26px;min-width:240px;max-width:86vw;text-align:center;box-shadow:0 24px 60px rgba(64,40,60,.25);animation:celin .45s cubic-bezier(.2,1.4,.4,1);cursor:pointer}
+.celebra .em{font-size:46px;line-height:1}.celebra b{display:block;font-size:19px;font-weight:800;margin-top:8px;color:var(--ink,#3a2436)}.celebra small{display:block;margin-top:6px;color:var(--muted);font-size:13px;line-height:1.4}
+.celebra.out{opacity:0;transform:translate(-50%,-50%) scale(.9);transition:.3s}
+@keyframes celin{from{opacity:0;transform:translate(-50%,-50%) scale(.6)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+.cerrar{margin-top:10px;border:1.5px dashed var(--line);background:transparent}
 .pwwrap{position:relative;display:block}.pwwrap .in{padding-right:48px;width:100%}
 .pwwrap .eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:38px;height:38px;display:grid;place-items:center;color:var(--muted);border-radius:10px;background:none}
 .pwwrap .eye:active{background:var(--tile)}
@@ -662,6 +668,44 @@ const fmt=n=>new Intl.NumberFormat('es-ES').format(R(n));
 const fmt1=n=>new Intl.NumberFormat('es-ES',{maximumFractionDigits:1}).format(n);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function toast(t){const e=document.createElement('div');e.className='toast';e.textContent=t;document.body.appendChild(e);setTimeout(()=>e.remove(),2200)}
+/* ---------- Celebraciones (confeti) ---------- */
+const CONF_COL=['#744a69','#c45c72','#7b5ea7','#d4a72c','#6ecf97','#f3b5c8','#a99bd0'];
+function confetti(n=140){
+  if(n<=0)return;
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const c=document.createElement('canvas');c.className='confetti';const dpr=Math.min(devicePixelRatio||1,2);
+  c.width=innerWidth*dpr;c.height=innerHeight*dpr;document.body.appendChild(c);const x=c.getContext('2d');x.scale(dpr,dpr);
+  const P=[...Array(n)].map((_,i)=>{const side=i%2?1:-1,a=(-Math.PI/2)+side*(0.25+Math.random()*0.55);const sp=9+Math.random()*9;
+    return {x:innerWidth/2+side*innerWidth*0.28,y:innerHeight*0.62,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,w:6+Math.random()*6,h:4+Math.random()*5,r:Math.random()*6,vr:(Math.random()-.5)*.35,c:CONF_COL[i%CONF_COL.length],shape:Math.random()<.25?'c':'r'}});
+  let t0=performance.now();
+  const step=t=>{const dt=Math.min((t-t0)/16.7,2.5);t0=t;x.clearRect(0,0,innerWidth,innerHeight);let alive=0;
+    for(const p of P){p.vy+=0.32*dt;p.vx*=Math.pow(0.985,dt);p.vy*=Math.pow(0.985,dt);p.x+=p.vx*dt;p.y+=p.vy*dt;p.r+=p.vr*dt;
+      if(p.y<innerHeight+30){alive++;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;
+        if(p.shape==='c'){x.beginPath();x.arc(0,0,p.w/2.4,0,7);x.fill()}else{x.scale(1,Math.cos(p.r*2));x.fillRect(-p.w/2,-p.h/2,p.w,p.h)}x.restore()}}
+    if(alive)requestAnimationFrame(step);else c.remove()};
+  requestAnimationFrame(step);setTimeout(()=>c.remove(),7000);
+}
+function celebrate(emoji,title,sub,{n=140,ms=3800}={}){
+  confetti(n);
+  document.querySelectorAll('.celebra').forEach(e=>e.remove());
+  const e=document.createElement('div');e.className='celebra';e.setAttribute('role','status');
+  e.innerHTML=`<div class="em">${emoji}</div><b>${esc(title)}</b>${sub?`<small>${esc(sub)}</small>`:''}`;
+  document.body.appendChild(e);const close=()=>{e.classList.add('out');setTimeout(()=>e.remove(),300)};
+  e.onclick=close;setTimeout(close,ms);
+}
+function rachaOk(u,d){let n=0;while(dayStatus(u,d)==='ok'){n++;d=addDays(d,-1)}return n}
+function celebrarDia(u,d,ayer){
+  const n=rachaOk(u,d);
+  celebrate('🏆',ayer?'¡Ayer cerraste dentro de tus calorías!':'¡Día cumplido!',n>1?`Llevas ${n} días seguidos en objetivo. ¡Sigue así!`:'Has comido dentro de tus calorías. Así se hace.',{n:180,ms:4500});
+}
+// Al abrir la app: celebra el día anterior si se cumplió y no se cerró a mano
+function maybeCelebrarAyer(){
+  const u=me();if(!u||!u.profile)return;const y=addDays(today(),-1);
+  if(u.celebrado===y||(u.celebrado&&u.celebrado>y))return;
+  const l=u.logs[y];if(!l||l.cerrado)return;
+  if(dayStatus(u,y)==='ok'){u.celebrado=y;save();let k=0;const go=()=>{if(document.querySelector('.modal')&&k++<120)return setTimeout(go,500);celebrarDia(u,y,true)};setTimeout(go,700)}
+}
+
 const SCREEN={busy:false};
 
 /* ---------- Enfoques ---------- */
@@ -1493,6 +1537,7 @@ function vDiario(){
     </div>
     ${pf.enfoque==6?`<div class="daytype"><button data-t="entreno" class="${isTrainDay(u,UI.date)?'on':''}">🏋️ Día de entreno</button><button data-t="descanso" class="${!isTrainDay(u,UI.date)?'on':''}">🛋️ Día de descanso</button></div>`:''}
     <button class="btn block" style="margin-top:20px" id="add">+ Añadir alimento</button>
+    ${log.foods.length&&UI.date<=today()&&UI.date>=addDays(today(),-1)?`<button class="btn ghost block cerrar" id="cerrar">${log.cerrado?'✓ Día cerrado · ver resultado':'🌙 Cerrar mi día'}</button>`:''}
     <button class="btn soft block" style="margin-top:8px" id="tm">${UI.showMeals?'Ocultar mis comidas':'Ver y editar mis comidas'}${log.foods.length?' ('+log.foods.length+')':''}</button>
     <div id="meals" class="${UI.showMeals?'':'hidden'}" style="margin-top:14px">
       ${MEAL_NAMES.map(m=>{const it=log.foods.map((f,i)=>({...f,i})).filter(f=>f.meal===m||(m==='Snack'&&!MEAL_NAMES.includes(f.meal))),mt=totals(it);
@@ -1525,6 +1570,11 @@ function vDiario(){
   bindArrows(()=>UI.date=addDays(UI.date,-1),()=>UI.date=addDays(UI.date,1),vDiario);
   $('#add').onclick=()=>openAdd(null);
   $('#tm').onclick=()=>{UI.showMeals=!UI.showMeals;vDiario()};
+  if($('#cerrar'))$('#cerrar').onclick=()=>{const lg=dayLog(u,UI.date),st=dayStatus(u,UI.date),t=totals(lg.foods).k,tg2=targetFor(u,UI.date).kcal;
+    lg.cerrado=true;if(UI.date===addDays(today(),-1))u.celebrado=UI.date;save();vDiario();
+    if(st==='ok')celebrarDia(u,UI.date,false);
+    else if(t<tg2)celebrate('🌱','Día cerrado',`Te has quedado ${fmt(tg2-t)} kcal por debajo. Comer muy poco también frena: mañana intenta acercarte a tu objetivo.`,{n:0,ms:4500});
+    else celebrate('💜','Día cerrado',`Te has pasado ${fmt(t-tg2)} kcal. No pasa nada: un día no define nada. Mañana, vuelve.`,{n:0,ms:4500})};
   $$('[data-meal]').forEach(b=>b.onclick=()=>openAdd(b.dataset.meal));
   $$('[data-del]').forEach(b=>b.onclick=()=>{dayLog(u,UI.date).foods.splice(+b.dataset.del,1);save();vDiario()});
   $$('[data-t]').forEach(b=>b.onclick=()=>{dayLog(u,UI.date).tipo=b.dataset.t;save();vDiario()});
@@ -1869,7 +1919,8 @@ function vMov(){
   bindArrows(()=>UI.date=addDays(UI.date,-1),()=>UI.date=addDays(UI.date,1),vMov);
   $('#madd').onclick=openActividad;
   const savePasos=()=>{const v=Math.round(num($('#ppas').value)||0);if(v<0||v>150000){toast('Número de pasos no válido');return}
-    dayLog(u,UI.date).pasos=v||undefined;save();toast(v?'Pasos guardados ✓':'Pasos borrados');vMov()};
+    const lg=dayLog(u,UI.date),antes=lg.pasos||0,obj=u.profile.objPasos||8000;lg.pasos=v||undefined;save();vMov();
+    if(v>=obj&&antes<obj)celebrate('👟','¡Objetivo de pasos cumplido!',`${fmt(v)} pasos hoy`,{n:110,ms:3200});else toast(v?'Pasos guardados ✓':'Pasos borrados')};
   $('#psave').onclick=savePasos;$('#ppas').onkeydown=e=>{if(e.key==='Enter')savePasos()};
   $('#pobj').onclick=()=>{const m=modal(`<div class="top"><b>Objetivo de pasos</b><button class="close">✕</button></div>
     <label class="f"><span>Pasos al día</span><input class="in" id="po" type="text" inputmode="numeric" value="${objP}"></label>
@@ -1942,7 +1993,8 @@ function openActividad(){
         ...((A.k==='nivel'||A.k==='bici'||A.k==='remo')?{nivel:st.nivel}:{}),...(st.watts>0?{watts:st.watts}:{}),...(st.kcalMaq>0?{kcalMaq:st.kcalMaq}:{}),
         ...(st.ej.length?{ej:st.ej.filter(x=>x.n)}:{}),...(st.n?{n:st.n}:{})};
       e.kcal=Math.round(movKcal(e,kg));
-      dayLog(u,UI.date).mov.push(e);save();m.remove();toast('Actividad guardada ✓ · '+fmt(e.kcal)+' kcal');vMov()};
+      const lg=dayLog(u,UI.date),primera=!lg.mov.length;lg.mov.push(e);save();m.remove();vMov();
+      celebrate(primera?'💪':'🔥',primera?'¡Movimiento hecho!':'¡Una más!',`${e.t||'Actividad'} · ${fmt(e.kcal)} kcal quemadas`,{n:primera?130:70,ms:3000})};
     preview();
   };
   pickTipo();
@@ -2044,9 +2096,16 @@ function checkin(auto){
     if(kgS&&!(kg>=30&&kg<=300))bad='Peso no válido.';
     if(!kgS&&!Object.keys(med).length)bad='Escribe tu peso o alguna medida.';
     if(bad){m.querySelector('#cerr').textContent=bad;return}
+    const prevW=u.weights.filter(w=>w.date<d).at(-1),firstW=u.weights[0];
     if(kgS){upsertWeight(u,d,kg);if(m.querySelector('#cu').checked&&d===u.weights.at(-1).date)u.profile.peso=kg}
     if(Object.keys(med).length){u.medidas=(u.medidas||[]).filter(x=>x.date!==d);u.medidas.push({date:d,...med});u.medidas.sort((a,b)=>a.date.localeCompare(b.date))}
-    save();m.remove();toast('Check-in guardado ✓');renderApp()};
+    const medPrev=(u.medidas||[]).filter(x=>x.date<d).at(-1);
+    save();m.remove();renderApp();
+    const bajo=kgS&&prevW&&kg<prevW.kg-0.04,cint=medPrev&&med.cintura&&medPrev.cintura&&med.cintura<medPrev.cintura;
+    if(bajo){const tot=firstW&&firstW.date<d?Math.round((firstW.kg-kg)*10)/10:0;
+      celebrate('🎉',`¡${dec(Math.round((prevW.kg-kg)*10)/10)} kg menos!`,tot>0?`Llevas ${dec(tot)} kg menos desde que empezaste.${cint?' Y tu cintura también baja 💜':''}`:'Tu constancia se nota.')}
+    else if(cint)celebrate('📏',`¡${dec(Math.round((medPrev.cintura-med.cintura)*10)/10)} cm menos de cintura!`,'Las medidas cuentan lo que la báscula no ve.');
+    else toast('Check-in guardado ✓')};
 }
 function medidasCard(u){
   const M=u.medidas||[];
@@ -2544,6 +2603,7 @@ function route(){
   if(!u.profile)return startOnboarding(false);
   renderApp();
   if(!maybeCheckin())maybeWelcome();
+  maybeCelebrarAyer();
 }
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.edgrasa');if(!b)return;e.preventDefault();
   const u=me();if(!u||!u.profile)return;
