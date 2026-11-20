@@ -250,6 +250,8 @@ details.how[open] summary::before{content:'▾ '}
 .fth{position:relative;aspect-ratio:3/4;border-radius:12px;overflow:hidden;background:var(--tile)}.fth img{width:100%;height:100%;object-fit:cover;display:block}
 .fth .fb{position:absolute;left:6px;bottom:6px;font-size:13px;background:rgba(255,255,255,.85);border-radius:8px;padding:1px 5px}
 .fth .fx{position:absolute;right:6px;top:6px;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.9);font-size:12px;display:grid;place-items:center}
+.fgrid.vu .fth{aspect-ratio:1}.fgrid.off{opacity:.35;filter:grayscale(.6)}
+.promopics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}.promopics img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:14px;display:block}
 .welcome .l.foto{background:#f1e6ee}.welcome .l.foto img{width:100%;height:100%;object-fit:cover;display:block}
 .welcome .wclose{position:absolute;top:16px;right:16px;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:#fff;display:grid;place-items:center}
 
@@ -1962,14 +1964,18 @@ function fotosCardHTML(){
   const mias=FOTOS.list.filter(f=>f.quien==='mia'),amigas=FOTOS.list.filter(f=>f.quien==='amiga');
   return `<div class="card" id="fotoscard"><div class="row between"><p class="eyebrow">📸 Fotos de motivación</p><label class="btn sm" style="cursor:pointer">+ Subir fotos<input type="file" id="fup" accept="image/*" multiple hidden></label></div>
     <p class="small muted" style="margin-top:8px">Cada vez que abras Vuelve te saldrá una de tus fotos para recordarte por qué empezaste. Solo las ves tú${'' } y, si las compartes, tus amigas de retos.</p>
-    <label class="row small" style="gap:8px;margin-top:10px"><input type="checkbox" id="fcomp" checked> Compartir las nuevas con mis amigas de retos</label>
+    <label class="row small" style="gap:8px;margin-top:10px"><input type="checkbox" id="fcomp"> Compartir las nuevas con mis amigas de retos</label>
     <div id="fprog" class="small" style="margin-top:8px"></div>
     ${!FOTOS.loaded?'<p class="small muted" style="margin-top:10px">Cargando…</p>':mias.length?`<div class="fgrid">${mias.map(f=>`<div class="fth"><img src="${esc(FOTOS.urls[f.path])}" alt="" loading="lazy"><span class="fb">${f.comp?'👭':'🔒'}</span><button class="fx" data-fdel="${esc(f.path)}" title="Borrar">✕</button></div>`).join('')}</div>`:'<p class="small muted" style="margin-top:10px">Aún no has subido ninguna.</p>'}
     ${amigas.length?`<p class="tiny muted" style="margin-top:10px">+ ${amigas.length} foto${amigas.length>1?'s':''} que comparten tus amigas.</p>`:''}
+    <p class="eyebrow" style="margin-top:18px">Imágenes de Vuelve</p>
+    <div class="fgrid vu ${me().verVuelve===false?'off':''}">${IMG_VUELVE.map(n=>`<div class="fth"><img src="${imgVuelve(n)}" alt="" loading="lazy"></div>`).join('')}</div>
+    <label class="row small" style="gap:8px;margin-top:10px"><input type="checkbox" id="fvu" ${me().verVuelve===false?'':'checked'}> Mostrar también estas imágenes al abrir Vuelve</label>
     <p class="tiny muted" style="margin-top:8px">🔒 solo tú · 👭 también tus amigas de retos</p></div>`;
 }
 function bindFotosCard(){
   const c=$('#fotoscard');if(!c)return;
+  c.querySelector('#fvu').onchange=e=>{const u=me();u.verVuelve=e.target.checked?undefined:false;save();c.querySelector('.fgrid.vu').classList.toggle('off',!e.target.checked)};
   c.querySelector('#fup').onchange=async e=>{const fs=[...e.target.files];if(!fs.length)return;const comp=c.querySelector('#fcomp').checked;
     const n=await fotosSubir(fs,comp,(i,t)=>{const p=$('#fprog');if(p)p.textContent=`Subiendo ${i} de ${t}…`});
     toast(n?`${n} foto${n>1?'s':''} subida${n>1?'s':''} ✓`:'No se pudo subir');if(UI.view==='espacio')vEspacio()};
@@ -1983,15 +1989,56 @@ const FRASES=[['Juntas, un día a la vez','El progreso también es <span>volver 
   ['Para ti','Cuidarte también es <span>quererte.</span>','Come rico, muévete a gusto, descansa sin culpa.'],
   ['Paso a paso','Cada día que vuelves, <span>ya estás ganando.</span>','La meta se acerca aunque hoy no lo notes.']];
 let WELCOME_DONE=false;
+// Imágenes de Vuelve: las ve todo el mundo por defecto (alojadas con la web)
+const IMG_VUELVE=['almuerzo-mediterraneo','cordones-flores','curl-mancuerna','estiramiento-hombro','pausa-costera','pedaleo-olivos','pesaje-matutino','trote-pinos'];
+const imgVuelve=n=>(/github\.io|localhost|127\.0\.0\.1/.test(location.hostname)?'':APP_URL)+'img/motivacion/'+n+'.webp';
+function fotoBienvenida(u){
+  const propias=FOTOS.list.map(f=>FOTOS.urls[f.path]).filter(Boolean),base=u.verVuelve===false?[]:IMG_VUELVE.map(imgVuelve);
+  if(propias.length&&(!base.length||Math.random()<0.65))return propias[Math.floor(Math.random()*propias.length)];
+  if(base.length)return base[Math.floor(Math.random()*base.length)];
+  return null;
+}
+// Aviso para descubrir las fotos propias: tras un rato usando la web, si aún no ha subido ninguna
+let PROMO_T=null,PROMO_T0=Date.now();
+function programarPromoFotos(){
+  clearTimeout(PROMO_T);
+  PROMO_T=setTimeout(function chk(){
+    const u=me();if(!u||!u.profile||!SERVER)return;
+    if(u.fotosPromo==='nunca'||FOTOS.list.some(f=>f.quien==='mia'))return;
+    if(u.fotosPromoAt&&u.fotosPromoAt>addDays(today(),-3))return;
+    if(!FOTOS.loaded||SCREEN.busy||document.querySelector('.modal')||document.hidden){PROMO_T=setTimeout(chk,15000);return}
+    abrirPromoFotos();
+  },Math.max(0,60000-(Date.now()-PROMO_T0)));
+}
+function abrirPromoFotos(){
+  const u=me();u.fotosPromoAt=today();save();
+  const pics=[...IMG_VUELVE].sort(()=>Math.random()-.5).slice(0,3).map(imgVuelve);
+  const m=modal(`<div class="top"><b>📸 Tu motivación, a tu manera</b><button class="close">✕</button></div>
+    <div class="promopics">${pics.map(s=>`<img src="${s}" alt="">`).join('')}</div>
+    <h3 class="h2" style="font-size:24px;margin-top:16px">¿Y si cada vez que entras <span>te ves a ti?</span></h3>
+    <p class="muted" style="margin-top:8px;line-height:1.6">Cada vez que abres Vuelve te saludamos con una imagen. Puedes subir tus propias fotos: tu viaje soñado, tu ropa favorita, tu perro, tu "por qué"… y saldrán junto a las de Vuelve.</p>
+    <p class="small muted" style="margin-top:8px">🔒 Son privadas: solo las ves tú, salvo que decidas compartirlas con tus amigas de retos.</p>
+    <label class="row small" style="gap:8px;margin-top:12px"><input type="checkbox" id="pcomp"> Compartirlas con mis amigas de retos</label>
+    <div id="pprog" class="small" style="margin-top:8px"></div>
+    <label class="btn block" style="margin-top:14px;cursor:pointer">Subir mis fotos<input type="file" id="pup" accept="image/*" multiple hidden></label>
+    <div class="grid2" style="margin-top:8px"><button class="btn soft" id="plater">Más tarde</button><button class="btn ghost" id="pnever">No, gracias</button></div>`);
+  m.querySelector('#plater').onclick=()=>m.remove();
+  m.querySelector('#pnever').onclick=()=>{u.fotosPromo='nunca';save();m.remove();toast('Vale. Lo tienes siempre en Mi Espacio 📸')};
+  m.querySelector('#pup').onchange=async e=>{const fs=[...e.target.files];if(!fs.length)return;
+    const n=await fotosSubir(fs,m.querySelector('#pcomp').checked,(i,t)=>{const p=m.querySelector('#pprog');if(p)p.textContent=`Subiendo ${i} de ${t}…`});
+    m.remove();if(n){u.fotosPromo='nunca';save();celebrate('📸',`¡${n} foto${n>1?'s':''} guardada${n>1?'s':''}!`,'La próxima vez que abras Vuelve, te verás aquí.',{n:90,ms:3500})}else toast('No se pudo subir');
+    if(UI.view==='espacio')vEspacio()};
+}
+
 
 /* ---------- Bienvenida diaria ---------- */
 function maybeWelcome(){
   const u=me();if(!u||!u.profile)return;
   if(WELCOME_DONE)return;WELCOME_DONE=true;
   u.lastWelcome=today();save();
-  const pf=u.profile,fotos=FOTOS.list,f=fotos.length?fotos[Math.floor(Math.random()*fotos.length)]:null;
+  const pf=u.profile,f=fotoBienvenida(u);
   const [ey,ti,tx]=FRASES[Math.floor(Math.random()*FRASES.length)];
-  const m=modal(`<div class="l ${f?'foto':''}" style="padding:0">${f?`<img src="${esc(FOTOS.urls[f.path])}" alt="">`:ILLU}</div><div class="r"><button class="close wclose">✕</button>
+  const m=modal(`<div class="l ${f?'foto':''}" style="padding:0">${f?`<img src="${esc(f)}" alt="" onerror="this.parentNode.classList.remove('foto');this.outerHTML=ILLU">`:ILLU}</div><div class="r"><button class="close wclose">✕</button>
     <p class="eyebrow" style="text-transform:none;letter-spacing:.5px;font-size:11px">${ey}</p>
     <h3 class="h2" style="font-size:28px;margin-top:10px;line-height:1.15">${ti}</h3>
     <p class="muted" style="margin-top:12px;font-size:14px;line-height:1.6">${tx}</p>
@@ -2777,6 +2824,7 @@ function route(){
   renderApp();
   if(!maybeCheckin()){if(SERVER&&!FOTOS.loaded)Promise.race([fotosLoad(),new Promise(r=>setTimeout(r,2500))]).catch(()=>{}).then(()=>{if(me()?.profile&&!document.querySelector('.modal'))maybeWelcome()});else maybeWelcome()}
   maybeCelebrarAyer();
+  programarPromoFotos();
 }
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.edgrasa');if(!b)return;e.preventDefault();
   const u=me();if(!u||!u.profile)return;
