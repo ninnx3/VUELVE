@@ -665,7 +665,8 @@ function offMap(p){
   const r1=x=>Math.round((Number(x)||0)*10)/10;
   return {id:'o'+p.code,code:p.code,n:name+(p.brands?' · '+p.brands.split(',')[0].trim():''),k:Math.round(k),p:r1(n.proteins_100g),c:r1(n.carbohydrates_100g),g:r1(n.fat_100g),src:'off'};
 }
-const OFF_OFFLINE='No se puede conectar con Open Food Facts desde esta vista previa (la página está aislada de internet). Funcionará en cuanto la web esté publicada en tu propio dominio.';
+const IN_PREVIEW=!!(window.claude&&window.claude.use)||/claude\.ai|claudeusercontent/.test(location.hostname)||location.protocol==='file:';
+const OFF_OFFLINE=IN_PREVIEW?'No se puede conectar con Open Food Facts desde esta vista previa. Úsalo en tu web: https://ninnx3.github.io/VUELVE/':'No se pudo conectar con Open Food Facts. Revisa tu conexión y vuelve a intentarlo en unos segundos.';
 async function offFetch(url){
   let r;
   try{r=await fetch(url,{headers:{'Accept':'application/json'}})}catch(e){throw new Error(OFF_OFFLINE)}
@@ -673,12 +674,27 @@ async function offFetch(url){
   if(!r.ok)throw new Error('Open Food Facts no responde ahora mismo ('+r.status+').');
   return r.json();
 }
+const OFF_CACHE={};
 async function offSearch(q){
-  const u='https://world.openfoodfacts.org/cgi/search.pl?action=process&json=1&search_simple=1&page_size=30'
-    +'&tagtype_0=countries&tag_contains_0=contains&tag_0=spain&sort_by=unique_scans_n'
-    +'&fields='+OFF_FIELDS+'&search_terms='+encodeURIComponent(q);
-  const j=await offFetch(u);
-  return (j.products||[]).map(offMap).filter(Boolean);
+  const key=q.toLowerCase().trim();if(OFF_CACHE[key])return OFF_CACHE[key];
+  let out=[],err=null;
+  // 1) Buscador moderno de Open Food Facts (Search-a-licious), limitado a productos vendidos en España
+  try{
+    const u='https://search.openfoodfacts.org/search?page_size=30&langs=es&fields='+OFF_FIELDS+'&q='+encodeURIComponent(q+' countries_tags:"en:spain"');
+    const j=await offFetch(u);out=(j.hits||j.products||[]).map(offMap).filter(Boolean);
+  }catch(e){err=e}
+  // 2) Buscador clásico como respaldo
+  if(!out.length){
+    try{
+      const u='https://world.openfoodfacts.org/cgi/search.pl?action=process&json=1&search_simple=1&page_size=30'
+        +'&tagtype_0=countries&tag_contains_0=contains&tag_0=spain&sort_by=unique_scans_n'
+        +'&fields='+OFF_FIELDS+'&search_terms='+encodeURIComponent(q);
+      const j=await offFetch(u);out=(j.products||[]).map(offMap).filter(Boolean);err=null;
+    }catch(e){if(!err)err=e}
+  }
+  if(!out.length&&err)throw err;
+  const seen=new Set();out=out.filter(f=>!seen.has(f.id)&&seen.add(f.id));
+  OFF_CACHE[key]=out;return out;
 }
 async function offBarcode(code){
   const j=await offFetch('https://world.openfoodfacts.org/api/v2/product/'+encodeURIComponent(code)+'.json?fields='+OFF_FIELDS);
@@ -1060,9 +1076,9 @@ function vRetos(){
     const sc=r.miembros.map(e=>({e,...retoScore(r,e)})).sort((a,b)=>b.pts-a.pts);
     const max=r.tipo==='ambos'?r.dias*2:r.dias;
     const st=today()<r.inicio?`Empieza el ${fmtD(r.inicio)}`:today()>retoFin(r)?'Finalizado':`Día ${Math.floor((parse(today())-parse(r.inicio))/864e5)+1} de ${r.dias}`;
-    return `<div class="card"><div class="row between"><div><p class="eyebrow">${st}</p><div class="h3" style="margin-top:4px;font-size:18px">${esc(r.nombre)}</div>
-      <p class="small muted">${RETO_TIPOS[r.tipo].ic} ${RETO_TIPOS[r.tipo].t} · ${fmtD(r.inicio)} – ${fmtD(retoFin(r))}</p></div>
-      ${r.owner===u.email?`<div class="row" style="gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="btn ghost" data-edr="${r.id}">✎ Fechas</button><button class="btn ghost" data-inv="${r.id}">+ Invitar</button></div>`:''}</div>
+    return `<div class="card"><p class="eyebrow">${st}</p><div class="h3" style="margin-top:4px;font-size:18px">${esc(r.nombre)}</div>
+      <p class="small muted">${RETO_TIPOS[r.tipo].ic} ${RETO_TIPOS[r.tipo].t} · ${fmtD(r.inicio)} – ${fmtD(retoFin(r))} · ${r.dias} días</p>
+      <div class="row" style="gap:6px;flex-wrap:wrap;margin-top:12px">${r.owner===u.email?`<button class="btn ghost" data-edr="${r.id}">✎ Editar reto</button><button class="btn ghost" data-inv="${r.id}">+ Invitar</button>`:`<button class="btn ghost" data-leave="${r.id}">Salir del reto</button>`}</div>
       <div style="margin-top:10px">${sc.map((s,i)=>`<div class="lb"><span class="pos">${i===0&&s.pts>0?'🥇':i===1&&s.pts>0?'🥈':i===2&&s.pts>0?'🥉':i+1}</span><span class="av">${ini(s.e)}</span>
         <div style="flex:1;min-width:0"><b style="font-size:13px">${esc(d.users[s.e]?.nombre||s.e)}${s.e===u.email?' (tú)':''}</b><div class="tiny muted">${r.tipo!=='mov'?s.kcal+' días en objetivo':''}${r.tipo==='ambos'?' · ':''}${r.tipo!=='kcal'?s.mov+' días de movimiento':''}</div>
         <div class="bar"><i style="width:${Math.min(s.pts/max*100,100)}%"></i></div></div><span class="pts">${s.pts}</span></div>`).join('')}
@@ -1074,19 +1090,53 @@ function vRetos(){
   $$('[data-acc]').forEach(b=>b.onclick=()=>{const r=d.retos[b.dataset.acc];r.miembros.push(u.email);save();toast('¡Te has unido al reto! 💜');renderApp()});
   $$('[data-rej]').forEach(b=>b.onclick=()=>{const r=d.retos[b.dataset.rej];(r.rechazados=r.rechazados||[]).push(u.email);save();renderApp()});
   $$('[data-inv]').forEach(b=>b.onclick=()=>reinvite(d.retos[b.dataset.inv]));
-  $$('[data-edr]').forEach(b=>b.onclick=()=>editRetoFechas(d.retos[b.dataset.edr]));
+  $$('[data-edr]').forEach(b=>b.onclick=()=>editReto(d.retos[b.dataset.edr]));
+  $$('[data-leave]').forEach(b=>b.onclick=()=>{const r=d.retos[b.dataset.leave];
+    const m=modal(`<div class="top"><b>Salir del reto</b><button class="close">✕</button></div><h3 class="h2" style="font-size:22px;margin-top:12px">¿Salir de <span>«${esc(r.nombre)}»?</span></h3>
+      <p class="small muted" style="margin-top:8px">Dejarás de aparecer en la clasificación. Tus registros del diario no se borran.</p>
+      <button class="btn danger block" style="margin-top:18px" id="y">Sí, salir</button><button class="btn soft block" style="margin-top:8px" id="n">Cancelar</button>`);
+    m.querySelector('#n').onclick=()=>m.remove();
+    m.querySelector('#y').onclick=()=>{r.miembros=r.miembros.filter(e=>e!==u.email);r.invitados=r.invitados.filter(e=>e!==u.email);save();m.remove();toast('Has salido del reto');renderApp()}});
 }
-function editRetoFechas(r){
-  const m=modal(`<div class="top"><b>Fechas de «${esc(r.nombre)}»</b><button class="close">✕</button></div>
-    <div class="grid2" style="margin-top:12px"><label class="f" style="margin-top:0"><span>Empieza el</span><input class="in" type="date" id="ei" value="${r.inicio}"></label>
-    <label class="f" style="margin-top:0"><span>Termina el</span><input class="in" type="date" id="ef" value="${retoFin(r)}"></label></div>
-    <p class="small" style="margin-top:8px;font-weight:600" id="ed"></p><div class="err" id="ee"></div>
-    <button class="btn block" id="es">Guardar fechas</button>`);
-  const upd=()=>{const n=diasEntre(m.querySelector('#ei').value,m.querySelector('#ef').value);m.querySelector('#ed').textContent=n>0?n+' días':'';return n};
-  m.querySelectorAll('input').forEach(i=>i.onchange=upd);upd();
-  m.querySelector('#es').onclick=()=>{const n=upd();if(!(n>0)){m.querySelector('#ee').textContent='La fecha de fin debe ser igual o posterior a la de inicio.';return}
-    if(n>366){m.querySelector('#ee').textContent='Máximo un año.';return}
-    r.inicio=m.querySelector('#ei').value;r.dias=n;save();m.remove();toast('Fechas actualizadas ✓');renderApp()};
+function editReto(r){
+  const d=load(),u=me();
+  const st={nombre:r.nombre,tipo:r.tipo,inicio:r.inicio,fin:retoFin(r),quitar:[]};
+  const m=modal(`<div class="top"><b>Editar reto</b><button class="close">✕</button></div><div id="eb"></div>`);
+  const draw=()=>{
+    const gente=[...new Set([...r.miembros,...r.invitados])].filter(e=>e!==r.owner&&!st.quitar.includes(e));
+    const n=diasEntre(st.inicio,st.fin);
+    m.querySelector('#eb').innerHTML=`
+      <label class="f"><span>Nombre del reto</span><input class="in" id="en" value="${esc(st.nombre)}"></label>
+      <label class="f"><span>Tipo de reto</span></label>
+      <div class="optc">${Object.entries(RETO_TIPOS).map(([k,x])=>`<button class="opt ${st.tipo===k?'on':''}" data-et="${k}" style="padding:12px"><span class="ic">${x.ic}</span><div><b>${x.t}</b><small>${x.s}</small></div></button>`).join('')}</div>
+      <label class="f"><span>Fechas del reto</span></label>
+      <div class="grid2"><label class="f" style="margin-top:0"><span class="small muted" style="font-weight:600">Empieza el</span><input class="in" type="date" id="ei" value="${st.inicio}"></label>
+        <label class="f" style="margin-top:0"><span class="small muted" style="font-weight:600">Termina el</span><input class="in" type="date" id="ef" value="${st.fin}" min="${st.inicio}"></label></div>
+      <p class="small" style="margin-top:8px;font-weight:600">${n>0?n+' días':'La fecha de fin debe ser posterior al inicio'}</p>
+      <label class="f"><span>Participantes</span></label>
+      ${gente.length?gente.map(e=>`<div class="wk"><span>${esc(d.users[e]?.nombre||e)} <span class="tiny muted">${r.miembros.includes(e)?'participa':'invitación pendiente'}</span></span><button class="btn ghost" data-q="${esc(e)}">Quitar</button></div>`).join(''):'<p class="small muted">Solo estás tú. Invita a alguien desde el botón «+ Invitar».</p>'}
+      <div class="err" id="ee"></div>
+      <button class="btn block" style="margin-top:6px" id="es">Guardar cambios</button>
+      <button class="btn ghost block" style="margin-top:10px;color:var(--warn)" id="ed">🗑 Eliminar reto</button>`;
+    const keep=()=>{st.nombre=m.querySelector('#en').value;st.inicio=m.querySelector('#ei').value||st.inicio;st.fin=m.querySelector('#ef').value||st.fin};
+    m.querySelectorAll('[data-et]').forEach(b=>b.onclick=()=>{keep();st.tipo=b.dataset.et;draw()});
+    ['#ei','#ef'].forEach(s=>m.querySelector(s).onchange=()=>{keep();if(st.fin<st.inicio)st.fin=st.inicio;draw()});
+    m.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{keep();st.quitar.push(b.dataset.q);draw()});
+    m.querySelector('#es').onclick=()=>{keep();const n=diasEntre(st.inicio,st.fin);
+      if(!(n>0)){m.querySelector('#ee').textContent='La fecha de fin debe ser igual o posterior a la de inicio.';return}
+      if(n>366){m.querySelector('#ee').textContent='El reto puede durar como máximo un año.';return}
+      r.nombre=st.nombre.trim()||r.nombre;r.tipo=st.tipo;r.inicio=st.inicio;r.dias=n;
+      r.miembros=r.miembros.filter(e=>!st.quitar.includes(e));r.invitados=r.invitados.filter(e=>!st.quitar.includes(e));
+      save();m.remove();toast('Reto actualizado ✓');renderApp()};
+    m.querySelector('#ed').onclick=()=>{
+      m.querySelector('.sheet').innerHTML=`<div class="top"><b>Eliminar reto</b><button class="close">✕</button></div>
+        <h3 class="h2" style="font-size:22px;margin-top:12px">¿Eliminar <span>«${esc(r.nombre)}»?</span></h3>
+        <p class="small muted" style="margin-top:8px">Desaparecerá para todas las participantes. No se puede deshacer. Los diarios de cada persona no se tocan.</p>
+        <button class="btn danger block" style="margin-top:18px" id="y">Sí, eliminar</button><button class="btn soft block" style="margin-top:8px" id="n">Cancelar</button>`;
+      m.querySelector('.close').onclick=()=>m.remove();m.querySelector('#n').onclick=()=>m.remove();
+      m.querySelector('#y').onclick=()=>{delete d.retos[r.id];save();m.remove();toast('Reto eliminado');renderApp()}};
+  };
+  draw();
 }
 function reinvite(r){
   const u=me(),d=load();
@@ -1262,7 +1312,7 @@ function modal(html,cls=''){
   return m;
 }
 function openAdd(meal0){
-  const u=me();let meal=meal0||defaultMeal(),mode='menu',q='',qRaw='',sub='todos',offRes=null,offErr='',offLoading=false,scanCtl=null;
+  let offT;const u=me();let meal=meal0||defaultMeal(),mode='menu',q='',qRaw='',sub='todos',offRes=null,offErr='',offLoading=false,scanCtl=null;
   const stopScan=()=>{try{scanCtl&&scanCtl.stop()}catch(e){}scanCtl=null};
   const m=modal(`<div class="top"><b id="mtitle"></b><button class="close">✕</button></div><div id="mb"></div>`);
   const _rm=m.remove.bind(m);m.remove=()=>{stopScan();_rm()};
@@ -1280,7 +1330,7 @@ function openAdd(meal0){
       mb.innerHTML=`${pickHTML()}<p class="h3" style="margin-top:18px">Elige lo que has comido</p>
       <div class="ways">
         <button class="way" data-mode="manual"><span class="ic" style="background:var(--beige)">✍️</span><div><b>Introducir calorías</b><small>Calorías y macros opcionales, sin buscar.</small></div></button>
-        <button class="way" data-mode="buscar"><span class="ic" style="background:var(--lilac)">🔍</span><div><b>Buscar alimento</b><small>Básicos, supermercados de España y favoritos.</small></div></button>
+        <button class="way" data-mode="buscar"><span class="ic" style="background:var(--lilac)">🔍</span><div><b>Buscar alimento</b><small>Productos de supermercados de España (Open Food Facts), básicos y favoritos.</small></div></button>
         <button class="way" data-mode="codigo"><span class="ic" style="background:var(--mint)">▦</span><div><b>Escanear código</b><small>Con la cámara o escribiendo las cifras.</small></div></button>
       </div>`;
       bindPick();
@@ -1304,9 +1354,11 @@ function openAdd(meal0){
         <p class="notfound">No lo encuentro · <a href="#" id="toown">introducir etiqueta propia →</a></p>${OFF_NOTE}`;
       bindPick();
       const pool=()=>[...all,...(offRes||[])];
-      const runOff=async()=>{if(qRaw.trim().length<2){toast('Escribe al menos 2 letras');return}sub='todos';offLoading=true;offErr='';draw();try{offRes=await offSearch(qRaw.trim())}catch(e){offErr=e.message}offLoading=false;draw()};
+      const drawK=()=>{const had=document.activeElement&&document.activeElement.id==='q';draw();const n=m.querySelector('#q');if(had&&n){n.focus();n.setSelectionRange(n.value.length,n.value.length)}};
+      const runOff=async()=>{if(qRaw.trim().length<2){toast('Escribe al menos 2 letras');return}const qq=qRaw.trim();sub='todos';offLoading=true;offErr='';drawK();try{const res=await offSearch(qq);if(qq!==qRaw.trim())return;offRes=res}catch(e){if(qq!==qRaw.trim())return;offErr=e.message}offLoading=false;if(m.isConnected&&mode==='buscar')drawK()};
       const qi=mb.querySelector('#q');
-      qi.oninput=()=>{qRaw=qi.value;q=norm(qi.value);offRes=null;offErr='';draw();const n=m.querySelector('#q');n.focus();n.setSelectionRange(n.value.length,n.value.length)};
+      qi.oninput=()=>{qRaw=qi.value;q=norm(qi.value);offRes=null;offErr='';draw();const n=m.querySelector('#q');n.focus();n.setSelectionRange(n.value.length,n.value.length);
+        clearTimeout(offT);if(qRaw.trim().length>=3&&!IN_PREVIEW)offT=setTimeout(()=>{if(m.isConnected&&mode==='buscar')runOff()},900)};
       qi.onkeydown=e=>{if(e.key==='Enter')runOff()};
       mb.querySelector('#offgo2').onclick=runOff;
       mb.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{sub=b.dataset.sub;draw()});
