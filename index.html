@@ -191,6 +191,7 @@ details.how[open] summary::before{content:'▾ '}
 .meal .h{display:flex;justify-content:space-between;align-items:center;font-weight:700}
 .item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:13px;gap:10px}
 .item .n{flex:1;min-width:0}
+.item.editable{cursor:pointer;border-radius:10px}.item.editable:active{background:var(--tile)}
 .item .n small{display:block;color:var(--muted);font-size:11px}
 .item .k{font-weight:700;white-space:nowrap}
 .x{color:var(--muted);width:26px;height:26px;border-radius:8px;flex-shrink:0}
@@ -1544,7 +1545,7 @@ function vDiario(){
     <div id="meals" class="${UI.showMeals?'':'hidden'}" style="margin-top:14px">
       ${MEAL_NAMES.map(m=>{const it=log.foods.map((f,i)=>({...f,i})).filter(f=>f.meal===m||(m==='Snack'&&!MEAL_NAMES.includes(f.meal))),mt=totals(it);
         return `<div class="meal"><div class="h"><span>${MEALS.find(x=>x[0]===m)[1]} ${m} <span class="small muted" style="font-weight:500">${it.length?fmt(mt.k)+' kcal':''}</span></span><button class="plus" data-meal="${m}">+</button></div>
-        ${it.map(f=>`<div class="item"><div class="n">${esc(f.n)}<small>${f.uq?dec(f.uq)+' '+esc(Math.abs(f.uq-1)<1e-9?f.un:f.unp)+' ('+fmt1(f.q)+' g) · ':f.q?fmt1(f.q)+' g · ':''}P ${fmt1(f.p)} · C ${fmt1(f.c)} · G ${fmt1(f.g)}</small></div><span class="k">${fmt(f.k)} kcal</span><button class="x" data-del="${f.i}">✕</button></div>`).join('')}</div>`}).join('')}
+        ${it.map(f=>`<div class="item editable" data-ed="${f.i}"><div class="n">${esc(f.n)}<small>${f.uq?dec(f.uq)+' '+esc(Math.abs(f.uq-1)<1e-9?f.un:f.unp)+' ('+fmt1(f.q)+' g) · ':f.q?fmt1(f.q)+' g · ':''}P ${fmt1(f.p)} · C ${fmt1(f.c)} · G ${fmt1(f.g)}</small></div><span class="k">${fmt(f.k)} kcal</span><button class="x" data-edb="${f.i}" title="Editar" aria-label="Editar">✎</button><button class="x" data-del="${f.i}" title="Eliminar" aria-label="Eliminar">✕</button></div>`).join('')}</div>`}).join('')}
     </div>
     <div class="grid2" style="margin-top:16px">
       <div class="tile"><div class="lbl">Tu objetivo</div><div class="big">${fmt(tg.kcal)}<small>kcal</small></div></div>
@@ -1578,7 +1579,8 @@ function vDiario(){
     else if(t<tg2)celebrate('🌱','Día cerrado',`Te has quedado ${fmt(tg2-t)} kcal por debajo. Comer muy poco también frena: mañana intenta acercarte a tu objetivo.`,{n:0,ms:4500});
     else celebrate('💜','Día cerrado',`Te has pasado ${fmt(t-tg2)} kcal. No pasa nada: un día no define nada. Mañana, vuelve.`,{n:0,ms:4500})};
   $$('[data-meal]').forEach(b=>b.onclick=()=>openAdd(b.dataset.meal));
-  $$('[data-del]').forEach(b=>b.onclick=()=>{dayLog(u,UI.date).foods.splice(+b.dataset.del,1);save();vDiario()});
+  $$('[data-del]').forEach(b=>b.onclick=e=>{e.stopPropagation();dayLog(u,UI.date).foods.splice(+b.dataset.del,1);save();vDiario()});
+  $$('[data-ed]').forEach(r=>r.onclick=()=>editFood(UI.date,+r.dataset.ed));
   $$('[data-t]').forEach(b=>b.onclick=()=>{dayLog(u,UI.date).tipo=b.dataset.t;save();vDiario()});
   if($('#cd'))tick();
   if($('#gor'))$('#gor').onclick=()=>{UI.view='retos';renderApp();scrollTo(0,0)};
@@ -1810,10 +1812,65 @@ function openAdd(meal0){
     };
     const calc=()=>{const v=num(mb.querySelector('#qg').value)||0,g=modo==='u'?v*f.ug:v,x=g/100;
       return {fid:f.id,n:f.n,q:Math.round(g*10)/10,...(modo==='u'?{uq:v,un:f.un,unp:f.unp}:{}),k:f.k*x,p:f.p*x,c:f.c*x,g:f.g*x}};
-    const upd=()=>{const c=calc();mb.querySelector('#qp').innerHTML=`<div class="row between"><b style="font-size:24px;font-weight:800;letter-spacing:-1px">${fmt(c.k)} kcal</b><span class="small">P ${fmt1(c.p)} · C ${fmt1(c.c)} · G ${fmt1(c.g)}</span></div>${modo==='u'?`<p class="small muted" style="margin-top:4px">${dec(c.uq)} ${esc(pl(c.uq))} ≈ ${fmt1(c.q)} g</p>`:''}`};
+    const upd=()=>{const c=calc();mb.querySelector('#qp').innerHTML=`<div class="row between"><b style="font-size:24px;font-weight:800;letter-spacing:-1px">${fmt(c.k)} kcal</b><span class="small">P ${fmt1(c.p)} · C ${fmt1(c.c)} · G ${fmt1(c.g)}</span></div>${modo==='u'?`<p class="small muted" style="margin-top:4px">${dec(c.uq)} ${esc(pl(c.uq))} ≈ ${fmt1(c.q)} g</p>`:''}${modo==='u'&&c.uq>=15&&c.uq*f.ug>=1000?`<p class="small" style="margin-top:8px;color:#a86a2d;font-weight:600">¿Seguro que son ${dec(c.uq)} ${esc(pl(c.uq))}? <button class="btn ghost sm" id="tog">Usar ${dec(c.uq)} g</button></p>`:''}`;
+      const tg=mb.querySelector('#tog');if(tg)tg.onclick=()=>{const v=mb.querySelector('#qg').value;modo='g';render();mb.querySelector('#qg').value=v;upd()}};
     render();
   };
   const add=item=>{dayLog(u,UI.date).foods.push({...item,meal});save();m.remove();toast('Añadido a '+meal+' ✓');UI.showMeals=true;if(UI.view==='diario'){UI.range='dia';vDiario()}};
+  draw();
+}
+
+/* ---------- Editar un alimento ya apuntado ---------- */
+function editFood(date,idx){
+  const u=me(),lg=dayLog(u,date),e=lg.foods[idx];if(!e)return;
+  let meal=MEAL_NAMES.includes(e.meal)?e.meal:'Snack';
+  const hasQ=e.q>0;
+  // Valores por 100 g a partir de lo apuntado
+  const per=hasQ?{k:e.k/e.q*100,p:e.p/e.q*100,c:e.c/e.q*100,g:e.g/e.q*100}:null;
+  const ug=hasQ&&e.uq>0?e.q/e.uq:null,un=e.un,unp=e.unp||e.un;
+  let modo=ug?'u':'g';
+  const rac0=e.rac||1,uBase=e.base||{k:e.k/rac0,p:e.p/rac0,c:e.c/rac0,g:e.g/rac0};
+  const m=modal(`<div class="top"><b>Editar alimento</b><button class="close">✕</button></div><div id="eb"></div>`);
+  const eb=()=>m.querySelector('#eb');
+  const pick=()=>`<div class="mealpick" style="margin-top:12px">${MEALS.map(([n,i])=>`<button data-em="${n}" class="${meal===n?'on':''}"><span>${i}</span>${n}</button>`).join('')}</div>`;
+  const draw=()=>{
+    if(hasQ){
+      eb().innerHTML=`<div class="pv" style="background:#fff;border:1px solid var(--line);margin-top:12px"><b>${esc(e.n)}</b><p class="small muted">${fmt(per.k)} kcal por 100 g${ug?` · 1 ${esc(un)} ≈ ${fmt1(ug)} g`:''}</p></div>
+        ${pick()}
+        ${ug?`<div class="subseg" style="margin-top:14px"><button data-mo="u" class="${modo==='u'?'on':''}">Unidades (${esc(unp)})</button><button data-mo="g" class="${modo==='g'?'on':''}">Gramos</button></div>`:''}
+        <label class="f"><span>${modo==='u'?'¿Cuántos? ('+esc(unp)+')':'Cantidad (g)'}</span><input class="in dec" id="eq" type="text" inputmode="decimal" value="${dec(modo==='u'?(e.uq||1):Math.round(e.q*10)/10)}"></label>
+        <div class="pv" id="ep"></div>`;
+    }else{
+      eb().innerHTML=`${pick()}
+        <label class="f"><span>Descripción</span><input class="in" id="en" value="${esc(e.n)}"></label>
+        <label class="f"><span>Raciones</span><input class="in dec" id="er" type="text" inputmode="decimal" value="${dec(rac0)}"></label>
+        <label class="f"><span>Calorías (kcal)</span><input class="in dec" id="ek" type="text" inputmode="decimal" value="${dec(Math.round(e.k))}"></label>
+        <div class="grid3"><label class="f"><span>Proteínas g</span><input class="in dec" id="ep2" type="text" inputmode="decimal" value="${dec(Math.round(e.p*10)/10)}"></label><label class="f"><span>Carbos g</span><input class="in dec" id="ec" type="text" inputmode="decimal" value="${dec(Math.round(e.c*10)/10)}"></label><label class="f"><span>Grasas g</span><input class="in dec" id="eg" type="text" inputmode="decimal" value="${dec(Math.round(e.g*10)/10)}"></label></div>`;
+    }
+    eb().insertAdjacentHTML('beforeend',`<button class="btn block" style="margin-top:16px" id="esv">Guardar cambios</button><button class="btn ghost block" style="margin-top:8px;color:var(--warn)" id="edl">🗑 Eliminar</button>`);
+    eb().querySelectorAll('[data-em]').forEach(b=>b.onclick=()=>{meal=b.dataset.em;eb().querySelectorAll('[data-em]').forEach(x=>x.classList.toggle('on',x===b))});
+    if(hasQ){
+      const calc=()=>{const v=num(eb().querySelector('#eq').value)||0,g=modo==='u'?v*ug:v,x=g/100;return {q:Math.round(g*10)/10,uq:modo==='u'?v:undefined,k:per.k*x,p:per.p*x,c:per.c*x,g:per.g*x}};
+      const upd=()=>{const c=calc();eb().querySelector('#ep').innerHTML=`<div class="row between"><b style="font-size:24px;font-weight:800;letter-spacing:-1px">${fmt(c.k)} kcal</b><span class="small">P ${fmt1(c.p)} · C ${fmt1(c.c)} · G ${fmt1(c.g)}</span></div>${modo==='u'&&ug?`<p class="small muted" style="margin-top:4px">${dec(c.uq)} ${esc(pl2(c.uq))} ≈ ${fmt1(c.q)} g</p>`:''}${modo==='u'&&ug&&c.uq>=15&&c.q>=1000?`<p class="small" style="margin-top:8px;color:#a86a2d;font-weight:600">¿Seguro que son ${dec(c.uq)} ${esc(pl2(c.uq))}? <button class="btn ghost sm" id="tog">Usar ${dec(c.uq)} g</button></p>`:''}`;
+        const tg=eb().querySelector('#tog');if(tg)tg.onclick=()=>{const v=eb().querySelector('#eq').value;modo='g';draw();eb().querySelector('#eq').value=v;eb().querySelector('#eq').oninput()}};
+      const pl2=n=>Math.abs(n-1)<1e-9?un:unp;
+      eb().querySelector('#eq').oninput=upd;upd();
+      eb().querySelectorAll('[data-mo]').forEach(b=>b.onclick=()=>{const c=calc();modo=b.dataset.mo;e.q=c.q||e.q;if(modo==='u'&&ug)e.uq=Math.round(e.q/ug*10)/10;draw()});
+      eb().querySelector('#esv').onclick=()=>{const c=calc();if(!(c.q>0)){toast('Indica una cantidad');return}
+        Object.assign(e,{q:c.q,k:c.k,p:c.p,c:c.c,g:c.g,meal});if(modo==='u'&&ug){e.uq=c.uq;e.un=un;e.unp=unp}else{delete e.uq}done()};
+    }else{
+      const ri=eb().querySelector('#er');
+      ri.oninput=()=>{const r=num(ri.value);if(!(r>0))return;
+        eb().querySelector('#ek').value=dec(Math.round(uBase.k*r));
+        [['#ep2','p'],['#ec','c'],['#eg','g']].forEach(([s,k])=>eb().querySelector(s).value=dec(Math.round(uBase[k]*r*10)/10))};
+      eb().querySelector('#esv').onclick=()=>{const k=num(eb().querySelector('#ek').value);if(!(k>=0)||eb().querySelector('#ek').value===''){toast('Indica las calorías');return}
+        const r=num(ri.value)||1;
+        const nk=num(eb().querySelector('#ep2').value)||0;e.base=Math.abs(k-uBase.k*r)<1?uBase:{k:k/r,p:nk/r,c:(num(eb().querySelector('#ec').value)||0)/r,g:(num(eb().querySelector('#eg').value)||0)/r};
+        Object.assign(e,{n:eb().querySelector('#en').value.trim()||e.n,k,p:num(eb().querySelector('#ep2').value)||0,c:num(eb().querySelector('#ec').value)||0,g:num(eb().querySelector('#eg').value)||0,meal,rac:r});done()};
+    }
+    eb().querySelector('#edl').onclick=()=>{lg.foods.splice(idx,1);save();m.remove();toast('Alimento eliminado');vDiario()};
+  };
+  const done=()=>{save();m.remove();toast('Cambios guardados ✓');vDiario()};
   draw();
 }
 
