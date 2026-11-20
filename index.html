@@ -2,7 +2,15 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#744a69">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Vuelve">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
 <title>Vuelve · Tu diario de nutrición</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,7 +31,9 @@ body{font-family:Montserrat,Arial,sans-serif;background:var(--bg);color:var(--in
 button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 input,select,textarea{font:inherit;color:inherit}
 a{color:var(--plum)}
-.wrap{max-width:860px;margin:0 auto;padding:0 20px 120px}
+.wrap{max-width:860px;margin:0 auto;padding:0 20px calc(150px + env(safe-area-inset-bottom))}
+html,body{overscroll-behavior-y:none;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+nav.tabs{transform:translateZ(0)}
 .hidden{display:none!important}
 .muted{color:var(--muted)}
 .small{font-size:12px}
@@ -72,7 +82,7 @@ input[type=date].in::-webkit-calendar-picker-indicator{opacity:.6}
 .tile .big small{font-size:11px;font-weight:500;color:var(--muted);letter-spacing:0}
 
 /* Header */
-header.app{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);z-index:20}
+header.app{position:sticky;top:0;padding-top:env(safe-area-inset-top);background:#fff;border-bottom:1px solid var(--line);z-index:20}
 header.app .in2{max-width:1000px;margin:0 auto;padding:0 20px;height:72px;display:flex;align-items:center;justify-content:space-between}
 .logo{display:flex;align-items:center;gap:10px}
 .logo .mk{width:40px;height:40px;border-radius:10px;background:linear-gradient(140deg,#9b6b8d,#5e3a55);display:grid;place-items:center;color:#fff;font-weight:600;font-style:italic;font-size:12px;letter-spacing:-.3px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)}
@@ -249,8 +259,8 @@ table.calc td:last-child{text-align:right;font-weight:700}
 .auth .box{display:flex;flex-direction:column;justify-content:center;padding:40px;max-width:480px;width:100%;margin:0 auto}
 @media(max-width:800px){.auth{grid-template-columns:1fr}.auth .art{display:none}}
 .note{margin-top:18px;font-size:11px;color:var(--muted);background:var(--tile);padding:12px 14px;border-radius:12px;line-height:1.5}
-.ob{max-width:600px;margin:0 auto;padding:0 20px 140px}
-.ob-top{position:sticky;top:0;background:var(--bg);padding:18px 0 12px;z-index:5}
+.ob{max-width:600px;margin:0 auto;padding:0 20px calc(160px + env(safe-area-inset-bottom))}
+.ob-top{position:sticky;top:0;background:var(--bg);padding:calc(18px + env(safe-area-inset-top)) 0 12px;z-index:5}
 .pbar{height:5px;background:var(--seg);border-radius:9px;overflow:hidden;margin-top:14px}
 .pbar i{display:block;height:100%;background:var(--plum);border-radius:9px;transition:width .3s}
 .ob .lead{color:var(--muted);margin-top:10px;font-size:14px}
@@ -265,7 +275,7 @@ table.calc td:last-child{text-align:right;font-weight:700}
 .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
 .chip{width:46px;height:46px;border-radius:12px;border:1px solid var(--line);background:#fff;font-weight:700}
 .chip.on{background:var(--plum);border-color:var(--plum);color:#fff}
-.ob-nav{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(transparent,var(--bg) 35%);padding:28px 20px 20px}
+.ob-nav{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(transparent,var(--bg) 35%);padding:28px 20px calc(20px + env(safe-area-inset-bottom))}
 .ob-nav .in2{max-width:600px;margin:0 auto;display:flex;gap:10px}
 .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;z-index:99;animation:pop .2s}
 textarea.in{min-height:90px;resize:vertical;font-size:11px;font-family:ui-monospace,monospace}
@@ -360,7 +370,7 @@ textarea.in{min-height:90px;resize:vertical;font-size:11px;font-family:ui-monosp
 /* ======== Móvil ======== */
 @media(max-width:640px){
   .in,select.in,textarea.in{font-size:16px}
-  .wrap{padding:0 16px 110px}
+  .wrap{padding:0 16px calc(140px + env(safe-area-inset-bottom))}
   header.app .in2{height:64px;padding:0 16px}
   nav.tabs{padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
   nav.tabs .in2{gap:2px}
@@ -427,7 +437,7 @@ function toDocs(){
     if(mealprep)docs['mp~'+ekey(em)]={email:em,json:JSON.stringify(mealprep)};
     const byM={};
     for(const [date,l] of Object.entries(logs||{})){
-      if(!(l.foods||[]).length&&!(l.mov||[]).length&&!l.tipo)continue;
+      if(!(l.foods||[]).length&&!(l.mov||[]).length&&!l.tipo&&!l.pasos)continue;
       (byM[date.slice(0,7)]=byM[date.slice(0,7)]||{})[date]=l;
     }
     for(const [m,days] of Object.entries(byM))docs['log~'+ekey(em)+'~'+m]={email:em,month:m,json:JSON.stringify(days)};
@@ -506,7 +516,12 @@ function sbErr(e){const m=(e&&e.message)||String(e);
   return m}
 async function initServer(){
   await loadSBLib();
-  SB=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'vuelve_auth'}});
+  // "Recordarme": con la casilla marcada la sesión se guarda en el dispositivo; sin marcar, solo mientras la pestaña está abierta.
+  const remember=()=>{try{return localStorage.getItem('vuelve_recordar')!=='0'}catch(e){return true}};
+  const authStore={getItem:k=>{try{return localStorage.getItem(k)??sessionStorage.getItem(k)}catch(e){return null}},
+    setItem:(k,v)=>{try{if(remember()){localStorage.setItem(k,v);sessionStorage.removeItem(k)}else{sessionStorage.setItem(k,v);localStorage.removeItem(k)}}catch(e){}},
+    removeItem:k=>{try{localStorage.removeItem(k);sessionStorage.removeItem(k)}catch(e){}}};
+  SB=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'vuelve_auth',storage:authStore}});
   SB.auth.onAuthStateChange(ev=>{if(ev==='PASSWORD_RECOVERY')setTimeout(openNewPassword,300)});
   const {data:{session}}=await SB.auth.getSession();
   if(session){try{await sbLoadUser(session.user)}catch(e){console.warn(e);toast(sbErr(e))}}
@@ -580,6 +595,7 @@ const RETOS_API={
 };
 async function logout(){
   const d=load();UI.view='diario';UI.date=today();UI.range='dia';MP.screen='home';
+  if(CLOUD.db){clearTimeout(CLOUD.timer);try{await flush();for(let i=0;i<20&&CLOUD.busy;i++)await new Promise(r=>setTimeout(r,100))}catch(e){}}
   if(SERVER&&SB){await SB.auth.signOut().catch(()=>{});MEM={users:{},session:null,retos:{}};CLOUD.db=null;CLOUD.last={};saveLocal()}
   else{d.session=null;save()}
   route();
@@ -860,7 +876,10 @@ let UI={view:'diario',date:today(),range:'dia',showMeals:false};
 /* =========================================================
    AUTH
    ========================================================= */
-function renderAuth(mode='registro',prefill=''){
+function lastEmail(){try{return localStorage.getItem('vuelve_email')||''}catch(e){return ''}}
+function renderAuth(mode,prefill=''){
+  if(!mode)mode=SERVER&&lastEmail()?'login':'registro';
+  if(!prefill&&mode==='login')prefill=lastEmail();
   SCREEN.busy=false;
   $('#root').innerHTML=`
   <div class="auth">
@@ -877,9 +896,10 @@ function renderAuth(mode='registro',prefill=''){
       <div class="seg"><button data-m="registro" class="${mode==='registro'?'on':''}">Crear cuenta</button><button data-m="login" class="${mode==='login'?'on':''}">Iniciar sesión</button></div>
       <form id="af">
         ${mode==='registro'?`<label class="f"><span>Nombre</span><input class="in" name="nombre" required autocomplete="given-name" placeholder="¿Cómo te llamas?"></label>`:''}
-        <label class="f"><span>Email</span><input class="in" type="email" name="email" required autocomplete="email" placeholder="tu@email.com" value="${esc(prefill)}"></label>
+        <label class="f"><span>Email</span><input class="in" type="email" name="email" required autocomplete="${mode==='login'?'username':'email'}" autocapitalize="off" spellcheck="false" placeholder="tu@email.com" value="${esc(prefill)}"></label>
         <label class="f"><span>Contraseña</span><input class="in" type="password" name="pass" required minlength="${SERVER?6:4}" autocomplete="${mode==='registro'?'new-password':'current-password'}" placeholder="Mínimo ${SERVER?6:4} caracteres"></label>
         <div class="err" id="aerr"></div>
+        ${SERVER?`<label class="row small" style="margin:4px 0 12px;gap:8px;font-weight:600;cursor:pointer"><input type="checkbox" id="remem" ${(()=>{try{return localStorage.getItem('vuelve_recordar')!=='0'}catch(e){return true}})()?'checked':''} style="width:18px;height:18px;accent-color:var(--plum)"> Recordarme en este dispositivo</label>`:''}
         <button class="btn block" style="margin-top:4px" id="asub">${mode==='registro'?'Crear cuenta y empezar →':'Entrar →'}</button>
         ${SERVER&&mode==='login'?'<p style="text-align:center;margin-top:14px"><a href="#" id="forgot" class="small" style="font-weight:600">¿Has olvidado tu contraseña?</a></p>':''}
       </form>
@@ -897,6 +917,7 @@ function renderAuth(mode='registro',prefill=''){
     const d=load(),err=$('#aerr');
     if(SERVER){
       const btn=$('#asub');btn.disabled=true;err.textContent='';
+      const rm=$('#remem');try{localStorage.setItem('vuelve_recordar',rm&&!rm.checked?'0':'1');if(!rm||rm.checked)localStorage.setItem('vuelve_email',email);else localStorage.removeItem('vuelve_email')}catch(x){}
       try{
         if(mode==='registro'){
           const {data,error}=await SB.auth.signUp({email,password:pass,options:{data:{nombre:f.get('nombre').trim()},emailRedirectTo:APP_URL}});
@@ -1357,7 +1378,7 @@ function vDiario(){
   if(UI.range==='semana')return vSemana(head);
   if(UI.range==='mes')return vMes(head);
   const log=peekLog(u,UI.date),tg=tg0,tt=totals(log.foods);
-  const r=calcular(pf),ex=exKcal(u,log.mov),gasto=r.get+ex,disp=tg.kcal-tt.k,def=gasto-tt.k;
+  const r=calcular(pf),ex=exKcal(u,log.mov)+pasosKcal(u,log),gasto=r.get+ex,disp=tg.kcal-tt.k,def=gasto-tt.k;
   const W=Math.max(gasto,tt.k,tg.kcal);
   let cd='';
   const act=retosOf(u).filter(r=>r.inicio<=today()&&retoFin(r)>=today());
@@ -1398,7 +1419,7 @@ function vDiario(){
         <div class="mk" style="left:${tg.kcal/W*100}%"><span>Objetivo ${fmt(tg.kcal)} kcal</span></div>
       </div>
       <div class="row between tiny muted" style="margin-top:6px"><span>0 kcal</span><span>${fmt(W)} kcal</span></div>
-      <div class="legend"><span><i style="background:var(--base)"></i>Base diaria ${fmt(r.get)} kcal</span><span><i style="background:var(--ex)"></i>Ejercicio ${fmt(ex)} kcal</span><span><i style="background:var(--food)"></i>Comida ${fmt(tt.k)} kcal</span></div>
+      <div class="legend"><span><i style="background:var(--base)"></i>Base diaria ${fmt(r.get)} kcal</span><span><i style="background:var(--ex)"></i>Ejercicio${log.pasos?' y pasos':''} ${fmt(ex)} kcal</span><span><i style="background:var(--food)"></i>Comida ${fmt(tt.k)} kcal</span></div>
       <div class="deficit"><span class="small">${def>=0?'Déficit estimado':'Superávit estimado'}</span><b>${fmt(Math.abs(def))} kcal</b></div>
       <p class="small" style="margin-top:12px;font-weight:600">Disponibles para tu objetivo: ${fmt(disp)} kcal</p>
       <p class="tiny muted" style="margin-top:6px">Balance provisional según las comidas registradas. El ejercicio se añade al gasto; no aumenta tu objetivo de comida.</p>
@@ -1717,13 +1738,17 @@ function movDetail(m){
   if(m.kcalMaq>0)p.push('kcal de la máquina');
   return p.join(' · ');
 }
+function pasosKcal(u,log){const p=+(log&&log.pasos)||0;if(!p)return 0;
+  // km = pasos × zancada (≈ 0,414 × altura); gasto neto caminando ≈ 0,5 kcal por kg y km
+  const km=p*(+u.profile.altura*0.414/100)/1000;return 0.5*(+u.profile.peso)*km}
+function pasosKm(u,p){return p*(+u.profile.altura*0.414/100)/1000}
 function pace(v){const s=Math.round(3600/v);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')}
 function exKcalM(u,m){return m.kcal!=null?m.kcal:movKcal(m,+u.profile.peso)}
 function vMov(){
   const u=me(),log=peekLog(u,UI.date),ws=weekStart(UI.date);
   const days=[...Array(7)].map((_,i)=>addDays(ws,i));
   const done=days.filter(d=>(u.logs[d]?.mov||[]).length).length,goal=u.profile.dias.length;
-  const tot=log.mov.reduce((a,m)=>a+exKcalM(u,m),0),mins=log.mov.reduce((a,m)=>a+(+m.min||0),0);
+  const tot=log.mov.reduce((a,m)=>a+exKcalM(u,m),0)+pasosKcal(u,log),mins=log.mov.reduce((a,m)=>a+(+m.min||0),0),pasos=+log.pasos||0,objP=+u.profile.objPasos||8000;
   $('#view').innerHTML=heroHTML('Movimiento','Mueve el','cuerpo.')+`
   <div class="datenav"><button class="ar" id="dp">←</button><div class="t"><b>${dateTitle(UI.date)}</b><small>${UI.date===today()?'Hoy':'Registro del día'}</small></div><button class="ar" id="dn">→</button></div>
   <div class="card"><div class="row between movwk"><div><p class="eyebrow">Esta semana</p><div style="font-size:30px;font-weight:800;letter-spacing:-1.2px;margin-top:4px">${done}<span style="font-weight:500;color:var(--accent)"> / ${goal} días</span></div></div>
@@ -1733,6 +1758,13 @@ function vMov(){
   <div class="grid2" style="margin-top:14px">
     <div class="tile"><div class="lbl">Quemadas hoy</div><div class="big">${fmt(tot)}<small> kcal</small></div></div>
     <div class="tile"><div class="lbl">Tiempo activo</div><div class="big">${fmt(mins)}<small> min</small></div></div></div>
+  <div class="card" style="padding:18px">
+    <div class="row between"><p class="eyebrow">👟 Pasos del día</p><button class="small" id="pobj" style="color:var(--plum);font-weight:700">Objetivo: ${fmt(objP)}</button></div>
+    <div class="row" style="margin-top:10px;gap:8px"><input class="in" id="ppas" type="text" inputmode="numeric" placeholder="Ej. 8500" value="${pasos||''}" style="font-size:20px;font-weight:800">
+      <button class="btn" id="psave" style="padding:12px 16px">Guardar</button></div>
+    <div class="minibar" style="margin-top:12px"><i style="width:${Math.min(pasos/objP*100,100)}%;background:${pasos>=objP?'var(--base)':'var(--plum)'}"></i></div>
+    <p class="small muted" style="margin-top:8px">${pasos?`${fmt(pasos)} pasos · ${fmt1(pasosKm(u,pasos))} km · ${fmt(pasosKcal(u,log))} kcal${pasos>=objP?' · 🎉 ¡objetivo cumplido!':` · te faltan ${fmt(objP-pasos)}`}`:'Copia los pasos que marca la app Salud de tu iPhone o tu reloj.'}</p>
+  </div>
   <button class="btn block" style="margin-top:14px" id="madd">+ Añadir actividad</button>
   <div class="card"><p class="eyebrow">Actividad del día</p>
     ${log.mov.length?log.mov.map((x,i)=>{const A=ACTS[x.tipo];return `<div class="item" style="align-items:flex-start"><span style="font-size:22px;width:30px">${A?A.ic:'🏃‍♀️'}</span><div class="n"><b>${esc(x.t)}</b><small>${esc(movDetail(x))}</small>
@@ -1741,6 +1773,15 @@ function vMov(){
   </div><p class="foot">Calorías estimadas con fórmulas del ACSM y valores MET, según tu peso (${fmt1(+u.profile.peso)} kg). Si tu máquina marca calorías, puedes usar las suyas.</p>`;
   bindArrows(()=>UI.date=addDays(UI.date,-1),()=>UI.date=addDays(UI.date,1),vMov);
   $('#madd').onclick=openActividad;
+  const savePasos=()=>{const v=Math.round(num($('#ppas').value)||0);if(v<0||v>150000){toast('Número de pasos no válido');return}
+    dayLog(u,UI.date).pasos=v||undefined;save();toast(v?'Pasos guardados ✓':'Pasos borrados');vMov()};
+  $('#psave').onclick=savePasos;$('#ppas').onkeydown=e=>{if(e.key==='Enter')savePasos()};
+  $('#pobj').onclick=()=>{const m=modal(`<div class="top"><b>Objetivo de pasos</b><button class="close">✕</button></div>
+    <label class="f"><span>Pasos al día</span><input class="in" id="po" type="text" inputmode="numeric" value="${objP}"></label>
+    <div class="optc three" style="margin-top:10px">${[6000,8000,10000].map(n=>`<button class="tag" data-po="${n}">${fmt(n)}</button>`).join('')}</div>
+    <button class="btn block" style="margin-top:14px" id="pos">Guardar</button>`);
+    m.querySelectorAll('[data-po]').forEach(b=>b.onclick=()=>m.querySelector('#po').value=b.dataset.po);
+    m.querySelector('#pos').onclick=()=>{const v=Math.round(num(m.querySelector('#po').value)||0);if(!(v>=1000&&v<=50000)){toast('Entre 1.000 y 50.000');return}u.profile.objPasos=v;save();m.remove();vMov()}};
   $$('[data-del]').forEach(b=>b.onclick=()=>{dayLog(u,UI.date).mov.splice(+b.dataset.del,1);save();vMov()});
 }
 function openActividad(){
@@ -2175,6 +2216,10 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
     if(v!==''&&!(v>=3&&v<=70)){m.querySelector('#ge').textContent='Escribe un valor entre 3 y 70.';return}
     u.profile.grasa=v===''?null:v;save();m.remove();toast('Actualizado ✓');renderApp()};
 });
+// Guardar enseguida al salir de la app, cambiar de pestaña o bloquear el móvil
+const flushNow=()=>{if(CLOUD.db&&CLOUD.timer){clearTimeout(CLOUD.timer);CLOUD.timer=null;flush()}};
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushNow()});
+addEventListener('pagehide',flushNow);
 let LAST_MOB=innerWidth<=640;
 addEventListener('resize',()=>{const m=innerWidth<=640;if(m!==LAST_MOB){LAST_MOB=m;if(me()?.profile&&!SCREEN.busy&&$('#view'))renderApp()}});
 if(SERVER){$('#root').innerHTML='<div style="min-height:100vh;display:grid;place-items:center"><div style="text-align:center"><div class="logo" style="justify-content:center">'+LOGO+'</div><p class="small muted" style="margin-top:14px">Cargando…</p></div></div>';
