@@ -393,8 +393,8 @@ textarea.in{min-height:90px;resize:vertical;font-size:11px;font-family:ui-monosp
 /* ---------- Modo servidor (Supabase) ----------
    Rellena estas dos claves con los datos de tu proyecto (Project Settings → API).
    La "anon public key" es pública y puede ir en la web. NUNCA pongas aquí la service_role. */
-const SUPABASE_URL='';
-const SUPABASE_KEY='';
+const SUPABASE_URL='https://vzzkzajzzehhxzwonpgv.supabase.co';
+const SUPABASE_KEY='sb_publishable_9-Tb4XFSfV_EXN6cG1Nxtw_KZotYkWS';
 const IN_CLAUDE=!!(window.claude&&window.claude.use)||/claude\.ai|claudeusercontent/.test(location.hostname);
 const SERVER=!!(SUPABASE_URL&&SUPABASE_KEY)&&!IN_CLAUDE&&location.protocol!=='file:';
 let SB=null,SBUID=null;const RES={};
@@ -498,6 +498,8 @@ function sbErr(e){const m=(e&&e.message)||String(e);
   if(/already registered|already exists/i.test(m))return 'Ya existe una cuenta con ese email. Inicia sesión.';
   if(/Email not confirmed/i.test(m))return 'Confirma tu email: te hemos enviado un enlace. Revisa también el spam.';
   if(/Password should be at least/i.test(m))return 'La contraseña debe tener al menos 6 caracteres.';
+  if(/not authorized|email_address_not_authorized/i.test(m))return 'Ahora mismo no podemos enviar el email de confirmación a esa dirección. Avisa a la administradora de Vuelve.';
+  if(/email rate limit/i.test(m))return 'Se han enviado demasiados emails en la última hora. Prueba de nuevo más tarde.';
   if(/rate limit|too many/i.test(m))return 'Demasiados intentos seguidos. Espera un minuto y vuelve a intentarlo.';
   if(/Failed to fetch|NetworkError/i.test(m))return 'Sin conexión con el servidor. Revisa tu internet.';
   return m}
@@ -571,7 +573,9 @@ const RETOS_API={
   editar:(r,quitar)=>sbRun(async()=>{const {error}=await SB.from('retos').update({nombre:r.nombre,tipo:r.tipo,inicio:r.inicio,dias:r.dias}).eq('id',r.id);if(error)throw error;
     if(quitar.length){const {error:e2}=await SB.from('reto_miembros').delete().eq('reto_id',r.id).in('email',quitar);if(e2)throw e2}},'Reto actualizado ✓'),
   borrar:id=>sbRun(()=>SB.from('retos').delete().eq('id',id),'Reto eliminado'),
-  invitar:(id,email)=>sbRun(()=>SB.from('reto_miembros').upsert({reto_id:id,email,estado:'invitado'}),null)
+  invitar:(id,email)=>sbRun(async()=>{const {error}=await SB.from('reto_miembros').insert({reto_id:id,email,estado:'invitado'});
+    if(error&&error.code==='23505'){const {error:e2}=await SB.from('reto_miembros').update({estado:'invitado'}).eq('reto_id',id).eq('email',email);if(e2)throw e2}
+    else if(error)throw error},null)
 };
 async function logout(){
   const d=load();UI.view='diario';UI.date=today();UI.range='dia';MP.screen='home';
