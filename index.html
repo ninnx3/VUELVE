@@ -1135,11 +1135,21 @@ function retoScore(r,email){
   const pts=r.tipo==='kcal'?kcal:r.tipo==='mov'?mov:kcal+mov;
   return {pts,kcal,mov};
 }
-function inviteText(u,r){
+function inviteText(u,r,para){
   return `¡Hola!\n\n${u.nombre} te invita a unirte a Vuelve y a hacer juntas el reto «${r.nombre}».\n\n`+
   `🏆 Reto: ${RETO_TIPOS[r.tipo].t}\n📅 ${r.dias} días, del ${fmtD(r.inicio)} al ${fmtD(retoFin(r))}\n\n`+
   `Vuelve calcula tus calorías y macros según tu cuerpo y tu objetivo, y te ayuda a registrar comidas y movimiento. Cada día que cumplas sumas puntos y veréis vuestra clasificación juntas.\n\n`+
-  `Únete aquí con este mismo email: ${APP_URL}\n\nVuelve por encima de perfección. Un día a la vez. 💜`;
+  `Únete aquí y crea tu cuenta ${para?'con tu email '+para:'con el email con el que te he invitado'}: ${APP_URL}\n\nVuelve por encima de perfección. Un día a la vez. 💜`;
+}
+const CAN_SHARE=!!navigator.share&&!IN_CLAUDE;
+function shareHTML(mailto){return `${CAN_SHARE?'<button class="btn block" style="margin-top:14px" id="shr">📤 Compartir invitación</button>':''}
+  <a class="btn ${CAN_SHARE?'soft':''} block" style="margin-top:${CAN_SHARE?8:14}px;text-decoration:none;${CAN_SHARE?'':''}" id="wa" target="_blank" rel="noopener">💬 Enviar por WhatsApp</a>
+  <a class="btn soft block" style="margin-top:8px;text-decoration:none" href="${mailto}" target="_blank" rel="noopener">✉️ Abrir en mi correo</a>
+  <button class="btn ghost block" style="margin-top:8px" id="cpi">Copiar invitación</button>`}
+function bindShare(root,subj,txt){
+  const wa=root.querySelector('#wa');if(wa)wa.href='https://wa.me/?text='+encodeURIComponent(txt);
+  const s=root.querySelector('#shr');if(s)s.onclick=async()=>{try{await navigator.share({title:subj,text:txt})}catch(e){}};
+  root.querySelector('#cpi').onclick=async()=>{try{await navigator.clipboard.writeText(subj+'\n\n'+txt);toast('Invitación copiada ✓')}catch(e){toast('Selecciona el texto y cópialo')}};
 }
 function fmtD(s){const d=parse(s);return d.getDate()+' de '+MONL[d.getMonth()]}
 function openInvite(){
@@ -1192,7 +1202,7 @@ function openInvite(){
         d.retos[id]=reto;save();step='send';draw();
       };
     }else{
-      const txt=inviteText(u,reto),subj=`${u.nombre} te invita a un reto en Vuelve 💜`;
+      const txt=inviteText(u,reto,reto.invitados.length===1?reto.invitados[0]:null),subj=`${u.nombre} te invita a un reto en Vuelve 💜`;
       const mailto='mailto:'+reto.invitados.map(encodeURIComponent).join(',')+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(txt);
       const enApp=SERVER?[]:reto.invitados.filter(e=>d.users[e]);
       ib.innerHTML=`<div style="text-align:center;margin-top:12px;font-size:40px">🏆</div>
@@ -1201,11 +1211,10 @@ function openInvite(){
       ${enApp.length?`<div class="tip">✓ ${enApp.map(esc).join(', ')} ya ${enApp.length>1?'tienen':'tiene'} cuenta en Vuelve: verá la invitación en su menú al entrar.</div>`:''}
       <p class="eyebrow" style="margin-top:16px">Asunto</p><p class="small" style="font-weight:600;margin-top:4px">${esc(subj)}</p>
       <div class="mailbox">${esc(txt)}</div>
-      <a class="btn block" style="margin-top:14px;text-decoration:none" href="${mailto}" target="_blank" rel="noopener">✉️ Abrir en mi correo</a>
-      <button class="btn soft block" style="margin-top:8px" id="cpi">Copiar invitación</button>
-      <p class="tiny muted" style="margin-top:10px;text-align:center">Si tu correo no se abre, copia la invitación y pégala en un email, WhatsApp o Instagram.</p>
+      ${shareHTML(mailto)}
+      <p class="tiny muted" style="margin-top:10px;text-align:center">Tu amiga debe crear su cuenta con el mismo email al que la has invitado para ver el reto.</p>
       <button class="btn ghost block" style="margin-top:12px" id="vr">Ver el reto</button>`;
-      ib.querySelector('#cpi').onclick=async()=>{try{await navigator.clipboard.writeText(subj+'\n\n'+txt);toast('Invitación copiada ✓')}catch(e){toast('Selecciona el texto y cópialo')}};
+      bindShare(ib,subj,txt);
       ib.querySelector('#vr').onclick=()=>{m.remove();UI.view='retos';renderApp()};
     }
   };
@@ -1295,12 +1304,11 @@ function reinvite(r){
   m.querySelector('#ok').onclick=()=>{const v=m.querySelector('#em').value.trim().toLowerCase();
     if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){m.querySelector('#ierr').textContent='Ese email no parece válido.';return}
     if(SERVER)RETOS_API.invitar(r.id,v);else{if(!r.invitados.includes(v))r.invitados.push(v);r.rechazados=(r.rechazados||[]).filter(x=>x!==v);save()}
-    const txt=inviteText(u,r),subj=`${u.nombre} te invita a un reto en Vuelve 💜`;
+    const txt=inviteText(u,r,v),subj=`${u.nombre} te invita a un reto en Vuelve 💜`;
     m.querySelector('.sheet').innerHTML=`<div class="top"><b>Invitación lista</b><button class="close">✕</button></div><div class="mailbox">${esc(txt)}</div>
-      <a class="btn block" style="margin-top:14px;text-decoration:none" target="_blank" rel="noopener" href="mailto:${encodeURIComponent(v)}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(txt)}">✉️ Abrir en mi correo</a>
-      <button class="btn soft block" style="margin-top:8px" id="cpi">Copiar invitación</button>`;
+      ${shareHTML('mailto:'+encodeURIComponent(v)+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(txt))}`;
     m.querySelector('.close').onclick=()=>{m.remove();renderApp()};
-    m.querySelector('#cpi').onclick=async()=>{try{await navigator.clipboard.writeText(subj+'\n\n'+txt);toast('Invitación copiada ✓')}catch(e){toast('Selecciona el texto y cópialo')}};
+    bindShare(m,subj,txt);
   };
 }
 
