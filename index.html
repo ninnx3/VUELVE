@@ -483,6 +483,8 @@ async function hash(s){
 
 /* ---------- Utilidades ---------- */
 const $=s=>document.querySelector(s);
+const num=v=>{const n=parseFloat(String(v??'').trim().replace(',','.'));return isNaN(n)?'':n};
+const dec=v=>v===''||v==null?'':String(v).replace('.',',');
 const $$=s=>[...document.querySelectorAll(s)];
 const R=Math.round;
 const pad=n=>String(n).padStart(2,'0');
@@ -612,14 +614,14 @@ function ajusteEditor(el,pf,onValid){
       ${opt('ritmo','🐢','Elegir mi ritmo','Cuántos kg por semana quieres perder')}
       ${a.modo==='ritmo'?`<div class="optc two">${RIT.map(([v,t])=>`<button class="tag ${a.ritmo==v?'on':''}" data-rit="${v}" style="border-radius:12px;line-height:1.3">${t} · ${String(v).replace('.',',')} kg<br><small style="font-weight:500">${fmt(kRit(v))} kcal/día</small></button>`).join('')}</div>`:''}
       ${opt('fecha','📅','Llegar a un peso en una fecha','Por ejemplo, para tus vacaciones')}
-      ${a.modo==='fecha'?`<div class="grid2"><label class="f" style="margin-top:0"><span>Peso objetivo (kg)</span><input class="in" type="number" step="0.1" inputmode="decimal" data-aj="pesoObj" value="${esc(a.pesoObj??'')}" placeholder="Ej. 62"></label><label class="f" style="margin-top:0"><span>Fecha</span><input class="in" type="date" data-aj="fechaObj" min="${addDays(today(),7)}" value="${esc(a.fechaObj||'')}"></label></div>`:''}
+      ${a.modo==='fecha'?`<div class="grid2"><label class="f" style="margin-top:0"><span>Peso objetivo (kg)</span><input class="in dec" type="text" inputmode="decimal" data-aj="pesoObj" value="${esc(dec(a.pesoObj??''))}" placeholder="Ej. 62"></label><label class="f" style="margin-top:0"><span>Fecha</span><input class="in" type="date" data-aj="fechaObj" min="${addDays(today(),7)}" value="${esc(a.fechaObj||'')}"></label></div>`:''}
       ${opt('fijo','🎯','Calorías exactas','Tú decides el número, por ejemplo 1.500')}
       ${a.modo==='fijo'?`<label class="f" style="margin-top:0"><span>Calorías al día${pf.enfoque==6?' (media de la semana)':''}</span><input class="in" type="number" inputmode="numeric" data-aj="kcal" value="${esc(a.kcal??'')}" placeholder="Ej. 1500"></label>`:''}
     </div><div id="ajprev"></div>`;
     el.querySelectorAll('[data-am2]').forEach(b=>b.onclick=()=>{a.modo=b.dataset.am2;
       if(a.modo==='ritmo'&&!a.ritmo)a.ritmo=0.5;if(a.modo==='fecha'&&!a.fechaObj&&pf.meta&&pf.meta>=addDays(today(),7))a.fechaObj=pf.meta;draw()});
     el.querySelectorAll('[data-rit]').forEach(b=>b.onclick=()=>{a.ritmo=+b.dataset.rit;draw()});
-    el.querySelectorAll('[data-aj]').forEach(i=>i.oninput=()=>{a[i.dataset.aj]=i.type==='date'?i.value:(i.value===''?'':Number(i.value));prev()});
+    el.querySelectorAll('[data-aj]').forEach(i=>i.oninput=()=>{a[i.dataset.aj]=i.type==='date'?i.value:num(i.value);prev()});
     prev();
   };
   draw();
@@ -799,14 +801,14 @@ function renderOB(){
     body=`<p class="eyebrow">Paso 2 de 8</p><h2 class="h2" style="margin-top:10px">Cuéntame sobre <span>tu cuerpo.</span></h2><p class="lead">Datos de hoy, sin juzgar.</p>
     <label class="f"><span>Edad (años)</span><input class="in" type="number" inputmode="numeric" min="14" max="100" data-k="edad" value="${esc(d.edad)}" placeholder="Ej. 34"></label>
     <label class="f"><span>Altura (cm)</span><input class="in" type="number" inputmode="numeric" min="120" max="230" data-k="altura" value="${esc(d.altura)}" placeholder="Ej. 165"></label>
-    <label class="f"><span>Peso actual (kg)</span><input class="in" type="number" inputmode="decimal" step="0.1" min="30" max="300" data-k="peso" value="${esc(d.peso)}" placeholder="Ej. 68,5"></label>`;
+    <label class="f"><span>Peso actual (kg)</span><input class="in dec" type="text" inputmode="decimal" min="30" max="300" data-k="peso" value="${esc(dec(d.peso))}" placeholder="Ej. 68,5"></label>`;
     ok=okCuerpo(d);
   }
   if(s==='grasa'){
     const imc=d.peso/Math.pow(d.altura/100,2),est=estimarGrasa(imc,+d.edad,d.sexo);
     body=`<p class="eyebrow">Paso 3 de 8 · Opcional</p><h2 class="h2" style="margin-top:10px">¿Conoces tu <span>% de grasa?</span></h2>
     <p class="lead">Si te has medido con báscula de bioimpedancia, DEXA o pliegues, ponlo aquí. Si no, lo estimamos con tu IMC.</p>
-    <label class="f"><span>% de grasa corporal</span><input class="in" type="number" inputmode="decimal" step="0.1" min="3" max="70" data-k="grasa" value="${esc(d.grasa)}" placeholder="Déjalo vacío si no lo sabes"></label>
+    <label class="f"><span>% de grasa corporal</span><input class="in dec" type="text" inputmode="decimal" min="3" max="70" data-k="grasa" value="${esc(dec(d.grasa))}" placeholder="Déjalo vacío si no lo sabes"></label>
     <div class="grid2" style="margin-top:14px"><div class="tile"><div class="lbl">Tu IMC</div><div class="big">${fmt1(imc)}</div></div><div class="tile"><div class="lbl">Grasa estimada</div><div class="big">${fmt1(est)}<small> %</small></div></div></div>
     <p class="small muted" style="margin-top:10px">Estimación de Deurenberg. Una medición real siempre es más precisa.</p>`;
     ok=okGrasa(d);
@@ -848,7 +850,7 @@ function renderOB(){
   </div></div>`;
   $$('[data-k][data-v]').forEach(b=>b.onclick=()=>{const k=b.dataset.k;d[k]=k==='sexo'?b.dataset.v:Number(b.dataset.v);renderOB()});
   if(s==='ritmo')ajusteEditor($('#ajw'),d,v=>{$('#obn').disabled=!v});
-  $$('input[data-k]').forEach(i=>i.oninput=()=>{const k=i.dataset.k;d[k]=(i.type==='number')?(i.value===''?'':Number(i.value)):i.value;
+  $$('input[data-k]').forEach(i=>i.oninput=()=>{const k=i.dataset.k;d[k]=(i.type==='number'||i.classList.contains('dec')||i.inputMode==='numeric')?num(i.value):i.value;
     const s=STEPS[OB.step];if(s==='cuerpo')$('#obn').disabled=!okCuerpo(d);if(s==='grasa')$('#obn').disabled=!okGrasa(d)});
   $$('[data-day]').forEach(b=>b.onclick=()=>{const i=+b.dataset.day;d.dias=d.dias.includes(i)?d.dias.filter(x=>x!==i):[...d.dias,i];renderOB()});
   if($('#obb'))$('#obb').onclick=()=>{OB.step--;renderOB();scrollTo(0,0)};
@@ -1414,23 +1416,23 @@ function openAdd(meal0){
       mb.innerHTML=`${back}${pickHTML()}<p class="small muted" style="margin-top:14px">Calorías y macros opcionales, sin buscar.</p>
       <label class="f"><span>Descripción</span><input class="in" id="mn" placeholder="Ej. Menú del día"></label>
       <label class="f"><span>Calorías (kcal)</span><input class="in" id="mk" type="number" inputmode="numeric"></label>
-      <div class="grid3"><label class="f"><span>Proteínas g</span><input class="in" id="mp" type="number" inputmode="decimal"></label><label class="f"><span>Carbos g</span><input class="in" id="mc" type="number" inputmode="decimal"></label><label class="f"><span>Grasas g</span><input class="in" id="mg" type="number" inputmode="decimal"></label></div>
+      <div class="grid3"><label class="f"><span>Proteínas g</span><input class="in dec" id="mp" type="text" inputmode="decimal"></label><label class="f"><span>Carbos g</span><input class="in dec" id="mc" type="text" inputmode="decimal"></label><label class="f"><span>Grasas g</span><input class="in dec" id="mg" type="text" inputmode="decimal"></label></div>
       <button class="btn block" style="margin-top:18px" id="ms">Añadir a ${meal}</button>`;
       bindPick();
       mb.querySelector('#bk').onclick=()=>{mode='menu';draw()};
-      mb.querySelector('#ms').onclick=()=>{const k=+mb.querySelector('#mk').value;if(!k){toast('Indica las calorías');return}
-        add({n:mb.querySelector('#mn').value||'Entrada rápida',k,p:+mb.querySelector('#mp').value||0,c:+mb.querySelector('#mc').value||0,g:+mb.querySelector('#mg').value||0})};
+      mb.querySelector('#ms').onclick=()=>{const k=num(mb.querySelector('#mk').value);if(!k){toast('Indica las calorías');return}
+        add({n:mb.querySelector('#mn').value||'Entrada rápida',k,p:num(mb.querySelector('#mp').value)||0,c:num(mb.querySelector('#mc').value)||0,g:num(mb.querySelector('#mg').value)||0})};
       return;
     }
     if(mode==='propio'){
       mb.innerHTML=`${back}<p class="small muted" style="margin-top:14px">Copia los valores <b>por 100 g</b> de la etiqueta. Se guardará en tu lista para la próxima vez.</p>
       <label class="f"><span>Nombre del producto</span><input class="in" id="cn" placeholder="Ej. Yogur proteico marca X" value="${esc(qRaw)}"></label>
-      <div class="grid2"><label class="f"><span>kcal / 100 g</span><input class="in" id="ck" type="number"></label><label class="f"><span>Proteínas / 100 g</span><input class="in" id="cp" type="number" step="0.1"></label>
-      <label class="f"><span>Carbos / 100 g</span><input class="in" id="cc" type="number" step="0.1"></label><label class="f"><span>Grasas / 100 g</span><input class="in" id="cg" type="number" step="0.1"></label></div>
+      <div class="grid2"><label class="f"><span>kcal / 100 g</span><input class="in" id="ck" type="text" inputmode="numeric"></label><label class="f"><span>Proteínas / 100 g</span><input class="in dec" id="cp" type="text" inputmode="decimal"></label>
+      <label class="f"><span>Carbos / 100 g</span><input class="in dec" id="cc" type="text" inputmode="decimal"></label><label class="f"><span>Grasas / 100 g</span><input class="in dec" id="cg" type="text" inputmode="decimal"></label></div>
       <button class="btn block" style="margin-top:18px" id="cs">Guardar y elegir cantidad</button>`;
       mb.querySelector('#bk').onclick=()=>{mode='menu';draw()};
-      mb.querySelector('#cs').onclick=()=>{const n=mb.querySelector('#cn').value.trim(),k=+mb.querySelector('#ck').value;if(!n||!k){toast('Nombre y kcal son obligatorios');return}
-        const f={id:'u'+Date.now(),n,k,p:+mb.querySelector('#cp').value||0,c:+mb.querySelector('#cc').value||0,g:+mb.querySelector('#cg').value||0};
+      mb.querySelector('#cs').onclick=()=>{const n=mb.querySelector('#cn').value.trim(),k=num(mb.querySelector('#ck').value);if(!n||!k){toast('Nombre y kcal son obligatorios');return}
+        const f={id:'u'+Date.now(),n,k,p:num(mb.querySelector('#cp').value)||0,c:num(mb.querySelector('#cc').value)||0,g:num(mb.querySelector('#cg').value)||0};
         u.custom.unshift(f);save();qty(f)};
     }
   };
@@ -1440,12 +1442,12 @@ function openAdd(meal0){
     mb.innerHTML=`<button class="back" id="qb">← Volver</button>
       <div class="pv" style="background:#fff;border:1px solid var(--line)"><b>${esc(f.n)}</b><p class="small muted">${f.k} kcal por 100 g</p></div>
       ${pickHTML()}
-      <label class="f"><span>Cantidad (g)</span><input class="in" id="qg" type="number" inputmode="decimal" value="100"></label>
+      <label class="f"><span>Cantidad (g)</span><input class="in dec" id="qg" type="text" inputmode="decimal" value="100"></label>
       <div class="row" style="margin-top:8px;flex-wrap:wrap">${[30,50,125,150,200].map(g=>`<button class="btn ghost" data-g="${g}">${g} g</button>`).join('')}</div>
       <div class="pv" id="qp"></div>
       <button class="btn block" style="margin-top:14px" id="qa">Añadir a ${meal}</button>`;
     m.querySelectorAll('[data-pm]').forEach(b=>b.onclick=()=>{meal=b.dataset.pm;m.querySelector('#mtitle').textContent=meal+' · '+u.nombre;m.querySelectorAll('[data-pm]').forEach(x=>x.classList.toggle('on',x===b));mb.querySelector('#qa').textContent='Añadir a '+meal});
-    const calc=()=>{const g=+mb.querySelector('#qg').value||0,x=g/100;return{fid:f.id,n:f.n,q:g,k:f.k*x,p:f.p*x,c:f.c*x,g:f.g*x}};
+    const calc=()=>{const g=num(mb.querySelector('#qg').value)||0,x=g/100;return{fid:f.id,n:f.n,q:g,k:f.k*x,p:f.p*x,c:f.c*x,g:f.g*x}};
     const upd=()=>{const c=calc();mb.querySelector('#qp').innerHTML=`<div class="row between"><b style="font-size:24px;font-weight:800;letter-spacing:-1px">${fmt(c.k)} kcal</b><span class="small">P ${fmt1(c.p)} · C ${fmt1(c.c)} · G ${fmt1(c.g)}</span></div>`};
     mb.querySelector('#qg').oninput=upd;
     mb.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{mb.querySelector('#qg').value=b.dataset.g;upd()});
@@ -1495,7 +1497,7 @@ function vMov(){
     ${log.mov.length?log.mov.map((x,i)=>`<div class="item"><div class="n"><b>${esc(x.t)}</b><small>${x.min} min · ${x.int}${x.n?' · '+esc(x.n):''}</small></div><span class="k">${fmt(exKcal(u,[x]))} kcal</span><button class="x" data-del="${i}">✕</button></div>`).join(''):'<p class="muted small" style="margin-top:8px">Aún no hay nada. ¡Hasta un paseo cuenta!</p>'}
   </div><p class="foot">Estimación con valores MET según intensidad y tu peso.</p>`;
   bindArrows(()=>UI.date=addDays(UI.date,-1),()=>UI.date=addDays(UI.date,1),vMov);
-  $('#ma').onclick=()=>{const min=+$('#mm').value;if(!min){toast('Indica los minutos');return}
+  $('#ma').onclick=()=>{const min=num($('#mm').value);if(!min){toast('Indica los minutos');return}
     dayLog(u,UI.date).mov.push({t:$('#mt').value,min,int:$('#mi').value,n:$('#mn').value});save();toast('Actividad guardada ✓');vMov()};
   $$('[data-del]').forEach(b=>b.onclick=()=>{dayLog(u,UI.date).mov.splice(+b.dataset.del,1);save();vMov()});
 }
@@ -1547,12 +1549,12 @@ function checkin(){
   const m=modal(`<div class="top"><b>Check-in</b><button class="close">✕</button></div>
     <h3 class="h2" style="font-size:24px;margin-top:12px">¿Cómo vamos <span>esta semana?</span></h3><p class="small muted" style="margin-top:6px">Recomendado: mismo día y hora cada semana, en ayunas.</p>
     <label class="f"><span>Fecha</span><input class="in" type="date" id="cdt" value="${today()}" max="${today()}"></label>
-    <label class="f"><span>Peso (kg)</span><input class="in" type="number" step="0.1" inputmode="decimal" id="ck" value="${u.weights.at(-1)?.kg||''}"></label>
+    <label class="f"><span>Peso (kg)</span><input class="in dec" type="text" inputmode="decimal" id="ck" value="${dec(u.weights.at(-1)?.kg??'')}"></label>
     <label class="row small" style="margin-top:14px;gap:8px"><input type="checkbox" id="cu" checked> Actualizar mi plan con este peso</label>
     <button class="btn block" style="margin-top:18px" id="cs">Guardar peso</button>
     <button class="btn soft block" style="margin-top:8px" id="cl">Ahora no, lo haré después</button>`);
   m.querySelector('#cl').onclick=()=>m.remove();
-  m.querySelector('#cs').onclick=()=>{const kg=+m.querySelector('#ck').value,d=m.querySelector('#cdt').value;if(!(kg>=30&&kg<=300)){toast('Peso no válido');return}
+  m.querySelector('#cs').onclick=()=>{const kg=num(m.querySelector('#ck').value),d=m.querySelector('#cdt').value;if(!(kg>=30&&kg<=300)){toast('Peso no válido');return}
     upsertWeight(u,d,kg);if(m.querySelector('#cu').checked&&d===u.weights.at(-1).date)u.profile.peso=kg;save();m.remove();toast('Peso guardado ✓');renderApp()};
 }
 
