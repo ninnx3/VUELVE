@@ -422,6 +422,27 @@ textarea.in{min-height:90px;resize:vertical;font-size:11px;font-family:ui-monosp
 }
 @keyframes up{from{transform:translateY(60px);opacity:0}}
 .tip{background:var(--mint);border-radius:12px;padding:12px 14px;font-size:12px;margin-top:14px;color:#3d5d50}
+
+/* ===== Escritorio: menú lateral y contenido más ancho ===== */
+@media(min-width:1100px){
+  header.app .in2{max-width:none;padding:0 32px}
+  nav.tabs{top:72px;bottom:0;right:auto;width:232px;padding:28px 16px;box-shadow:none;border-right:1px solid var(--line);background:#fff;backdrop-filter:none;display:block}
+  nav.tabs .in2{max-width:none;display:flex;flex-direction:column;gap:6px}
+  nav.tabs button{flex-direction:row;justify-content:flex-start;gap:14px;font-size:14px;font-weight:600;padding:13px 16px;border-radius:14px;white-space:nowrap}
+  nav.tabs button svg{width:22px;height:22px}
+  nav.tabs button:not(.on):hover{background:var(--tile)}
+  .nav-l{display:inline}.nav-s{display:none}
+  main.wrap{max-width:1180px;margin-left:max(272px,calc((100vw - 1180px)/2 + 116px));margin-right:auto;padding:0 40px 70px}
+  .daycard .dl .sum{margin-top:6px}
+  #view.v-progreso,#view.v-plan{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:24px;align-items:start}
+  #view.v-progreso>*,#view.v-plan>*{grid-column:1/-1}
+  #view.v-progreso>.card,#view.v-plan>.card{grid-column:auto;margin-top:16px}
+  #view.v-movimiento{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:24px;align-items:start}
+  #view.v-movimiento>*{grid-column:1/-1}
+  .modal .sheet{max-width:600px}
+}
+@media(min-width:1300px){.dcols{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,1fr);gap:32px;align-items:start}.dcol.dr>.grid2:first-child{margin-top:0!important}}
+@media(min-width:1500px){main.wrap{max-width:1280px;margin-left:max(272px,calc((100vw - 1280px)/2 + 116px))}}
 </style>
 </head>
 <body>
@@ -1244,7 +1265,7 @@ function renderApp(){
     <div class="row" style="gap:0"><span id="sync" class="${CLOUD.state}">${SYNC_TXT[CLOUD.state]}</span>
       <div class="dd-wrap"><button class="avatar" id="av" title="Mi cuenta">${esc((u.nombre[0]||'?').toUpperCase())}<i>⌄</i>${pendingInvites(u).length?'<span class="dot"></span>':''}</button></div></div>
   </div></header>
-  <main class="wrap" id="view"></main>
+  <main class="wrap v-${UI.view}" id="view"></main>
   <nav class="tabs"><div class="in2">
     ${[['diario',IC.diario,'Diario'],['movimiento',IC.mov,'Movimiento'],['plan',IC.target,'Mi plan'],['progreso',IC.prog,'Mi progreso|Progreso'],['menu',IC.plan,'Menú']].map(([k,i,t])=>{const [l,s]=t.split('|');return `<button data-v="${k}" class="${UI.view===k?'on':''}">${i}${s?`<span class="nav-l">${l}</span><span class="nav-s">${s}</span>`:l}</button>`}).join('')}
   </div></nav>`;
@@ -1544,7 +1565,7 @@ function vDiario(){
   const mb=(v,t,col)=>`<div class="mb"><i style="width:${Math.min(v/t*100||0,100)}%;background:${col}"></i></div>`;
   $('#view').innerHTML=head+`
   <div class="datenav"><button class="ar" id="dp">←</button><div class="t"><b>${dateTitle(UI.date)}</b><small>${UI.date===today()?'Tu resumen de hoy':'Tu resumen del día'}</small></div><button class="ar" id="dn">→</button></div>
-  <div class="card">
+  <div class="card daycard"><div class="dcols"><div class="dcol dl">
     <div class="who"><span class="av">${esc((u.nombre[0]||'?').toUpperCase())}</span>${esc(u.nombre)}</div>
     <div class="sum">
       <div class="ring">${ring(tt.k,tg.kcal)}<div class="ctr"><div><b>${fmt(tt.k)}</b><small>kcal consumidas</small></div></div></div>
@@ -1563,6 +1584,7 @@ function vDiario(){
         return `<div class="meal"><div class="h"><span>${MEALS.find(x=>x[0]===m)[1]} ${m} <span class="small muted" style="font-weight:500">${it.length?fmt(mt.k)+' kcal':''}</span></span><button class="plus" data-meal="${m}">+</button></div>
         ${it.map(f=>`<div class="item editable" data-ed="${f.i}"><div class="n">${esc(f.n)}<small>${f.uq?dec(f.uq)+' '+esc(Math.abs(f.uq-1)<1e-9?f.un:f.unp)+' ('+fmt1(f.q)+' g) · ':f.q?fmt1(f.q)+' g · ':''}P ${fmt1(f.p)} · C ${fmt1(f.c)} · G ${fmt1(f.g)}</small></div><span class="k">${fmt(f.k)} kcal</span><button class="x" data-edb="${f.i}" title="Editar" aria-label="Editar">✎</button><button class="x" data-del="${f.i}" title="Eliminar" aria-label="Eliminar">✕</button></div>`).join('')}</div>`}).join('')}
     </div>
+    </div><div class="dcol dr">
     <div class="grid2" style="margin-top:16px">
       <div class="tile"><div class="lbl">Tu objetivo</div><div class="big">${fmt(tg.kcal)}<small>kcal</small></div></div>
       <div class="tile"><div class="lbl">${disp>=0?'Te quedan':'Te has pasado'}</div><div class="big" style="${disp<0?'color:var(--warn)':''}">${fmt(Math.abs(disp))}<small>kcal</small></div></div>
@@ -1582,7 +1604,7 @@ function vDiario(){
       <p class="tiny muted" style="margin-top:6px">Balance provisional según las comidas registradas. El ejercicio se añade al gasto; no aumenta tu objetivo de comida.</p>
     </div>
     <details class="how"><summary>Cómo se calcula</summary>${calcTable(r,pf)}</details>
-  </div>
+  </div></div></div>
   ${cd}
   <p class="foot">Vuelve por encima de perfección. Cada registro cuenta.</p>`;
   bindRange();
