@@ -48,7 +48,9 @@ nav.tabs{transform:translateZ(0)}
 .celebra .em{font-size:46px;line-height:1}.celebra b{display:block;font-size:19px;font-weight:800;margin-top:8px;color:var(--ink,#3a2436)}.celebra small{display:block;margin-top:6px;color:var(--muted);font-size:13px;line-height:1.4}
 .celebra.out{opacity:0;transform:translate(-50%,-50%) scale(.9);transition:.3s}
 @keyframes celin{from{opacity:0;transform:translate(-50%,-50%) scale(.6)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
-.cerrar{margin-top:10px;border:1.5px dashed var(--line);background:transparent}
+.btn.cerrar{margin-top:8px;background:rgb(110,207,151);color:#14432b;border:0}
+.btn.cerrar:hover{background:rgb(96,196,139)}
+.btn.cerrar.done{background:#e3f6eb;color:#1f6a43}
 .pwwrap{position:relative;display:block}.pwwrap .in{padding-right:48px;width:100%}
 .pwwrap .eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:38px;height:38px;display:grid;place-items:center;color:var(--muted);border-radius:10px;background:none}
 .pwwrap .eye:active{background:var(--tile)}
@@ -1537,7 +1539,7 @@ function vDiario(){
     </div>
     ${pf.enfoque==6?`<div class="daytype"><button data-t="entreno" class="${isTrainDay(u,UI.date)?'on':''}">🏋️ Día de entreno</button><button data-t="descanso" class="${!isTrainDay(u,UI.date)?'on':''}">🛋️ Día de descanso</button></div>`:''}
     <button class="btn block" style="margin-top:20px" id="add">+ Añadir alimento</button>
-    ${log.foods.length&&UI.date<=today()&&UI.date>=addDays(today(),-1)?`<button class="btn ghost block cerrar" id="cerrar">${log.cerrado?'✓ Día cerrado · ver resultado':'🌙 Cerrar mi día'}</button>`:''}
+    ${log.foods.length&&UI.date<=today()&&UI.date>=addDays(today(),-1)?`<button class="btn block cerrar ${log.cerrado?'done':''}" id="cerrar">${log.cerrado?'✓ Día cerrado · ver resultado':'🏁 Cerrar mi día'}</button>`:''}
     <button class="btn soft block" style="margin-top:8px" id="tm">${UI.showMeals?'Ocultar mis comidas':'Ver y editar mis comidas'}${log.foods.length?' ('+log.foods.length+')':''}</button>
     <div id="meals" class="${UI.showMeals?'':'hidden'}" style="margin-top:14px">
       ${MEAL_NAMES.map(m=>{const it=log.foods.map((f,i)=>({...f,i})).filter(f=>f.meal===m||(m==='Snack'&&!MEAL_NAMES.includes(f.meal))),mt=totals(it);
