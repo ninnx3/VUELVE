@@ -541,7 +541,94 @@ function calcular(pf){
     case 5: plan={normal:macros(get*1.0,pc*1.8,pc*1.0)};break;
     case 6: plan={entreno:macros(get*1.0,pc*2.0,pc*0.7),descanso:macros(get*0.85,pc*2.0,pc*1.1)};break;
   }
-  return {imc,grasa:grasaEst,grasaFuente:tiene?'indicada':'estimada',estado:obes?'Obesidad':'Normal',pc,tmb:R(tmb),get:R(get),plan};
+  return aplicarAjuste(pf,{imc,grasa:grasaEst,grasaFuente:tiene?'indicada':'estimada',estado:obes?'Obesidad':'Normal',pc,tmb:R(tmb),get:R(get),plan});
+}
+
+/* ---------- Ajuste de calorías (ritmo elegido por la persona) ---------- */
+const KCAL_KG=7700;
+const FLOOR=s=>s==='Mujer'?1200:1500;
+function ajusteKcal(pf,get){
+  const a=pf.ajuste||{};
+  if(a.modo==='ritmo'&&a.ritmo>0)return get-a.ritmo*KCAL_KG/7;
+  if(a.modo==='fecha'){const dias=(parse(a.fechaObj||today())-parse(today()))/864e5,kg=(+pf.peso)-(+a.pesoObj);
+    if(!(dias>=7)||!(kg>0)||!a.pesoObj)return null;return get-kg*KCAL_KG/dias}
+  if(a.modo==='fijo'&&+a.kcal>=500)return +a.kcal;
+  return null;
+}
+function macrosAj(cal,m,pc){
+  // Se mantiene la proteína del enfoque; si no caben, se baja la grasa (mínimo 0,6 g/kg) y los carbohidratos absorben el resto.
+  let g=m.g;const minG=Math.round(pc*0.6);
+  if((cal-m.p*4-g*9)/4<0)g=Math.max(minG,Math.floor((cal-m.p*4)/9));
+  return macros(cal,m.p,g);
+}
+function aplicarAjuste(pf,r){
+  const a=pf.ajuste||{modo:'recomendado'},nE=(pf.dias||[]).length;
+  const avg=p=>p.normal?p.normal.kcal:(p.entreno.kcal*nE+p.descanso.kcal*(7-nE))/7;
+  const rec=avg(r.plan);
+  const info={modo:a.modo||'recomendado',recomendado:R(rec),avisos:[]};
+  let want=ajusteKcal(pf,r.get);
+  if(info.modo!=='recomendado'&&want==null)info.invalido=true;
+  if(want!=null){
+    const fl=FLOOR(pf.sexo);
+    if(want<fl){info.avisos.push(`Lo hemos subido a ${fmt(fl)} kcal: por debajo no es recomendable sin supervisión profesional.`);want=fl;info.limitado=true}
+    const d=want-rec;r.base=r.plan;
+    r.plan=r.plan.normal?{normal:macrosAj(want,r.plan.normal,r.pc)}:{entreno:macrosAj(r.plan.entreno.kcal+d,r.plan.entreno,r.pc),descanso:macrosAj(r.plan.descanso.kcal+d,r.plan.descanso,r.pc)};
+  }
+  const media=avg(r.plan);info.kcal=R(media);info.kgSem=(r.get-media)*7/KCAL_KG;
+  if(media<r.tmb)info.avisos.push('Estás por debajo de tu metabolismo basal: mejor usarlo solo por temporadas cortas.');
+  if(info.kgSem>(+pf.peso)*0.01)info.avisos.push('Ritmo muy agresivo (más del 1% de tu peso por semana): puedes perder músculo y energía.');
+  if(Object.values(r.plan).some(m=>m.carbNeg))info.avisos.push('Con tan pocas calorías no caben los carbohidratos: revisa el número.');
+  r.ajuste=info;return r;
+}
+function ajusteLabel(pf){
+  const a=pf.ajuste||{};
+  return a.modo==='ritmo'?`Ritmo de ${String(a.ritmo).replace('.',',')} kg por semana`:a.modo==='fecha'?`Llegar a ${fmt1(a.pesoObj)} kg el ${fmtD(a.fechaObj)}`:a.modo==='fijo'?`${fmt(a.kcal)} kcal fijas al día`:'Recomendado por tu enfoque';
+}
+function ajusteEditor(el,pf,onValid){
+  pf.ajuste=pf.ajuste||{modo:'recomendado'};const a=pf.ajuste;
+  const r0=calcular({...pf,ajuste:{modo:'recomendado'}}),rec=r0.ajuste.recomendado,get=r0.get;
+  const RIT=[[0.25,'Suave'],[0.5,'Moderado'],[0.75,'Intenso'],[1,'Máximo']];
+  const kRit=v=>R(Math.max(FLOOR(pf.sexo),get-v*KCAL_KG/7));
+  const opt=(m,ic,t,s)=>`<button class="opt ${a.modo===m?'on':''}" data-am2="${m}"><span class="ic">${ic}</span><div><b>${t}</b><small>${s}</small></div></button>`;
+  const prev=()=>{
+    const r=calcular(pf),j=r.ajuste,p=el.querySelector('#ajprev');
+    if(j.invalido){p.innerHTML=`<div class="tip" style="background:var(--beige);color:#7a5a2a">${a.modo==='fecha'?'Indica un peso objetivo menor que tu peso actual y una fecha a más de una semana.':'Escribe tus calorías (mínimo 500).'}</div>`;onValid&&onValid(false);return}
+    const k=j.kgSem,dif=R(r.get-j.kcal);
+    let linea=Math.abs(k)<0.03?'Mantenimiento: ni déficit ni superávit.':k>0?`Déficit medio de <b>${fmt(dif)} kcal/día</b> · ≈ <b>−${fmt1(k)} kg por semana</b>`:`Superávit medio de <b>${fmt(-dif)} kcal/día</b> · ≈ <b>+${fmt1(-k)} kg por semana</b>`;
+    if(k>0.03){const kgObj=a.modo==='fecha'?+a.pesoObj:null;
+      if(kgObj){const dias=(parse(a.fechaObj)-parse(today()))/864e5;linea+=`<br>En ${R(dias)} días llegarías a ≈ ${fmt1(+pf.peso-k*dias/7)} kg.`}}
+    p.innerHTML=(r.plan.normal?planCard(r.plan.normal):planCard(r.plan.entreno,'Días de entreno')+planCard(r.plan.descanso,'Días de descanso'))+
+      `<p class="small" style="margin-top:12px">${linea}</p>`+j.avisos.map(t=>`<div class="tip" style="background:var(--beige);color:#7a5a2a">⚠️ ${t}</div>`).join('')+
+      `<p class="tiny muted" style="margin-top:10px">Estimación: 7.700 kcal ≈ 1 kg de grasa. La proteína se mantiene para cuidar tu músculo; se ajustan sobre todo los carbohidratos.</p>`;
+    onValid&&onValid(true);
+  };
+  const draw=()=>{
+    el.innerHTML=`<div class="opts">
+      ${opt('recomendado','✨','Recomendado para tu enfoque',`${fmt(rec)} kcal al día`)}
+      ${opt('ritmo','🐢','Elegir mi ritmo','Cuántos kg por semana quieres perder')}
+      ${a.modo==='ritmo'?`<div class="optc two">${RIT.map(([v,t])=>`<button class="tag ${a.ritmo==v?'on':''}" data-rit="${v}" style="border-radius:12px;line-height:1.3">${t} · ${String(v).replace('.',',')} kg<br><small style="font-weight:500">${fmt(kRit(v))} kcal/día</small></button>`).join('')}</div>`:''}
+      ${opt('fecha','📅','Llegar a un peso en una fecha','Por ejemplo, para tus vacaciones')}
+      ${a.modo==='fecha'?`<div class="grid2"><label class="f" style="margin-top:0"><span>Peso objetivo (kg)</span><input class="in" type="number" step="0.1" inputmode="decimal" data-aj="pesoObj" value="${esc(a.pesoObj??'')}" placeholder="Ej. 62"></label><label class="f" style="margin-top:0"><span>Fecha</span><input class="in" type="date" data-aj="fechaObj" min="${addDays(today(),7)}" value="${esc(a.fechaObj||'')}"></label></div>`:''}
+      ${opt('fijo','🎯','Calorías exactas','Tú decides el número, por ejemplo 1.500')}
+      ${a.modo==='fijo'?`<label class="f" style="margin-top:0"><span>Calorías al día${pf.enfoque==6?' (media de la semana)':''}</span><input class="in" type="number" inputmode="numeric" data-aj="kcal" value="${esc(a.kcal??'')}" placeholder="Ej. 1500"></label>`:''}
+    </div><div id="ajprev"></div>`;
+    el.querySelectorAll('[data-am2]').forEach(b=>b.onclick=()=>{a.modo=b.dataset.am2;
+      if(a.modo==='ritmo'&&!a.ritmo)a.ritmo=0.5;if(a.modo==='fecha'&&!a.fechaObj&&pf.meta&&pf.meta>=addDays(today(),7))a.fechaObj=pf.meta;draw()});
+    el.querySelectorAll('[data-rit]').forEach(b=>b.onclick=()=>{a.ritmo=+b.dataset.rit;draw()});
+    el.querySelectorAll('[data-aj]').forEach(i=>i.oninput=()=>{a[i.dataset.aj]=i.type==='date'?i.value:(i.value===''?'':Number(i.value));prev()});
+    prev();
+  };
+  draw();
+}
+function openAjuste(){
+  const u=me(),pf=JSON.parse(JSON.stringify(u.profile));
+  const m=modal(`<div class="top"><b>Ajustar calorías</b><button class="close">✕</button></div>
+    <h3 class="h2" style="font-size:24px;margin-top:12px">¿A qué <span>ritmo vamos?</span></h3>
+    <p class="small muted" style="margin-top:6px">Tu enfoque marca el reparto de macros; aquí decides cuántas calorías comer.</p>
+    <div id="ajm" style="margin-top:6px"></div><button class="btn block" style="margin-top:16px" id="ajs">Guardar</button>`);
+  const btn=m.querySelector('#ajs');
+  ajusteEditor(m.querySelector('#ajm'),pf,v=>btn.disabled=!v);
+  btn.onclick=()=>{u.profile.ajuste=pf.ajuste;save();m.remove();toast('Calorías actualizadas ✓');renderApp()};
 }
 
 /* ---------- Base de alimentos (por 100 g) ---------- */
@@ -671,7 +758,7 @@ function startOnboarding(editing=false){
   if(OB.d.grasa==null)OB.d.grasa='';
   renderOB();
 }
-const STEPS=['bienvenida','sexo','cuerpo','grasa','actividad','enfoque','dias','meta'];
+const STEPS=['bienvenida','sexo','cuerpo','grasa','actividad','enfoque','dias','meta','ritmo'];
 const okCuerpo=d=>d.edad>=14&&d.edad<=100&&d.altura>=120&&d.altura<=230&&d.peso>=30&&d.peso<=300;
 const okGrasa=d=>d.grasa===''||(d.grasa>=3&&d.grasa<=70);
 function renderOB(){
@@ -684,12 +771,12 @@ function renderOB(){
     <div class="card" style="margin-top:10px"><div class="opt" style="border:0;padding:0;background:none"><span class="ic">🌿</span><div><b>Sin juicios</b><small>Son solo tu punto de partida. Vuelve por encima de perfección.</small></div></div></div>`;
   }
   if(s==='sexo'){
-    body=`<p class="eyebrow">Paso 1 de 7</p><h2 class="h2" style="margin-top:10px">¿Cuál es tu <span>sexo biológico?</span></h2><p class="lead">Lo usamos en la fórmula del metabolismo basal (Mifflin-St Jeor).</p>
+    body=`<p class="eyebrow">Paso 1 de 8</p><h2 class="h2" style="margin-top:10px">¿Cuál es tu <span>sexo biológico?</span></h2><p class="lead">Lo usamos en la fórmula del metabolismo basal (Mifflin-St Jeor).</p>
     <div class="opts">${['Mujer','Hombre'].map(x=>`<button class="opt ${d.sexo===x?'on':''}" data-k="sexo" data-v="${x}"><span class="ic">${x==='Mujer'?'♀':'♂'}</span><div><b>${x}</b></div></button>`).join('')}</div>`;
     ok=!!d.sexo;
   }
   if(s==='cuerpo'){
-    body=`<p class="eyebrow">Paso 2 de 7</p><h2 class="h2" style="margin-top:10px">Cuéntame sobre <span>tu cuerpo.</span></h2><p class="lead">Datos de hoy, sin juzgar.</p>
+    body=`<p class="eyebrow">Paso 2 de 8</p><h2 class="h2" style="margin-top:10px">Cuéntame sobre <span>tu cuerpo.</span></h2><p class="lead">Datos de hoy, sin juzgar.</p>
     <label class="f"><span>Edad (años)</span><input class="in" type="number" inputmode="numeric" min="14" max="100" data-k="edad" value="${esc(d.edad)}" placeholder="Ej. 34"></label>
     <label class="f"><span>Altura (cm)</span><input class="in" type="number" inputmode="numeric" min="120" max="230" data-k="altura" value="${esc(d.altura)}" placeholder="Ej. 165"></label>
     <label class="f"><span>Peso actual (kg)</span><input class="in" type="number" inputmode="decimal" step="0.1" min="30" max="300" data-k="peso" value="${esc(d.peso)}" placeholder="Ej. 68,5"></label>`;
@@ -697,7 +784,7 @@ function renderOB(){
   }
   if(s==='grasa'){
     const imc=d.peso/Math.pow(d.altura/100,2),est=estimarGrasa(imc,+d.edad,d.sexo);
-    body=`<p class="eyebrow">Paso 3 de 7 · Opcional</p><h2 class="h2" style="margin-top:10px">¿Conoces tu <span>% de grasa?</span></h2>
+    body=`<p class="eyebrow">Paso 3 de 8 · Opcional</p><h2 class="h2" style="margin-top:10px">¿Conoces tu <span>% de grasa?</span></h2>
     <p class="lead">Si te has medido con báscula de bioimpedancia, DEXA o pliegues, ponlo aquí. Si no, lo estimamos con tu IMC.</p>
     <label class="f"><span>% de grasa corporal</span><input class="in" type="number" inputmode="decimal" step="0.1" min="3" max="70" data-k="grasa" value="${esc(d.grasa)}" placeholder="Déjalo vacío si no lo sabes"></label>
     <div class="grid2" style="margin-top:14px"><div class="tile"><div class="lbl">Tu IMC</div><div class="big">${fmt1(imc)}</div></div><div class="tile"><div class="lbl">Grasa estimada</div><div class="big">${fmt1(est)}<small> %</small></div></div></div>
@@ -705,23 +792,27 @@ function renderOB(){
     ok=okGrasa(d);
   }
   if(s==='actividad'){
-    body=`<p class="eyebrow">Paso 4 de 7</p><h2 class="h2" style="margin-top:10px">¿Cómo de activa es <span>tu semana?</span></h2><p class="lead">Piensa en una semana normal, con trabajo y ejercicio.</p>
+    body=`<p class="eyebrow">Paso 4 de 8</p><h2 class="h2" style="margin-top:10px">¿Cómo de activa es <span>tu semana?</span></h2><p class="lead">Piensa en una semana normal, con trabajo y ejercicio.</p>
     <div class="opts">${ACT.map(a=>`<button class="opt ${d.actividad==a.v?'on':''}" data-k="actividad" data-v="${a.v}"><span class="ic">${a.ic}</span><div><b>${a.t}</b><small>${a.s}</small></div></button>`).join('')}</div>`;
     ok=!!d.actividad;
   }
   if(s==='enfoque'){
-    body=`<p class="eyebrow">Paso 5 de 7</p><h2 class="h2" style="margin-top:10px">¿Qué quieres <span>conseguir?</span></h2><p class="lead">Elige el enfoque que mejor encaje contigo ahora mismo.</p>
+    body=`<p class="eyebrow">Paso 5 de 8</p><h2 class="h2" style="margin-top:10px">¿Qué quieres <span>conseguir?</span></h2><p class="lead">Elige el enfoque que mejor encaje contigo ahora mismo.</p>
     <div class="opts">${Object.entries(ENFOQUES).map(([k,e])=>`<button class="opt ${d.enfoque==k?'on':''}" data-k="enfoque" data-v="${k}"><span class="ic">${e.ic}</span><div><b>${e.t}</b><small>${e.s}</small></div></button>`).join('')}</div>`;
     ok=!!d.enfoque;
   }
   if(s==='dias'){
-    body=`<p class="eyebrow">Paso 6 de 7</p><h2 class="h2" style="margin-top:10px">¿Qué días <span>entrenas?</span></h2>
+    body=`<p class="eyebrow">Paso 6 de 8</p><h2 class="h2" style="margin-top:10px">¿Qué días <span>entrenas?</span></h2>
     <p class="lead">${d.enfoque==6?'Tu enfoque cicla nutrientes: los días de entreno tendrás más carbohidratos y los de descanso más grasa y menos calorías.':'Lo usamos para tu objetivo semanal de movimiento.'}</p>
     <div class="chips">${[1,2,3,4,5,6,0].map(i=>`<button class="chip ${d.dias.includes(i)?'on':''}" data-day="${i}">${DOW[i]}</button>`).join('')}</div>
     <p class="small muted" style="margin-top:12px">${d.dias.length} día${d.dias.length===1?'':'s'} por semana</p>`;
   }
+  if(s==='ritmo'){
+    body=`<p class="eyebrow">Paso 8 de 8</p><h2 class="h2" style="margin-top:10px">¿A qué ritmo <span>quieres ir?</span></h2>
+    <p class="lead">Tu enfoque decide cómo se reparten los macros. Aquí eliges cuántas calorías comer: lo recomendado, un ritmo concreto, una fecha o un número exacto.</p><div id="ajw" style="margin-top:6px"></div>`;
+  }
   if(s==='meta'){
-    body=`<p class="eyebrow">Paso 7 de 7 · Opcional</p><h2 class="h2" style="margin-top:10px">¿Tienes una <span>fecha en mente?</span></h2><p class="lead">Un viaje, un evento, un cumpleaños… Te mostraremos una cuenta atrás.</p>
+    body=`<p class="eyebrow">Paso 7 de 8 · Opcional</p><h2 class="h2" style="margin-top:10px">¿Tienes una <span>fecha en mente?</span></h2><p class="lead">Un viaje, un evento, un cumpleaños… Te mostraremos una cuenta atrás.</p>
     <label class="f"><span>Fecha objetivo</span><input class="in" type="date" data-k="meta" value="${esc(d.meta)}" min="${today()}"></label>
     <label class="f"><span>Nombre de la meta</span><input class="in" data-k="metaNombre" value="${esc(d.metaNombre||'')}" placeholder="Ej. Vacaciones de verano"></label>`;
   }
@@ -736,6 +827,7 @@ function renderOB(){
     <button class="btn block" id="obn" ${ok?'':'disabled'}>${OB.step===tot-1?'Calcular mi plan ✓':OB.step===0?'Empezar →':'Siguiente →'}</button>
   </div></div>`;
   $$('[data-k][data-v]').forEach(b=>b.onclick=()=>{const k=b.dataset.k;d[k]=k==='sexo'?b.dataset.v:Number(b.dataset.v);renderOB()});
+  if(s==='ritmo')ajusteEditor($('#ajw'),d,v=>{$('#obn').disabled=!v});
   $$('input[data-k]').forEach(i=>i.oninput=()=>{const k=i.dataset.k;d[k]=(i.type==='number')?(i.value===''?'':Number(i.value)):i.value;
     const s=STEPS[OB.step];if(s==='cuerpo')$('#obn').disabled=!okCuerpo(d);if(s==='grasa')$('#obn').disabled=!okGrasa(d)});
   $$('[data-day]').forEach(b=>b.onclick=()=>{const i=+b.dataset.day;d.dias=d.dias.includes(i)?d.dias.filter(x=>x!==i):[...d.dias,i];renderOB()});
@@ -860,7 +952,7 @@ function toggleDD(){
    RETOS CON AMIGOS
    ========================================================= */
 // Enlace de la web que se incluye en las invitaciones. Cambiadlo por vuestro dominio.
-const APP_URL='https://tu-dominio.com';
+const APP_URL='https://ninnx3.github.io/VUELVE/';
 const RETO_TIPOS={
   kcal:{t:'Días cumpliendo calorías',s:'Suma un punto cada día dentro de ±10% de tu objetivo',ic:'🍽️'},
   mov:{t:'Días de movimiento',s:'Suma un punto cada día que registres actividad',ic:'🏃‍♀️'},
@@ -1002,7 +1094,7 @@ function vDiario(){
   const right=`<button class="btn ghost" id="hoy">Ir a hoy</button>`;
   let head=heroHTML('Mi diario','Hoy','cuenta.',right);
   const tg0=targetFor(u,UI.date);
-  head+=`<div class="strip"><span>${esc(u.nombre)} · ${fmt(tg0.kcal)} kcal / día</span><small>${pf.meta?'Meta · '+parse(pf.meta).getDate()+' '+MON[parse(pf.meta).getMonth()]:ENFOQUES[pf.enfoque].t}</small></div>
+  head+=`<div class="strip" id="strip" style="cursor:pointer" title="Ajustar calorías"><span>${esc(u.nombre)} · ${fmt(tg0.kcal)} kcal / día <b style="color:var(--plum)">· Ajustar</b></span><small>${pf.meta?'Meta · '+parse(pf.meta).getDate()+' '+MON[parse(pf.meta).getMonth()]:ENFOQUES[pf.enfoque].t}</small></div>
   <div class="seg">${[['dia','Día'],['semana','Semana'],['mes','Mes']].map(([k,t])=>`<button data-r="${k}" class="${UI.range===k?'on':''}">${t}</button>`).join('')}</div>`;
   if(UI.range==='semana')return vSemana(head);
   if(UI.range==='mes')return vMes(head);
@@ -1068,6 +1160,7 @@ function vDiario(){
   if($('#gor'))$('#gor').onclick=()=>{UI.view='retos';renderApp();scrollTo(0,0)};
 }
 function bindRange(){
+  if($('#strip'))$('#strip').onclick=openAjuste;
   $$('[data-r]').forEach(b=>b.onclick=()=>{UI.range=b.dataset.r;vDiario()});
   $('#hoy').onclick=()=>{UI.date=today();vDiario()};
 }
@@ -1387,6 +1480,7 @@ function checkin(){
 function vPlan(){
   const u=me(),pf=u.profile,r=calcular(pf),e=ENFOQUES[pf.enfoque];
   $('#view').innerHTML=heroHTML('Mi plan','Tus números,','tu enfoque.')+`
+  <div class="card" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap"><span style="font-size:28px">🎚️</span><div style="flex:1;min-width:180px"><p class="eyebrow">Tus calorías</p><div class="h3" style="margin-top:4px">${esc(ajusteLabel(pf))}</div><p class="small muted">${r.ajuste.kgSem>0.03?'≈ −'+fmt1(r.ajuste.kgSem)+' kg por semana':r.ajuste.kgSem<-0.03?'≈ +'+fmt1(-r.ajuste.kgSem)+' kg por semana':'Mantenimiento'} · media ${fmt(r.ajuste.kcal)} kcal/día</p></div><button class="btn" id="ajb">Ajustar calorías</button></div>
   <div class="card"><div class="opt" style="border:0;padding:0;background:none"><span class="ic">${e.ic}</span><div><b>${e.t}</b><small>${e.s}</small></div></div>
   ${r.plan.normal?planCard(r.plan.normal):planCard(r.plan.entreno,'Días de entreno · carga de glucógeno')+planCard(r.plan.descanso,'Días de descanso · oxidación de grasas')}</div>
   <div class="card"><p class="eyebrow">Cómo lo hemos calculado</p>${calcTable(r,pf)}</div>
@@ -1396,6 +1490,7 @@ function vPlan(){
   <button class="btn soft block" style="margin-top:14px" id="redo">Repetir el walkthrough completo</button>`;
   $$('[data-en]').forEach(b=>b.onclick=()=>{pf.enfoque=+b.dataset.en;save();toast('Enfoque actualizado ✓');vPlan()});
   $('#redo').onclick=()=>startOnboarding(true);
+  $('#ajb').onclick=openAjuste;
 }
 
 /* ---------- Mi espacio ---------- */
