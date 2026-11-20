@@ -111,6 +111,7 @@ input[type=date].in::-webkit-calendar-picker-indicator{opacity:.6}
 .tile .big small{font-size:11px;font-weight:500;color:var(--muted);letter-spacing:0}
 
 /* Header */
+a.logo{color:inherit;text-decoration:none;cursor:pointer}
 header.app{position:sticky;top:0;padding-top:env(safe-area-inset-top);background:#fff;border-bottom:1px solid var(--line);z-index:20}
 header.app .in2{max-width:1000px;margin:0 auto;padding:0 20px;height:72px;display:flex;align-items:center;justify-content:space-between}
 .logo{display:flex;align-items:center;gap:10px}
@@ -1275,7 +1276,7 @@ function renderApp(){
   const u=me();
   $('#root').innerHTML=`
   <header class="app"><div class="in2">
-    <div class="logo">${LOGO}<div><b>VUELVE</b><small>${esc(u.nombre)} · un día a la vez</small></div></div>
+    <a class="logo" id="home" href="#" title="Ir al Diario">${LOGO}<div><b>VUELVE</b><small>${esc(u.nombre)} · un día a la vez</small></div></a>
     <div class="row" style="gap:0"><span id="sync" class="${CLOUD.state}">${SYNC_TXT[CLOUD.state]}</span>
       <div class="dd-wrap"><button class="avatar" id="av" title="Mi cuenta">${esc((u.nombre[0]||'?').toUpperCase())}<i>⌄</i>${pendingInvites(u).length?'<span class="dot"></span>':''}</button></div></div>
   </div></header>
@@ -1285,6 +1286,7 @@ function renderApp(){
   </div></nav>`;
   $$('nav.tabs button').forEach(b=>b.onclick=()=>{UI.view=b.dataset.v;if(b.dataset.v==='menu'&&MP.screen!=='gen')MP.screen='home';renderApp();scrollTo(0,0)});
   $('#av').onclick=e=>{e.stopPropagation();toggleDD()};
+  $('#home').onclick=e=>{e.preventDefault();$$('.modal').forEach(m=>m.remove());UI.view='diario';UI.date=today();UI.range='dia';MP.screen=MP.screen==='gen'?'gen':'home';renderApp();scrollTo({top:0,behavior:'smooth'})};
   ({diario:vDiario,movimiento:vMov,progreso:vProgreso,plan:vPlan,espacio:vEspacio,menu:vMenu,retos:vRetos,biblio:vBiblio})[UI.view]();
   if(SERVER&&!LIB.adminChecked)libCheckAdmin().catch(()=>{});
 }
