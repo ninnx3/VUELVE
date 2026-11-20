@@ -58,6 +58,10 @@ label.f>span{display:block;font-size:12px;font-weight:700;margin-bottom:6px}
 .in{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;outline:none;font-size:14px;font-weight:500;transition:border .15s}
 .in:focus{border-color:var(--accent)}
 .in::placeholder{color:#b4a7b1}
+input[type=date].in{-webkit-appearance:none;appearance:none;display:block;min-width:0;max-width:100%;min-height:46px;text-align:left}
+input[type=date].in::-webkit-date-and-time-value{text-align:left;margin:0}
+input[type=date].in::-webkit-calendar-picker-indicator{opacity:.6}
+.grid2>*,.grid3>*{min-width:0}
 .err{color:var(--warn);font-size:12px;margin-top:10px;min-height:16px}
 
 /* Cards */
@@ -364,7 +368,7 @@ textarea.in{min-height:90px;resize:vertical;font-size:11px;font-family:ui-monosp
   .hero{padding-top:24px}
   .card{padding:18px;border-radius:18px}
   .modal{align-items:flex-end;padding:0}
-  .sheet{max-width:none;border-radius:22px 22px 0 0;max-height:94vh;padding:18px 16px calc(20px + env(safe-area-inset-bottom));animation:up .25s}
+  .sheet{max-width:none;border-radius:22px 22px 0 0;max-height:92vh;max-height:calc(100dvh - 24px);padding:18px 16px calc(20px + env(safe-area-inset-bottom));animation:up .25s}
   .sheet.welcome{border-radius:22px 22px 0 0}
   .dd{position:fixed;left:12px;right:12px;top:70px;width:auto}
   .movwk{flex-direction:column;align-items:flex-start!important;gap:12px}
@@ -961,6 +965,7 @@ const RETO_TIPOS={
 function retosOf(u){return Object.values(load().retos||{}).filter(r=>r.miembros.includes(u.email))}
 function pendingInvites(u){return Object.values(load().retos||{}).filter(r=>r.invitados.includes(u.email)&&!r.miembros.includes(u.email)&&!(r.rechazados||[]).includes(u.email))}
 function retoFin(r){return addDays(r.inicio,r.dias-1)}
+const diasEntre=(a,b)=>Math.round((parse(b)-parse(a))/864e5)+1;
 function retoScore(r,email){
   const u=load().users[email];if(!u||!u.profile)return {pts:0,kcal:0,mov:0};
   let kcal=0,mov=0;const end=retoFin(r)<today()?retoFin(r):today();
@@ -977,7 +982,8 @@ function inviteText(u,r){
 function fmtD(s){const d=parse(s);return d.getDate()+' de '+MONL[d.getMonth()]}
 function openInvite(){
   const u=me(),d=load();
-  let emails=[],tipo='ambos',dias=21,inicio=addDays(today(),1),nombre=`Reto ${dias} días`,step='form',reto=null;
+  let emails=[],tipo='ambos',inicio=addDays(today(),1),fin=addDays(today(),21),nombre='Reto 21 días',step='form',reto=null;
+  const ndias=()=>diasEntre(inicio,fin);
   const m=modal(`<div class="top"><b>Añadir amigo a Vuelve</b><button class="close">✕</button></div><div id="ib"></div>`);
   const draw=()=>{
     const ib=m.querySelector('#ib');
@@ -990,9 +996,12 @@ function openInvite(){
       <label class="f"><span>Nombre del reto</span><input class="in" id="rn" value="${esc(nombre)}"></label>
       <label class="f"><span>Tipo de reto</span></label>
       <div class="optc">${Object.entries(RETO_TIPOS).map(([k,x])=>`<button class="opt ${tipo===k?'on':''}" data-tipo="${k}" style="padding:12px"><span class="ic">${x.ic}</span><div><b>${x.t}</b><small>${x.s}</small></div></button>`).join('')}</div>
-      <label class="f"><span>Duración</span></label>
-      <div class="optc three">${[14,21,30].map(n=>`<button class="tag ${dias===n?'on':''}" data-dias="${n}">${n} días</button>`).join('')}</div>
-      <label class="f"><span>Empieza el</span><input class="in" type="date" id="ri" value="${inicio}" min="${today()}"></label>
+      <label class="f"><span>Fechas del reto</span></label>
+      <div class="grid2"><label class="f" style="margin-top:0"><span class="small muted" style="font-weight:600">Empieza el</span><input class="in" type="date" id="ri" value="${inicio}"></label>
+        <label class="f" style="margin-top:0"><span class="small muted" style="font-weight:600">Termina el</span><input class="in" type="date" id="rf" value="${fin}" min="${inicio}"></label></div>
+      <p class="small" style="margin-top:8px;font-weight:600" id="rdur">${ndias()>0?ndias()+' días · del '+fmtD(inicio)+' al '+fmtD(fin):'La fecha de fin debe ser posterior al inicio'}</p>
+      <p class="tiny muted" style="margin-top:10px">Atajos de duración desde la fecha de inicio:</p>
+      <div class="optc three" style="margin-top:6px">${[14,21,30].map(n=>`<button class="tag ${ndias()===n?'on':''}" data-dias="${n}">${n} días</button>`).join('')}</div>
       <div class="err" id="ierr"></div>
       <button class="btn block" style="margin-top:6px" id="ic">Crear reto e invitar →</button>`;
       const add=()=>{const v=ib.querySelector('#em').value.trim().toLowerCase();
@@ -1002,12 +1011,18 @@ function openInvite(){
       ib.querySelector('#ema').onclick=add;
       ib.querySelector('#em').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();add()}};
       ib.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{emails.splice(+b.dataset.rm,1);draw()});
-      ib.querySelectorAll('[data-tipo]').forEach(b=>b.onclick=()=>{tipo=b.dataset.tipo;nombre=ib.querySelector('#rn').value;inicio=ib.querySelector('#ri').value;draw()});
-      ib.querySelectorAll('[data-dias]').forEach(b=>b.onclick=()=>{const old=nombre;nombre=ib.querySelector('#rn').value;if(nombre===`Reto ${dias} días`)nombre=`Reto ${+b.dataset.dias} días`;dias=+b.dataset.dias;inicio=ib.querySelector('#ri').value;draw()});
+      const keep=()=>{nombre=ib.querySelector('#rn').value;inicio=ib.querySelector('#ri').value||inicio;fin=ib.querySelector('#rf').value||fin};
+      const autoName=old=>{if(/^Reto \d+ días$/.test(nombre)&&ndias()>0)nombre=`Reto ${ndias()} días`};
+      ib.querySelectorAll('[data-tipo]').forEach(b=>b.onclick=()=>{keep();tipo=b.dataset.tipo;draw()});
+      ['#ri','#rf'].forEach(s=>ib.querySelector(s).onchange=()=>{keep();if(fin<inicio)fin=inicio;autoName();draw()});
+      ib.querySelectorAll('[data-dias]').forEach(b=>b.onclick=()=>{keep();fin=addDays(inicio,+b.dataset.dias-1);autoName();draw()});
       ib.querySelector('#ic').onclick=()=>{
         const pend=ib.querySelector('#em').value.trim().toLowerCase();if(pend&&/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(pend)&&!emails.includes(pend)&&pend!==u.email)emails.push(pend);
         if(!emails.length){ib.querySelector('#ierr').textContent='Añade al menos un email.';return}
-        nombre=ib.querySelector('#rn').value.trim()||nombre;inicio=ib.querySelector('#ri').value||inicio;
+        keep();nombre=nombre.trim()||'Reto';
+        if(!(ndias()>0)){ib.querySelector('#ierr').textContent='La fecha de fin debe ser igual o posterior a la de inicio.';return}
+        if(ndias()>366){ib.querySelector('#ierr').textContent='El reto puede durar como máximo un año.';return}
+        const dias=ndias();
         d.retos=d.retos||{};const id='r'+Date.now();
         reto={id,nombre,tipo,dias,inicio,owner:u.email,miembros:[u.email],invitados:emails.slice(),rechazados:[],creado:today()};
         d.retos[id]=reto;save();step='send';draw();
@@ -1047,7 +1062,7 @@ function vRetos(){
     const st=today()<r.inicio?`Empieza el ${fmtD(r.inicio)}`:today()>retoFin(r)?'Finalizado':`Día ${Math.floor((parse(today())-parse(r.inicio))/864e5)+1} de ${r.dias}`;
     return `<div class="card"><div class="row between"><div><p class="eyebrow">${st}</p><div class="h3" style="margin-top:4px;font-size:18px">${esc(r.nombre)}</div>
       <p class="small muted">${RETO_TIPOS[r.tipo].ic} ${RETO_TIPOS[r.tipo].t} · ${fmtD(r.inicio)} – ${fmtD(retoFin(r))}</p></div>
-      ${r.owner===u.email?`<button class="btn ghost" data-inv="${r.id}">+ Invitar</button>`:''}</div>
+      ${r.owner===u.email?`<div class="row" style="gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="btn ghost" data-edr="${r.id}">✎ Fechas</button><button class="btn ghost" data-inv="${r.id}">+ Invitar</button></div>`:''}</div>
       <div style="margin-top:10px">${sc.map((s,i)=>`<div class="lb"><span class="pos">${i===0&&s.pts>0?'🥇':i===1&&s.pts>0?'🥈':i===2&&s.pts>0?'🥉':i+1}</span><span class="av">${ini(s.e)}</span>
         <div style="flex:1;min-width:0"><b style="font-size:13px">${esc(d.users[s.e]?.nombre||s.e)}${s.e===u.email?' (tú)':''}</b><div class="tiny muted">${r.tipo!=='mov'?s.kcal+' días en objetivo':''}${r.tipo==='ambos'?' · ':''}${r.tipo!=='kcal'?s.mov+' días de movimiento':''}</div>
         <div class="bar"><i style="width:${Math.min(s.pts/max*100,100)}%"></i></div></div><span class="pts">${s.pts}</span></div>`).join('')}
@@ -1059,6 +1074,19 @@ function vRetos(){
   $$('[data-acc]').forEach(b=>b.onclick=()=>{const r=d.retos[b.dataset.acc];r.miembros.push(u.email);save();toast('¡Te has unido al reto! 💜');renderApp()});
   $$('[data-rej]').forEach(b=>b.onclick=()=>{const r=d.retos[b.dataset.rej];(r.rechazados=r.rechazados||[]).push(u.email);save();renderApp()});
   $$('[data-inv]').forEach(b=>b.onclick=()=>reinvite(d.retos[b.dataset.inv]));
+  $$('[data-edr]').forEach(b=>b.onclick=()=>editRetoFechas(d.retos[b.dataset.edr]));
+}
+function editRetoFechas(r){
+  const m=modal(`<div class="top"><b>Fechas de «${esc(r.nombre)}»</b><button class="close">✕</button></div>
+    <div class="grid2" style="margin-top:12px"><label class="f" style="margin-top:0"><span>Empieza el</span><input class="in" type="date" id="ei" value="${r.inicio}"></label>
+    <label class="f" style="margin-top:0"><span>Termina el</span><input class="in" type="date" id="ef" value="${retoFin(r)}"></label></div>
+    <p class="small" style="margin-top:8px;font-weight:600" id="ed"></p><div class="err" id="ee"></div>
+    <button class="btn block" id="es">Guardar fechas</button>`);
+  const upd=()=>{const n=diasEntre(m.querySelector('#ei').value,m.querySelector('#ef').value);m.querySelector('#ed').textContent=n>0?n+' días':'';return n};
+  m.querySelectorAll('input').forEach(i=>i.onchange=upd);upd();
+  m.querySelector('#es').onclick=()=>{const n=upd();if(!(n>0)){m.querySelector('#ee').textContent='La fecha de fin debe ser igual o posterior a la de inicio.';return}
+    if(n>366){m.querySelector('#ee').textContent='Máximo un año.';return}
+    r.inicio=m.querySelector('#ei').value;r.dias=n;save();m.remove();toast('Fechas actualizadas ✓');renderApp()};
 }
 function reinvite(r){
   const u=me(),d=load();
