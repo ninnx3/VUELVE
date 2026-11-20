@@ -235,14 +235,23 @@ details.how[open] summary::before{content:'▾ '}
 .pv{background:var(--tile);border-radius:12px;padding:14px;margin-top:12px}
 
 /* Countdown */
-.cd{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
-.cd div{border-radius:10px;padding:8px 6px 6px}
-.cd b{font-size:26px;font-weight:800;display:block;line-height:1.05;letter-spacing:-1px}
-.cd small{font-size:8px;font-weight:800;letter-spacing:.6px}
-.cd div:nth-child(1){background:var(--pink);color:#8a4f6e}
-.cd div:nth-child(2){background:var(--lilac);color:#7b5ea7}
-.cd div:nth-child(3){background:var(--beige);color:#a88445}
-.cd div:nth-child(4){background:var(--mint);color:var(--green)}
+.cd{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px auto 0;max-width:560px}
+.cd div{border-radius:18px;padding:18px 6px 14px;text-align:center}
+.cd b{font-size:clamp(34px,9vw,58px);font-weight:800;display:block;line-height:1;letter-spacing:-1.5px}
+.cd small{display:block;margin-top:8px;font-size:10px;font-weight:700;letter-spacing:1.6px;color:#7d6c7a}
+.cd.sm{gap:8px;margin-top:10px}.cd.sm div{border-radius:12px;padding:12px 4px 10px}.cd.sm b{font-size:30px;letter-spacing:-1px}.cd.sm small{font-size:8.5px;margin-top:4px;letter-spacing:1px}
+.cd div:nth-child(1){background:#f4dce3;color:#8a4f6e}
+.cd div:nth-child(2){background:#e9dcf2;color:#7b5ea7}
+.cd div:nth-child(3){background:#f4e6d4;color:#a88445}
+.cd div:nth-child(4){background:#dcece6;color:#5f9480}
+.cdcard{text-align:center;margin-top:28px;padding:30px 8px 8px;border-top:1px solid var(--line)}
+.cdcard .h2{margin-top:10px;font-size:clamp(24px,5vw,32px)}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin-top:12px}
+.fth{position:relative;aspect-ratio:3/4;border-radius:12px;overflow:hidden;background:var(--tile)}.fth img{width:100%;height:100%;object-fit:cover;display:block}
+.fth .fb{position:absolute;left:6px;bottom:6px;font-size:13px;background:rgba(255,255,255,.85);border-radius:8px;padding:1px 5px}
+.fth .fx{position:absolute;right:6px;top:6px;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.9);font-size:12px;display:grid;place-items:center}
+.welcome .l.foto{background:#f1e6ee}.welcome .l.foto img{width:100%;height:100%;object-fit:cover;display:block}
+.welcome .wclose{position:absolute;top:16px;right:16px;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:#fff;display:grid;place-items:center}
 
 /* Lists, tables */
 table.calc{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}
@@ -309,10 +318,10 @@ table.calc td:last-child{text-align:right;font-weight:700}
 .ob-nav .in2{max-width:600px;margin:0 auto;display:flex;gap:10px}
 .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;z-index:99;animation:pop .2s}
 textarea.in{min-height:90px;resize:vertical;font-size:11px;font-family:ui-monospace,monospace}
-.welcome{display:grid;grid-template-columns:1fr 1.1fr;max-width:680px;padding:0;overflow:hidden}
+.welcome{display:grid;grid-template-columns:1fr 1.1fr;max-width:840px;padding:0;overflow:hidden}
 .welcome .l{background:linear-gradient(160deg,var(--pink),var(--lilac));min-height:320px;overflow:hidden}.welcome .l svg{display:block}
 .welcome .r{padding:28px 24px;position:relative}
-@media(max-width:600px){.welcome{grid-template-columns:1fr}.welcome .l{min-height:200px;height:200px}}
+@media(max-width:600px){.welcome{grid-template-columns:1fr}.welcome .l{min-height:200px;height:200px}.welcome .l.foto{height:46vh;min-height:260px}.welcome .l.foto img{object-position:center 22%}}
 
 /* Avatar dropdown */
 .dd-wrap{position:relative}
@@ -440,6 +449,9 @@ textarea.in{min-height:90px;resize:vertical;font-size:11px;font-family:ui-monosp
   #view.v-movimiento{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:24px;align-items:start}
   #view.v-movimiento>*{grid-column:1/-1}
   .modal .sheet{max-width:600px}
+  .modal .sheet.welcome{max-width:900px;width:900px}
+  .welcome .l{min-height:460px}
+  .welcome .r{padding:40px 36px 34px}
 }
 @media(min-width:1300px){.dcols{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,1fr);gap:32px;align-items:start}.dcol.dr>.grid2:first-child{margin-top:0!important}}
 @media(min-width:1500px){main.wrap{max-width:1280px;margin-left:max(272px,calc((100vw - 1280px)/2 + 116px))}}
@@ -1561,7 +1573,7 @@ function vDiario(){
   const act=retosOf(u).filter(r=>r.inicio<=today()&&retoFin(r)>=today());
   if(act.length){const r=act[0],sc=r.miembros.map(e=>({e,...retoScore(r,e)})).sort((a,b)=>b.pts-a.pts),pos=sc.findIndex(s=>s.e===u.email)+1;
     cd+=`<button class="card" id="gor" style="display:flex;width:100%;align-items:center;gap:14px;text-align:left"><span style="font-size:30px">🏆</span><div style="flex:1"><p class="eyebrow">Reto en curso</p><div class="h3">${esc(r.nombre)}</div><p class="small muted">Vas ${pos}ª de ${sc.length} · ${sc[pos-1].pts} puntos</p></div><span class="plus" style="display:grid;place-items:center">›</span></button>`}
-  if(pf.meta&&pf.meta>=today())cd+=`<div class="card"><p class="eyebrow">Hasta el ${parse(pf.meta).getDate()} de ${MONL[parse(pf.meta).getMonth()]}</p><div class="h3" style="margin-top:4px">${esc(pf.metaNombre||'Mi meta')}</div><div class="cd" id="cd"></div></div>`;
+  if(pf.meta&&pf.meta>=today()){const md=parse(pf.meta);cd+=`<div class="cdcard"><p class="eyebrow">Tu cuenta atrás</p><h2 class="h2">${esc(pf.metaNombre||'Tu meta')} · <span>el ${md.getDate()}.</span></h2><p class="small muted" style="margin-top:6px">Pequeños pasos cada día. Lista para el ${md.getDate()}.</p><div class="cd" id="cd"></div><p class="tiny muted" style="margin-top:12px;letter-spacing:1px;text-transform:uppercase">${md.getDate()} ${MONL[md.getMonth()]} ${md.getFullYear()} · hora de Madrid</p></div>`}
   const mb=(v,t,col)=>`<div class="mb"><i style="width:${Math.min(v/t*100||0,100)}%;background:${col}"></i></div>`;
   $('#view').innerHTML=head+`
   <div class="datenav"><button class="ar" id="dp">←</button><div class="t"><b>${dateTitle(UI.date)}</b><small>${UI.date===today()?'Tu resumen de hoy':'Tu resumen del día'}</small></div><button class="ar" id="dn">→</button></div>
@@ -1912,17 +1924,78 @@ function editFood(date,idx){
   draw();
 }
 
+/* ---------- Fotos de motivación (Supabase Storage, privadas) ---------- */
+const FOTOS={list:[],urls:{},loaded:false,loading:null};
+async function fotosLoad(force){
+  if(!SERVER||!SB||!SBUID)return [];
+  if(FOTOS.loaded&&!force)return FOTOS.list;
+  if(FOTOS.loading&&!force)return FOTOS.loading;
+  FOTOS.loading=(async()=>{
+    const d=load(),amigas=new Set();
+    Object.values(d.retos||{}).forEach(r=>Object.values(r.uids||{}).forEach(id=>{if(id&&id!==SBUID)amigas.add(id)}));
+    const dirs=[['privadas/'+SBUID,'mia',false],['compartidas/'+SBUID,'mia',true],...[...amigas].map(id=>['compartidas/'+id,'amiga',true])];
+    const out=[];
+    for(const [dir,quien,comp] of dirs){const {data}=await SB.storage.from('fotos').list(dir,{limit:200,sortBy:{column:'created_at',order:'desc'}});
+      (data||[]).filter(f=>f.name&&!f.name.startsWith('.')).forEach(f=>out.push({path:dir+'/'+f.name,quien,comp}))}
+    if(out.length){const {data}=await SB.storage.from('fotos').createSignedUrls(out.map(f=>f.path),60*60*6);
+      (data||[]).forEach(x=>{if(x.signedUrl)FOTOS.urls[x.path]=x.signedUrl})}
+    FOTOS.list=out.filter(f=>FOTOS.urls[f.path]);FOTOS.loaded=true;FOTOS.loading=null;return FOTOS.list})();
+  return FOTOS.loading;
+}
+async function fotoComprimir(file,max=1400){
+  const url=URL.createObjectURL(file);
+  try{const img=await new Promise((ok,ko)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=ko;i.src=url});
+    const s=Math.min(1,max/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+    return await new Promise(ok=>c.toBlob(b=>ok(b),'image/jpeg',0.86))}
+  finally{URL.revokeObjectURL(url)}
+}
+async function fotosSubir(files,compartir,onProg){
+  let ok=0;const dir=(compartir?'compartidas/':'privadas/')+SBUID;
+  for(const [i,f] of [...files].entries()){onProg&&onProg(i+1,files.length);
+    try{const blob=await fotoComprimir(f);const name=Date.now().toString(36)+Math.random().toString(36).slice(2,6)+'.jpg';
+      const {error}=await SB.storage.from('fotos').upload(dir+'/'+name,blob,{contentType:'image/jpeg',upsert:false});if(error)throw error;ok++}catch(e){console.warn(e)}}
+  await fotosLoad(true);return ok;
+}
+function fotosCardHTML(){
+  if(!SERVER)return '';
+  const mias=FOTOS.list.filter(f=>f.quien==='mia'),amigas=FOTOS.list.filter(f=>f.quien==='amiga');
+  return `<div class="card" id="fotoscard"><div class="row between"><p class="eyebrow">📸 Fotos de motivación</p><label class="btn sm" style="cursor:pointer">+ Subir fotos<input type="file" id="fup" accept="image/*" multiple hidden></label></div>
+    <p class="small muted" style="margin-top:8px">Cada vez que abras Vuelve te saldrá una de tus fotos para recordarte por qué empezaste. Solo las ves tú${'' } y, si las compartes, tus amigas de retos.</p>
+    <label class="row small" style="gap:8px;margin-top:10px"><input type="checkbox" id="fcomp" checked> Compartir las nuevas con mis amigas de retos</label>
+    <div id="fprog" class="small" style="margin-top:8px"></div>
+    ${!FOTOS.loaded?'<p class="small muted" style="margin-top:10px">Cargando…</p>':mias.length?`<div class="fgrid">${mias.map(f=>`<div class="fth"><img src="${esc(FOTOS.urls[f.path])}" alt="" loading="lazy"><span class="fb">${f.comp?'👭':'🔒'}</span><button class="fx" data-fdel="${esc(f.path)}" title="Borrar">✕</button></div>`).join('')}</div>`:'<p class="small muted" style="margin-top:10px">Aún no has subido ninguna.</p>'}
+    ${amigas.length?`<p class="tiny muted" style="margin-top:10px">+ ${amigas.length} foto${amigas.length>1?'s':''} que comparten tus amigas.</p>`:''}
+    <p class="tiny muted" style="margin-top:8px">🔒 solo tú · 👭 también tus amigas de retos</p></div>`;
+}
+function bindFotosCard(){
+  const c=$('#fotoscard');if(!c)return;
+  c.querySelector('#fup').onchange=async e=>{const fs=[...e.target.files];if(!fs.length)return;const comp=c.querySelector('#fcomp').checked;
+    const n=await fotosSubir(fs,comp,(i,t)=>{const p=$('#fprog');if(p)p.textContent=`Subiendo ${i} de ${t}…`});
+    toast(n?`${n} foto${n>1?'s':''} subida${n>1?'s':''} ✓`:'No se pudo subir');if(UI.view==='espacio')vEspacio()};
+  c.querySelectorAll('[data-fdel]').forEach(b=>b.onclick=async()=>{if(!b.dataset.ok){b.dataset.ok=1;b.textContent='¿?';b.title='Toca otra vez para borrar';return}
+    const {error}=await SB.storage.from('fotos').remove([b.dataset.fdel]);if(error){toast(sbErr(error));return}await fotosLoad(true);toast('Foto borrada');vEspacio()});
+}
+const FRASES=[['Juntas, un día a la vez','El progreso también es <span>volver a empezar.</span>','Nos cuidamos. Nos movemos. Seguimos juntas. Tu ritmo también cuenta.'],
+  ['Un día a la vez','Muévete por cómo quieres <span>sentirte.</span>','Te cuidas. Te mueves. Sigues. Tu ritmo también cuenta.'],
+  ['Hoy cuenta','No tiene que ser perfecto, <span>tiene que ser hoy.</span>','Un registro, un paseo, un vaso de agua. Todo suma.'],
+  ['Constancia','Lo pequeño, repetido, <span>se vuelve enorme.</span>','No busques motivación: busca volver. Siempre se puede volver.'],
+  ['Para ti','Cuidarte también es <span>quererte.</span>','Come rico, muévete a gusto, descansa sin culpa.'],
+  ['Paso a paso','Cada día que vuelves, <span>ya estás ganando.</span>','La meta se acerca aunque hoy no lo notes.']];
+let WELCOME_DONE=false;
+
 /* ---------- Bienvenida diaria ---------- */
 function maybeWelcome(){
   const u=me();if(!u||!u.profile)return;
-  if(u.lastWelcome===today())return;
+  if(WELCOME_DONE)return;WELCOME_DONE=true;
   u.lastWelcome=today();save();
-  const pf=u.profile;
-  const m=modal(`<div class="l" style="padding:0">${ILLU}</div><div class="r"><button class="close" style="position:absolute;top:16px;right:16px">✕</button>
-    <p class="eyebrow" style="text-transform:none;letter-spacing:.5px;font-size:10px">Un día a la vez</p>
-    <h3 class="h2" style="font-size:26px;margin-top:10px">Muévete por cómo quieres <span>sentirte.</span></h3>
-    <p class="muted" style="margin-top:12px;font-size:13px">Te cuidas. Te mueves. Sigues. Tu ritmo también cuenta.</p>
-    ${pf.meta&&pf.meta>=today()?`<p class="eyebrow" style="margin-top:20px">Hasta el ${parse(pf.meta).getDate()} de ${MONL[parse(pf.meta).getMonth()]}</p><div class="cd">${cdHTML(pf.meta)}</div>`:''}
+  const pf=u.profile,fotos=FOTOS.list,f=fotos.length?fotos[Math.floor(Math.random()*fotos.length)]:null;
+  const [ey,ti,tx]=FRASES[Math.floor(Math.random()*FRASES.length)];
+  const m=modal(`<div class="l ${f?'foto':''}" style="padding:0">${f?`<img src="${esc(FOTOS.urls[f.path])}" alt="">`:ILLU}</div><div class="r"><button class="close wclose">✕</button>
+    <p class="eyebrow" style="text-transform:none;letter-spacing:.5px;font-size:11px">${ey}</p>
+    <h3 class="h2" style="font-size:28px;margin-top:10px;line-height:1.15">${ti}</h3>
+    <p class="muted" style="margin-top:12px;font-size:14px;line-height:1.6">${tx}</p>
+    ${pf.meta&&pf.meta>=today()?`<p class="eyebrow" style="margin-top:22px">Hasta el ${parse(pf.meta).getDate()} de ${MONL[parse(pf.meta).getMonth()]}</p><div class="cd sm">${cdHTML(pf.meta)}</div>`:''}
     <button class="btn block" style="margin-top:20px" id="wgo">Vamos a por hoy →</button></div>`,'welcome');
   m.querySelector('#wgo').onclick=()=>m.remove();
   if(pf.meta)tick();
@@ -2235,6 +2308,7 @@ function vPlan(){
 
 /* ---------- Mi espacio ---------- */
 function vEspacio(){
+  setTimeout(bindFotosCard,0);if(SERVER&&!FOTOS.loaded&&!FOTOS.loading)fotosLoad().then(()=>{if(UI.view==='espacio')vEspacio()}).catch(()=>{});
   const u=me(),pf=u.profile,d=load();
   $('#view').innerHTML=heroHTML('Mi Espacio','Hola,',esc(u.nombre)+'.')+`
   <p class="small muted" style="margin-top:6px">${esc(u.email)} · cuenta creada el ${parse(u.creada).getDate()} de ${MONL[parse(u.creada).getMonth()]} de ${parse(u.creada).getFullYear()}</p>
@@ -2255,6 +2329,7 @@ function vEspacio(){
       <tr><td>Meta</td><td>${pf.meta?esc(pf.metaNombre||'Mi meta'):'—'}</td></tr>
     </table>
     <button class="btn block" style="margin-top:16px" id="ed">Editar mis datos</button></div>
+  ${fotosCardHTML()}
   <div class="card"><p class="eyebrow">Compartir y guardar</p>
     <p class="small muted" style="margin-top:8px">${CLOUD.db?'✓ Tus registros se guardan automáticamente en la nube.':'Tus registros se guardan en este navegador. Haz una copia de vez en cuando.'}</p>
     <div class="grid2" style="margin-top:12px"><button class="btn soft sm" id="ex">Descargar copia</button><button class="btn soft sm" id="im">Importar copia</button></div></div>
@@ -2699,7 +2774,7 @@ function route(){
   if(!u)return renderAuth();
   if(!u.profile)return startOnboarding(false);
   renderApp();
-  if(!maybeCheckin())maybeWelcome();
+  if(!maybeCheckin()){if(SERVER&&!FOTOS.loaded)Promise.race([fotosLoad(),new Promise(r=>setTimeout(r,2500))]).catch(()=>{}).then(()=>{if(me()?.profile&&!document.querySelector('.modal'))maybeWelcome()});else maybeWelcome()}
   maybeCelebrarAyer();
 }
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.edgrasa');if(!b)return;e.preventDefault();
