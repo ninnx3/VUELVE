@@ -481,7 +481,7 @@ function toDocs(){
 function cloudQueue(){
   if(!CLOUD.db)return;
   clearTimeout(CLOUD.timer);
-  CLOUD.timer=setTimeout(flush,600);
+  CLOUD.timer=setTimeout(()=>{CLOUD.timer=null;flush()},600);
 }
 async function flush(){
   if(!CLOUD.db)return;
@@ -492,6 +492,22 @@ async function flush(){
     const put=async(id,body)=>{if(SERVER){const {error}=await SB.from('user_docs').upsert({user_id:SBUID,id,body,updated_at:new Date().toISOString()});if(error)throw error}else await col.doc(id).set(body)};
     const del=async id=>{if(SERVER){const {error}=await SB.from('user_docs').delete().eq('user_id',SBUID).eq('id',id);if(error)throw error}else await col.doc(id).delete()};
     let wrote=false;
+    // Si otro dispositivo (o una importación) cambió los datos en el servidor, se juntan antes de escribir
+    if(SERVER){const u=me();let merged=false;
+      for(const id of Object.keys(docs)){const s=JSON.stringify(docs[id]);if(CLOUD.last[id]===s)continue;
+        if(!(id==='accounts'||id.startsWith('log~')))continue;
+        const {data:row}=await SB.from('user_docs').select('body').eq('user_id',SBUID).eq('id',id).maybeSingle();
+        const lastJ=CLOUD.last[id]?JSON.parse(CLOUD.last[id]).json:null;
+        if(!row||row.body?.json===lastJ)continue;
+        try{const srv=JSON.parse(row.body.json);
+          if(id.startsWith('log~')){for(const [day,l] of Object.entries(srv))if(!u.logs[day]){u.logs[day]=l;merged=true}}
+          else{const su=Object.values(srv.users||{})[0]||{};
+            for(const w of su.weights||[])if(!u.weights.some(x=>x.date===w.date)){u.weights.push(w);merged=true}
+            u.weights.sort((a,b)=>a.date.localeCompare(b.date));
+            for(const md of su.medidas||[])if(!(u.medidas||[]).some(x=>x.date===md.date)){(u.medidas=u.medidas||[]).push(md);merged=true}}
+        }catch(e){}
+        CLOUD.last[id]=JSON.stringify(row.body)}
+      if(merged){saveLocal();Object.assign(docs,toDocs());if(!SCREEN.busy&&$('#view'))setTimeout(renderApp,0)}}
     for(const [id,body] of Object.entries(docs)){
       const s=JSON.stringify(body);if(CLOUD.last[id]===s)continue;
       if(!wrote){setSync('saving');wrote=true}
@@ -2676,7 +2692,19 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
 });
 // Guardar enseguida al salir de la app, cambiar de pestaña o bloquear el móvil
 const flushNow=()=>{if(CLOUD.db&&CLOUD.timer){clearTimeout(CLOUD.timer);CLOUD.timer=null;flush()}};
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushNow()});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushNow();else refreshFromServer()});
+// Al volver a la app, recarga lo guardado en el servidor (otro móvil, el ordenador…)
+let LAST_REFRESH=0;
+async function refreshFromServer(){
+  if(!SERVER||!SB||!SBUID||!CLOUD.db||CLOUD.timer||CLOUD.busy||SCREEN.busy||document.querySelector('.modal'))return;
+  if(Date.now()-LAST_REFRESH<20000)return;LAST_REFRESH=Date.now();
+  try{const {data}=await SB.from('user_docs').select('id,body');if(!data)return;
+    const changed=data.some(r=>{const l=CLOUD.last[r.id];return !l||JSON.parse(l).json!==r.body?.json});
+    if(!changed||CLOUD.timer||CLOUD.busy||document.querySelector('.modal'))return;
+    const {data:{session}}=await SB.auth.getSession();if(!session)return;
+    const view=UI.view;await sbLoadUser(session.user);UI.view=view;if(me()?.profile)renderApp();
+  }catch(e){console.warn(e)}
+}
 addEventListener('pagehide',flushNow);
 addEventListener('popstate',()=>{if(SCREEN.busy&&typeof OB!=='undefined'&&OB&&$('.ob-nav')&&OB.step>(OB.editing?1:0)){OB.step--;renderOB();scrollTo(0,0)}});
 // Ojito para ver/ocultar la contraseña en todos los campos de contraseña
