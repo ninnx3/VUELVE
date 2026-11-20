@@ -43,6 +43,15 @@ nav.tabs{transform:translateZ(0)}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.animos{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px}
+.animos button{border:1.5px solid var(--line);background:#fff;border-radius:16px;padding:14px 4px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:700;font-size:12px;color:var(--ink,#3a2436)}
+.animos button span{font-size:30px;line-height:1}
+.animos button.on{background:var(--abg);border-color:var(--afg);color:var(--afg)}
+.apill{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-weight:700;font-size:13px}.apill.sm{padding:3px 9px;font-size:11.5px}
+#balcard .ar{width:34px;height:34px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:15px}
+.blist{margin-top:10px}.bday{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}.bday.fut{opacity:.4}
+.bday .bd{width:38px;text-align:center;flex-shrink:0}.bday .bd b{display:block;font-size:12px}.bday .bd small{color:var(--muted);font-size:11px}.bday .bc{flex:1;min-width:0}
+
 .confetti{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:200}
 .celebra{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%) scale(1);z-index:201;background:#fff;border-radius:24px;padding:22px 26px;min-width:240px;max-width:86vw;text-align:center;box-shadow:0 24px 60px rgba(64,40,60,.25);animation:celin .45s cubic-bezier(.2,1.4,.4,1);cursor:pointer}
 .celebra .em{font-size:46px;line-height:1}.celebra b{display:block;font-size:19px;font-weight:800;margin-top:8px;color:var(--ink,#3a2436)}.celebra small{display:block;margin-top:6px;color:var(--muted);font-size:13px;line-height:1.4}
@@ -452,6 +461,7 @@ textarea.in{min-height:90px;resize:vertical;font-size:11px;font-family:ui-monosp
   #view.v-progreso,#view.v-plan{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:24px;align-items:start}
   #view.v-progreso>*,#view.v-plan>*{grid-column:1/-1}
   #view.v-progreso>.card,#view.v-plan>.card{grid-column:auto;margin-top:16px}
+  #view.v-progreso>#balcard{grid-column:1/-1}
   #view.v-movimiento{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:24px;align-items:start}
   #view.v-movimiento>*{grid-column:1/-1}
   .modal .sheet{max-width:600px}
@@ -509,7 +519,7 @@ function toDocs(){
     if(mealprep)docs['mp~'+ekey(em)]={email:em,json:JSON.stringify(mealprep)};
     const byM={};
     for(const [date,l] of Object.entries(logs||{})){
-      if(!(l.foods||[]).length&&!(l.mov||[]).length&&!l.tipo&&!l.pasos)continue;
+      if(!(l.foods||[]).length&&!(l.mov||[]).length&&!l.tipo&&!l.pasos&&!l.animo&&!l.nota)continue;
       (byM[date.slice(0,7)]=byM[date.slice(0,7)]||{})[date]=l;
     }
     for(const [m,days] of Object.entries(byM))docs['log~'+ekey(em)+'~'+m]={email:em,month:m,json:JSON.stringify(days)};
@@ -1624,17 +1634,20 @@ function vDiario(){
     </div>
     <details class="how"><summary>Cómo se calcula</summary>${calcTable(r,pf)}</details>
   </div></div></div>
+  ${UI.range==='dia'?animoCardHTML(u,UI.date):''}
   ${cd}
   <p class="foot">Vuelve por encima de perfección. Cada registro cuenta.</p>`;
   bindRange();
   bindArrows(()=>UI.date=addDays(UI.date,-1),()=>UI.date=addDays(UI.date,1),vDiario);
   $('#add').onclick=()=>openAdd(null);
   $('#tm').onclick=()=>{UI.showMeals=!UI.showMeals;vDiario()};
+  if($('#aned'))$('#aned').onclick=()=>preguntarDia(UI.date);
   if($('#cerrar'))$('#cerrar').onclick=()=>{const lg=dayLog(u,UI.date),st=dayStatus(u,UI.date),t=totals(lg.foods).k,tg2=targetFor(u,UI.date).kcal;
     lg.cerrado=true;if(UI.date===addDays(today(),-1))u.celebrado=UI.date;save();vDiario();
     if(st==='ok')celebrarDia(u,UI.date,false);
     else if(t<tg2)celebrate('🌱','Día cerrado',`Te has quedado ${fmt(tg2-t)} kcal por debajo. Comer muy poco también frena: mañana intenta acercarte a tu objetivo.`,{n:0,ms:4500});
-    else celebrate('💜','Día cerrado',`Te has pasado ${fmt(t-tg2)} kcal. No pasa nada: un día no define nada. Mañana, vuelve.`,{n:0,ms:4500})};
+    else celebrate('💜','Día cerrado',`Te has pasado ${fmt(t-tg2)} kcal. No pasa nada: un día no define nada. Mañana, vuelve.`,{n:0,ms:4500});
+    preguntarDia(UI.date,{tras:st==='ok'?4700:4600})};
   $$('[data-meal]').forEach(b=>b.onclick=()=>openAdd(b.dataset.meal));
   $$('[data-del]').forEach(b=>b.onclick=e=>{e.stopPropagation();dayLog(u,UI.date).foods.splice(+b.dataset.del,1);save();vDiario()});
   $$('[data-ed]').forEach(r=>r.onclick=()=>editFood(UI.date,+r.dataset.ed));
@@ -2036,6 +2049,79 @@ function abrirPromoFotos(){
 }
 
 
+/* ---------- ¿Qué tal te fue el día? + balance semanal ---------- */
+const ANIMOS=[['muy_bien','😄','Muy bien','#dcece6','#3f7a62'],['regular','😐','Regular','#f4e6d4','#93703a'],['mal','😕','Mal','#f4dce3','#8a4f6e'],['muy_mal','😣','Muy mal','#ecd3dc','#7a3350']];
+const animoOf=k=>ANIMOS.find(a=>a[0]===k);
+function preguntarDia(date,{tras=0}={}){
+  const u=me(),lg=dayLog(u,date);let sel=lg.animo||null;
+  const abrir=()=>{
+    if(document.querySelector('.modal'))return setTimeout(abrir,600);
+    const hoy=date===today(),d=parse(date);
+    const m=modal(`<div class="top"><b>${hoy?'Tu día de hoy':cap(DOWL[d.getDay()])+' '+d.getDate()+' '+MON[d.getMonth()]}</b><button class="close">✕</button></div>
+      <h3 class="h2" style="font-size:24px;margin-top:12px">¿Qué tal te fue <span>${hoy?'hoy':'ese día'}?</span></h3>
+      <div class="animos">${ANIMOS.map(([k,e,t,bg,fg])=>`<button data-an="${k}" class="${sel===k?'on':''}" style="--abg:${bg};--afg:${fg}"><span>${e}</span>${t}</button>`).join('')}</div>
+      <label class="f"><span>Notas <span class="muted" style="font-weight:500">(opcional)</span></span>
+        <textarea class="in" id="anota" rows="4" style="font-family:inherit;font-size:16px;line-height:1.5" placeholder="Ej. Cena en el bar con amigas, comí más de lo previsto y con muchas calorías vacías. Dormí poco.">${esc(lg.nota||'')}</textarea></label>
+      <p class="tiny muted" style="margin-top:6px">Al final de la semana verás tus notas juntas para entender qué te ayuda y qué no.</p>
+      <div class="err" id="aerr"></div>
+      <button class="btn block" style="margin-top:12px" id="asv">Guardar</button>
+      <button class="btn ghost block" style="margin-top:6px" id="askip">Ahora no</button>`);
+    m.querySelectorAll('[data-an]').forEach(b=>b.onclick=()=>{sel=b.dataset.an;m.querySelectorAll('[data-an]').forEach(x=>x.classList.toggle('on',x===b))});
+    m.querySelector('#askip').onclick=()=>m.remove();
+    m.querySelector('#asv').onclick=()=>{const nota=m.querySelector('#anota').value.trim();
+      if(!sel&&!nota){m.querySelector('#aerr').textContent='Elige cómo te fue o escribe una nota.';return}
+      const l=dayLog(u,date);if(sel)l.animo=sel;else delete l.animo;if(nota)l.nota=nota.slice(0,1500);else delete l.nota;
+      save();m.remove();toast('Guardado en tu diario ✓');if(UI.view==='diario')vDiario();if(UI.view==='progreso')vProgreso()};
+  };
+  setTimeout(abrir,tras);
+}
+function animoCardHTML(u,date){
+  const l=u.logs[date];if(!l||(!l.animo&&!l.nota))return '';
+  const a=animoOf(l.animo);
+  return `<div class="card animocard"><div class="row between"><p class="eyebrow">Cómo te fue</p><button class="btn ghost sm" id="aned">✎ Editar</button></div>
+    <div class="row" style="gap:12px;margin-top:10px;align-items:flex-start">${a?`<span class="apill" style="background:${a[3]};color:${a[4]}">${a[1]} ${a[2]}</span>`:''}</div>
+    ${l.nota?`<p style="margin-top:10px;line-height:1.6;white-space:pre-wrap">${esc(l.nota)}</p>`:''}</div>`;
+}
+// Balance de una semana (lunes a domingo)
+let BAL_WS=null;
+function balanceHTML(u,ws,compact){
+  const days=[...Array(7)].map((_,i)=>addDays(ws,i));
+  const rows=days.map(d=>{const l=u.logs[d]||{},st=dayStatus(u,d),tt=totals(l.foods||[]).k,tg=targetFor(u,d).kcal,a=animoOf(l.animo),mov=(l.mov||[]).length,pd=parse(d);
+    const kc=st==='none'?'<span class="muted">sin registro</span>':`${fmt(tt)} / ${fmt(tg)} kcal ${st==='ok'?'✅':tt>tg?'⬆️':'⬇️'}`;
+    return `<div class="bday ${d>today()?'fut':''}"><div class="bd"><b>${cap(DOWL[pd.getDay()]).slice(0,3)}</b><small>${pd.getDate()}</small></div>
+      <div class="bc"><div class="row" style="gap:8px;flex-wrap:wrap">${a?`<span class="apill sm" style="background:${a[3]};color:${a[4]}">${a[1]} ${a[2]}</span>`:''}<span class="small">${kc}</span>${mov?'<span class="small">· 💪 '+mov+'</span>':''}${l.pasos?'<span class="small">· 👟 '+fmt(l.pasos)+'</span>':''}</div>
+      ${l.nota?`<p class="small" style="margin-top:4px;line-height:1.5;white-space:pre-wrap">${esc(l.nota)}</p>`:''}</div>
+      ${d<=today()?`<button class="x" data-anday="${d}" title="${a||l.nota?'Editar':'Añadir'} nota">✎</button>`:''}</div>`}).join('');
+  const reg=days.filter(d=>u.logs[d]?.animo),cnt=k=>reg.filter(d=>u.logs[d].animo===k).length;
+  const ok=days.filter(d=>dayStatus(u,d)==='ok').length,malos=days.filter(d=>['mal','muy_mal'].includes(u.logs[d]?.animo));
+  const malOk=malos.filter(d=>dayStatus(u,d)==='ok').length;
+  const resumen=reg.length?`${ANIMOS.filter(a=>cnt(a[0])).map(a=>`${a[1]} ${cnt(a[0])}`).join(' · ')} · ✅ ${ok} día${ok===1?'':'s'} en objetivo${malos.length?` · De los días malos, ${malOk} en objetivo`:''}`:`✅ ${ok} día${ok===1?'':'s'} en objetivo · Aún no has valorado ningún día de esta semana`;
+  const wsD=parse(ws),weD=parse(addDays(ws,6));
+  return `${compact?'':`<div class="row between" style="margin-top:4px"><button class="ar" id="bwp">←</button><b class="small">${wsD.getDate()} ${MON[wsD.getMonth()]} – ${weD.getDate()} ${MON[weD.getMonth()]}</b><button class="ar" id="bwn" ${ws>=weekStart(today())?'disabled style="opacity:.3"':''}>→</button></div>`}
+    <p class="small" style="margin-top:10px;font-weight:600">${resumen}</p><div class="blist">${rows}</div>`;
+}
+function bindBalance(root,u,rerender){
+  root.querySelectorAll('[data-anday]').forEach(b=>b.onclick=()=>preguntarDia(b.dataset.anday));
+  const p=root.querySelector('#bwp'),n=root.querySelector('#bwn');
+  if(p)p.onclick=()=>{BAL_WS=addDays(BAL_WS,-7);rerender()};
+  if(n)n.onclick=()=>{if(BAL_WS<weekStart(today())){BAL_WS=addDays(BAL_WS,7);rerender()}};
+}
+// El lunes (o al volver la semana siguiente) salta el balance de la semana pasada, una vez
+function maybeBalanceSemana(){
+  const u=me();if(!u||!u.profile)return;const prev=addDays(weekStart(today()),-7);
+  if(u.balanceVisto&&u.balanceVisto>=prev)return;
+  const days=[...Array(7)].map((_,i)=>addDays(prev,i));
+  if(!days.some(d=>u.logs[d]?.animo||u.logs[d]?.nota))return;
+  const go=(k=0)=>{if(document.querySelector('.modal')&&k<120)return setTimeout(()=>go(k+1),700);
+    u.balanceVisto=prev;save();
+    const m=modal(`<div class="top"><b>📖 Tu semana en notas</b><button class="close">✕</button></div>
+      <p class="muted" style="margin-top:8px">Así te fue la semana pasada. Mira qué tenían en común los días buenos y los difíciles.</p>
+      <div id="balm">${balanceHTML(u,prev,true)}</div>
+      <button class="btn block" style="margin-top:14px" id="bok">A por esta semana →</button>`,'wide');
+    m.querySelector('#bok').onclick=()=>m.remove();bindBalance(m,u,()=>{})};
+  setTimeout(go,1200);
+}
+
 /* ---------- Bienvenida diaria ---------- */
 function maybeWelcome(){
   const u=me();if(!u||!u.profile)return;
@@ -2261,7 +2347,10 @@ function vProgreso(){
   <div class="card"><p class="eyebrow">Registros de peso</p>
     ${W.slice().reverse().map(w=>`<div class="wk"><span>${cap(DOWL[parse(w.date).getDay()])} ${parse(w.date).getDate()} ${MON[parse(w.date).getMonth()]} ${parse(w.date).getFullYear()}</span><span class="row" style="gap:4px"><b>${fmt1(w.kg)} kg</b><button class="x" data-dw="${w.date}">✕</button></span></div>`).join('')||'<p class="muted small">Sin registros.</p>'}
   </div>
-  ${medidasCard(u)}`;
+  ${medidasCard(u)}
+  <div class="card" id="balcard"><p class="eyebrow">📖 Tu semana en notas</p><div id="balb"></div></div>`;
+  if(!BAL_WS)BAL_WS=weekStart(today());
+  const drawBal=()=>{$('#balb').innerHTML=balanceHTML(u,BAL_WS,false);bindBalance($('#balcard'),u,drawBal)};drawBal();
   $('#ci').onclick=()=>checkin(false);$('#ci2').onclick=()=>checkin(false);
   $$('[data-dm]').forEach(b=>b.onclick=()=>{u.medidas=(u.medidas||[]).filter(x=>x.date!==b.dataset.dm);save();vProgreso()});
   $$('[data-dw]').forEach(b=>b.onclick=()=>{u.weights=u.weights.filter(w=>w.date!==b.dataset.dw);save();vProgreso()});
@@ -2830,6 +2919,7 @@ function route(){
   if(!maybeCheckin()){if(SERVER&&!FOTOS.loaded)Promise.race([fotosLoad(),new Promise(r=>setTimeout(r,2500))]).catch(()=>{}).then(()=>{if(me()?.profile&&!document.querySelector('.modal'))maybeWelcome()});else maybeWelcome()}
   maybeCelebrarAyer();
   programarPromoFotos();
+  maybeBalanceSemana();
 }
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.edgrasa');if(!b)return;e.preventDefault();
   const u=me();if(!u||!u.profile)return;
