@@ -605,8 +605,10 @@ const RETOS_API={
   aceptar:(id,u)=>sbRun(()=>SB.from('reto_miembros').update({estado:'miembro',user_id:SBUID,nombre:u.nombre}).eq('reto_id',id).eq('email',u.email),'¡Te has unido al reto! 💜'),
   rechazar:(id,u)=>sbRun(()=>SB.from('reto_miembros').update({estado:'rechazado'}).eq('reto_id',id).eq('email',u.email)),
   salir:(id,u)=>sbRun(()=>SB.from('reto_miembros').delete().eq('reto_id',id).eq('email',u.email),'Has salido del reto'),
-  editar:(r,quitar)=>sbRun(async()=>{const {error}=await SB.from('retos').update({nombre:r.nombre,tipo:r.tipo,inicio:r.inicio,dias:r.dias}).eq('id',r.id);if(error)throw error;
-    if(quitar.length){const {error:e2}=await SB.from('reto_miembros').delete().eq('reto_id',r.id).in('email',quitar);if(e2)throw e2}},'Reto actualizado ✓'),
+  editar:(r,quitar,nuevos=[])=>sbRun(async()=>{const {error}=await SB.from('retos').update({nombre:r.nombre,tipo:r.tipo,inicio:r.inicio,dias:r.dias}).eq('id',r.id);if(error)throw error;
+    if(quitar.length){const {error:e2}=await SB.from('reto_miembros').delete().eq('reto_id',r.id).in('email',quitar);if(e2)throw e2}
+    for(const email of nuevos){const {error:e3}=await SB.from('reto_miembros').insert({reto_id:r.id,email,estado:'invitado'});
+      if(e3&&e3.code==='23505'){const {error:e4}=await SB.from('reto_miembros').update({estado:'invitado'}).eq('reto_id',r.id).eq('email',email);if(e4)throw e4}else if(e3)throw e3}},'Reto actualizado ✓'),
   borrar:id=>sbRun(()=>SB.from('retos').delete().eq('id',id),'Reto eliminado'),
   invitar:(id,email)=>sbRun(async()=>{const {error}=await SB.from('reto_miembros').insert({reto_id:id,email,estado:'invitado'});
     if(error&&error.code==='23505'){const {error:e2}=await SB.from('reto_miembros').update({estado:'invitado'}).eq('reto_id',id).eq('email',email);if(e2)throw e2}
@@ -1315,7 +1317,7 @@ function vRetos(){
 }
 function editReto(r){
   const d=load(),u=me();
-  const st={nombre:r.nombre,tipo:r.tipo,inicio:r.inicio,fin:retoFin(r),quitar:[]};
+  const st={nombre:r.nombre,tipo:r.tipo,inicio:r.inicio,fin:retoFin(r),quitar:[],nuevos:[]};
   const m=modal(`<div class="top"><b>Editar reto</b><button class="close">✕</button></div><div id="eb"></div>`);
   const draw=()=>{
     const gente=[...new Set([...r.miembros,...r.invitados])].filter(e=>e!==r.owner&&!st.quitar.includes(e));
@@ -1329,7 +1331,10 @@ function editReto(r){
         <label class="f" style="margin-top:0"><span class="small muted" style="font-weight:600">Termina el</span><input class="in" type="date" id="ef" value="${st.fin}" min="${st.inicio}"></label></div>
       <p class="small" style="margin-top:8px;font-weight:600">${n>0?n+' días':'La fecha de fin debe ser posterior al inicio'}</p>
       <label class="f"><span>Participantes</span></label>
-      ${gente.length?gente.map(e=>`<div class="wk"><span>${esc(d.users[e]?.nombre||r.nombres?.[e]||e)} <span class="tiny muted">${r.miembros.includes(e)?'participa':'invitación pendiente'}</span></span><button class="btn ghost" data-q="${esc(e)}">Quitar</button></div>`).join(''):'<p class="small muted">Solo estás tú. Invita a alguien desde el botón «+ Invitar».</p>'}
+      ${gente.length?gente.map(e=>`<div class="wk"><span>${esc(d.users[e]?.nombre||r.nombres?.[e]||e)} <span class="tiny muted">${r.miembros.includes(e)?'participa':'invitación pendiente'}</span></span><button class="btn ghost" data-q="${esc(e)}">Quitar</button></div>`).join(''):'<p class="small muted">Solo estás tú por ahora.</p>'}
+      ${st.nuevos.map((e,i)=>`<div class="wk"><span>${esc(e)} <span class="tiny" style="color:var(--green);font-weight:700">nueva · se invitará al guardar</span></span><button class="btn ghost" data-nq="${i}">Quitar</button></div>`).join('')}
+      <label class="f"><span>Añadir participantes</span>
+        <div class="searchrow" style="margin-top:0"><input class="in" id="enm" type="email" placeholder="amiga@email.com" autocomplete="off"><button class="btn" id="ena" style="padding:10px 14px;font-size:12px">Añadir</button></div></label>
       <div class="err" id="ee"></div>
       <button class="btn block" style="margin-top:6px" id="es">Guardar cambios</button>
       <button class="btn ghost block" style="margin-top:10px;color:var(--warn)" id="ed">🗑 Eliminar reto</button>`;
@@ -1337,13 +1342,37 @@ function editReto(r){
     m.querySelectorAll('[data-et]').forEach(b=>b.onclick=()=>{keep();st.tipo=b.dataset.et;draw()});
     ['#ei','#ef'].forEach(s=>m.querySelector(s).onchange=()=>{keep();if(st.fin<st.inicio)st.fin=st.inicio;draw()});
     m.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{keep();st.quitar.push(b.dataset.q);draw()});
-    m.querySelector('#es').onclick=()=>{keep();const n=diasEntre(st.inicio,st.fin);
+    m.querySelectorAll('[data-nq]').forEach(b=>b.onclick=()=>{keep();st.nuevos.splice(+b.dataset.nq,1);draw()});
+    const addNew=(silent)=>{const inp=m.querySelector('#enm'),v=inp.value.trim().toLowerCase(),err=t=>{if(!silent)m.querySelector('#ee').textContent=t;return false};
+      if(!v)return silent||err('Escribe un email.');
+      if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v))return err('Ese email no parece válido.');
+      if(v===r.owner||v===u.email)return err('Ese es tu propio email 🙂');
+      if(st.quitar.includes(v)){st.quitar=st.quitar.filter(x=>x!==v);return true}
+      if([...r.miembros,...r.invitados].includes(v)&&!(r.rechazados||[]).includes(v))return err('Esa persona ya está en el reto.');
+      if(!st.nuevos.includes(v))st.nuevos.push(v);return true};
+    m.querySelector('#ena').onclick=()=>{keep();if(addNew()){draw();m.querySelector('#enm').focus()}};
+    m.querySelector('#enm').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();m.querySelector('#ena').click()}};
+    m.querySelector('#es').onclick=async()=>{keep();if(m.querySelector('#enm').value.trim()&&!addNew())return;const n=diasEntre(st.inicio,st.fin);
       if(!(n>0)){m.querySelector('#ee').textContent='La fecha de fin debe ser igual o posterior a la de inicio.';return}
       if(n>366){m.querySelector('#ee').textContent='El reto puede durar como máximo un año.';return}
-      if(SERVER){m.remove();return RETOS_API.editar({id:r.id,nombre:st.nombre.trim()||r.nombre,tipo:st.tipo,inicio:st.inicio,dias:n},st.quitar)}
-      r.nombre=st.nombre.trim()||r.nombre;r.tipo=st.tipo;r.inicio=st.inicio;r.dias=n;
-      r.miembros=r.miembros.filter(e=>!st.quitar.includes(e));r.invitados=r.invitados.filter(e=>!st.quitar.includes(e));
-      save();m.remove();toast('Reto actualizado ✓');renderApp()};
+      const nuevos=st.nuevos.slice();
+      if(SERVER){const b=m.querySelector('#es');b.disabled=true;b.textContent='Guardando…';
+        const ok=await RETOS_API.editar({id:r.id,nombre:st.nombre.trim()||r.nombre,tipo:st.tipo,inicio:st.inicio,dias:n},st.quitar,nuevos);
+        if(!ok){b.disabled=false;b.textContent='Guardar cambios';return}}
+      else{r.nombre=st.nombre.trim()||r.nombre;r.tipo=st.tipo;r.inicio=st.inicio;r.dias=n;
+        r.miembros=r.miembros.filter(e=>!st.quitar.includes(e));r.invitados=r.invitados.filter(e=>!st.quitar.includes(e));
+        nuevos.forEach(v=>{if(!r.invitados.includes(v))r.invitados.push(v);r.rechazados=(r.rechazados||[]).filter(x=>x!==v)});
+        save();toast('Reto actualizado ✓');renderApp()}
+      if(!nuevos.length){m.remove();return}
+      // Invitación para enviar a las nuevas participantes
+      const rr={...r,nombre:st.nombre.trim()||r.nombre,tipo:st.tipo,inicio:st.inicio,dias:n};
+      const txt=inviteText(u,rr,nuevos.length===1?nuevos[0]:null),subj=`${u.nombre} te invita a un reto en Vuelve 💜`;
+      m.querySelector('.sheet').innerHTML=`<div class="top"><b>Invitación lista</b><button class="close">✕</button></div>
+        <p class="small muted" style="margin-top:10px">Envíasela a ${nuevos.map(esc).join(', ')}. Cuando creen su cuenta con ese email, verán el reto para unirse.</p>
+        <div class="mailbox">${esc(txt)}</div>
+        ${shareHTML('mailto:'+nuevos.map(encodeURIComponent).join(',')+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(txt))}`;
+      m.querySelector('.close').onclick=()=>m.remove();
+      bindShare(m,subj,txt)};
     m.querySelector('#ed').onclick=()=>{
       m.querySelector('.sheet').innerHTML=`<div class="top"><b>Eliminar reto</b><button class="close">✕</button></div>
         <h3 class="h2" style="font-size:22px;margin-top:12px">¿Eliminar <span>«${esc(r.nombre)}»?</span></h3>
