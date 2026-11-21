@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<title>Gracias · Vuelve</title>
+<meta name="theme-color" content="#744a69">
+<link rel="icon" href="../../icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--plum:#744a69;--plum-d:#5e3a55;--ink:#3d383c;--muted:#5d4a59;--line:#e2d4de;--bg:#f5eff4;--lilac:#ebe1f3;--em:#2f6f5d;--mint:#e3efe9}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Montserrat,Arial,sans-serif;color:var(--ink);background:var(--bg);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:28px 20px 50px}
+a{color:var(--plum)}
+.logo{height:32px;margin-bottom:28px}
+.card{background:#fff;border:1.5px solid var(--line);border-radius:24px;max-width:520px;width:100%;padding:30px 24px;text-align:center}
+.big{font-size:52px;line-height:1;margin-bottom:12px}
+h1{font-size:26px;font-weight:800;line-height:1.15;margin-bottom:8px}
+p{color:var(--muted)}
+.files{display:grid;gap:10px;margin:22px 0 6px;text-align:left}
+.file{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;background:var(--lilac);text-decoration:none;color:var(--ink);font-weight:700;font-size:14px}
+.file .e{font-size:22px}.file .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.file .go{color:var(--plum);font-weight:800}
+.tips{margin-top:20px;text-align:left;background:var(--mint);border-radius:14px;padding:14px 16px;font-size:13px;color:#2c4c42}
+.tips b{color:var(--em)}
+.btn{display:inline-flex;margin-top:18px;border-radius:12px;background:var(--plum);color:#fff;font-weight:800;padding:13px 20px;text-decoration:none}
+.spin{width:38px;height:38px;border-radius:50%;border:4px solid var(--lilac);border-top-color:var(--plum);animation:s 1s linear infinite;margin:0 auto 16px}
+@keyframes s{to{transform:rotate(360deg)}}
+.test{display:inline-block;margin-top:10px;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;background:#fff6e0;color:#6a5320;border-radius:999px;padding:4px 10px}
+</style>
+</head>
+<body>
+<a href="../../"><img class="logo" src="../../img/logo/vuelve-logo-ciruela.svg" alt="Vuelve"></a>
+<div class="card" id="c"><div class="spin"></div><p id="m"></p></div>
+<script>
+const SB_URL='https://vzzkzajzzehhxzwonpgv.supabase.co',SB_KEY='sb_publishable_9-Tb4XFSfV_EXN6cG1Nxtw_KZotYkWS';
+const qs=new URLSearchParams(location.search),S=qs.get('s')||'';
+let L=qs.get('l')==='en'?'en':qs.get('l')==='es'?'es':(()=>{try{const s=localStorage.getItem('vuelve_lang');if(s==='es'||s==='en')return s}catch(e){}return /^es\b/i.test(navigator.language||'es')?'es':'en'})();
+const T={es:{wait:'Confirmando tu pago…',ok:'¡Gracias por tu compra!',okP:e=>`Ya puedes descargarlo. El recibo de Stripe llegará a <b>${e}</b>.`,
+  tips:'<b>Guarda esta página</b> en favoritos para volver a descargarlo. Si creas tu cuenta en Vuelve con este mismo email, lo tendrás siempre en <b>Mis descargas</b>.',
+  slow:'Tu pago se está procesando. Si ya te han cobrado, recarga esta página en un minuto.',bad:'No encontramos esta compra. Si te han cobrado, escríbenos y lo solucionamos.',
+  noFiles:'Aún estamos preparando los archivos de este producto. Te escribiremos en cuanto estén.',shop:'Volver a la tienda',test:'Compra de prueba',dl:'Descargar'},
+ en:{wait:'Confirming your payment…',ok:'Thank you for your purchase!',okP:e=>`You can download it now. Stripe's receipt is on its way to <b>${e}</b>.`,
+  tips:'<b>Bookmark this page</b> to download again later. If you create a Vuelve account with this same email, you\'ll always find it in <b>My downloads</b>.',
+  slow:'Your payment is being processed. If you\'ve been charged, reload this page in a minute.',bad:'We couldn\'t find this purchase. If you were charged, write to us and we\'ll sort it out.',
+  noFiles:'We\'re still preparing this product\'s files. We\'ll email you as soon as they\'re ready.',shop:'Back to the shop',test:'Test purchase',dl:'Download'}};
+const D=T[L];document.documentElement.lang=L;
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const c=document.getElementById('c');document.getElementById('m').textContent=D.wait;
+const icon=n=>/\.pdf$/i.test(n)?'📕':/\.(mp4)$/i.test(n)?'🎬':/\.(zip)$/i.test(n)?'🗂️':'🖼️';
+async function go(intento=0){
+  if(!/^cs_(test|live)_/.test(S)){c.innerHTML=`<div class="big">🤔</div><p>${D.bad}</p><a class="btn" href="../">${D.shop}</a>`;return}
+  let r,j;try{r=await fetch(SB_URL+'/functions/v1/tienda',{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY},body:JSON.stringify({accion:'descarga',s:S})});j=await r.json().catch(()=>({}))}catch(e){r={status:0};j={}}
+  if(r.status===202||r.status===0||r.status>=500){if(intento<8)return setTimeout(()=>go(intento+1),2000);c.innerHTML=`<div class="big">⏳</div><p>${D.slow}</p>`;return}
+  if(!r.ok||!j.producto){c.innerHTML=`<div class="big">🤔</div><p>${D.bad}</p><a class="btn" href="../">${D.shop}</a>`;return}
+  const name=(L==='en'&&j.producto.nombre_en)||j.producto.nombre;
+  c.innerHTML=`<div class="big">💜</div><h1>${D.ok}</h1><p><b style="color:var(--ink)">${esc(name)}</b></p><p style="margin-top:6px">${D.okP(esc(j.email))}</p>${j.modo==='test'?`<span class="test">${D.test}</span>`:''}
+   ${j.archivos.length?`<div class="files">${j.archivos.map(f=>`<a class="file" href="${esc(f.url)}" rel="noopener"><span class="e">${icon(f.nombre)}</span><span class="n">${esc(f.nombre)}</span><span class="go">${D.dl} ↓</span></a>`).join('')}</div>`:`<p style="margin-top:16px">${D.noFiles}</p>`}
+   <div class="tips">${D.tips}</div><a class="btn" href="../">${D.shop}</a>`;
+}
+go();
+</script>
+</body>
+</html>
