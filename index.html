@@ -585,7 +585,11 @@ async function flush(){
         const lastJ=CLOUD.last[id]?JSON.parse(CLOUD.last[id]).json:null;
         if(!row||row.body?.json===lastJ)continue;
         try{const srv=JSON.parse(row.body.json);
-          if(id.startsWith('log~')){for(const [day,l] of Object.entries(srv))if(!u.logs[day]){u.logs[day]=l;merged=true}}
+          if(id.startsWith('log~')){for(const [day,l] of Object.entries(srv)){const loc=u.logs[day];
+            if(!loc){u.logs[day]=l;merged=true;continue}
+            // Lo que este dispositivo tiene vacío se completa con lo del servidor (nunca se pisa algo apuntado en otro dispositivo)
+            for(const k of ['foods','mov'])if(!(loc[k]||[]).length&&(l[k]||[]).length){loc[k]=l[k];merged=true}
+            for(const k of ['tipo','pasos','animo','nota','cerrado'])if(loc[k]==null&&l[k]!=null){loc[k]=l[k];merged=true}}}
           else{const su=Object.values(srv.users||{})[0]||{};
             for(const w of su.weights||[])if(!u.weights.some(x=>x.date===w.date)){u.weights.push(w);merged=true}
             u.weights.sort((a,b)=>a.date.localeCompare(b.date));
@@ -3213,7 +3217,11 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
 });
 // Guardar enseguida al salir de la app, cambiar de pestaña o bloquear el móvil
 const flushNow=()=>{if(CLOUD.db&&CLOUD.timer){clearTimeout(CLOUD.timer);CLOUD.timer=null;flush()}};
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushNow();else refreshFromServer()});
+let LAST_TODAY=today();
+function checkNewDay(){const t=today();if(t===LAST_TODAY)return;const was=LAST_TODAY;LAST_TODAY=t;
+  if(typeof UI!=='undefined'&&UI.date===was&&me()?.profile&&!SCREEN.busy){UI.date=t;if(!document.querySelector('.modal'))renderApp()}}
+setInterval(checkNewDay,60000);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushNow();else{checkNewDay();refreshFromServer()}});
 // Al volver a la app, recarga lo guardado en el servidor (otro móvil, el ordenador…)
 let LAST_REFRESH=0;
 async function refreshFromServer(){
@@ -3221,6 +3229,8 @@ async function refreshFromServer(){
   if(Date.now()-LAST_REFRESH<20000)return;LAST_REFRESH=Date.now();
   pasosAutoSync().catch(()=>{});
   try{const {data}=await SB.from('user_docs').select('id,body');if(!data)return;
+    const local=toDocs(),pend=Object.keys(local).some(id=>CLOUD.last[id]!==JSON.stringify(local[id]));
+    if(pend){await flush();return}
     const changed=data.some(r=>{const l=CLOUD.last[r.id];return !l||JSON.parse(l).json!==r.body?.json});
     if(!changed||CLOUD.timer||CLOUD.busy||document.querySelector('.modal'))return;
     const {data:{session}}=await SB.auth.getSession();if(!session)return;
