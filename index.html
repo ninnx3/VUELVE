@@ -3004,7 +3004,7 @@ async function packBuilder(){
 function packPDF(recs,title,sub){
   const w=window.open('','_blank');if(!w)return toast('Permite las ventanas emergentes para abrir el PDF');
   const BASE='https://ninnx3.github.io/VUELVE/',n1=x=>x==null?'':new Intl.NumberFormat('es-ES',{maximumFractionDigits:1}).format(x);
-  const ing=i=>`${i.cantidad!=null?`<b>${n1(i.cantidad)}${i.unidad&&i.unidad!=='ud'?' '+esc(i.unidad):''}</b> `:''}${esc(i.item)}`;
+  const ing=i=>i.cantidad!=null?`<b>${n1(i.cantidad)}${i.unidad&&i.unidad!=='ud'?' '+esc(i.unidad):''}</b> ${esc(i.item)}`:`${esc(i.item)}${i.unidad?` <span style="color:#8a7a86">(${esc(i.unidad)})</span>`:''}`;
   const shop={};recs.forEach(r=>(r.ingredientes||[]).forEach(i=>{const s=i.sec||'Despensa',k=(i.item||'').toLowerCase().trim()+'|'+(i.unidad||'');if(!k.trim())return;shop[s]=shop[s]||{};const o=shop[s][k]=shop[s][k]||{item:i.item,unidad:i.unidad,cantidad:0,sin:false};if(i.cantidad==null)o.sin=true;else o.cantidad+=Number(i.cantidad)||0}));
   const html=`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>${esc(title)} · Vuelve</title><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet"><style>
   @page{size:A4;margin:0}*{box-sizing:border-box;margin:0;padding:0}body{font-family:Montserrat,Arial,sans-serif;color:#3d383c;-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#e9e2e8}
@@ -3035,7 +3035,7 @@ function packPDF(recs,title,sub){
    <div class="cols"><div><h3>Ingredientes · 1 ración</h3><ul class="ing">${(r.ingredientes||[]).map(x=>`<li>${ing(x)}</li>`).join('')}</ul></div><div><h3>Preparación</h3><ol>${(r.pasos||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ol>
    ${r.conservacion?`<div class="tip"><b>Conservación.</b> ${esc(r.conservacion)}</div>`:''}${r.consejo?`<div class="tip" style="background:#f1e8f1;color:#5d4a59"><b style="color:#744a69">Consejo.</b> ${esc(r.consejo)}</div>`:''}</div></div>
    <div class="ft"><span>${esc(title)}</span><span>${i+3}</span></div></div>`).join('')}
-  <div class="pg"><div class="ey">Lista de la compra</div><h2>Todo lo que necesitas</h2><p class="desc" style="margin:-3mm 0 7mm">Para 1 ración de cada receta. Multiplica según las raciones que prepares.</p><div class="shop">${Object.entries(shop).map(([s,o])=>`<section><h3>${esc(s)}</h3><ul>${Object.values(o).map(x=>`<li>${x.cantidad?`<b>${n1(x.cantidad)}${x.unidad&&x.unidad!=='ud'?' '+esc(x.unidad):''}</b> `:''}${esc(x.item)}</li>`).join('')}</ul></section>`).join('')}</div><div class="ft"><span>${esc(title)}</span><span>Vuelve</span></div></div>
+  <div class="pg"><div class="ey">Lista de la compra</div><h2>Todo lo que necesitas</h2><p class="desc" style="margin:-3mm 0 7mm">Para 1 ración de cada receta. Multiplica según las raciones que prepares.</p><div class="shop">${Object.entries(shop).map(([s,o])=>`<section><h3>${esc(s)}</h3><ul>${Object.values(o).map(x=>`<li>${x.cantidad?`<b>${n1(x.cantidad)}${x.unidad&&x.unidad!=='ud'?' '+esc(x.unidad):''}</b> `:''}${esc(x.item)}${!x.cantidad&&x.unidad?` <span style="color:#8a7a86">(${esc(x.unidad)})</span>`:''}</li>`).join('')}</ul></section>`).join('')}</div><div class="ft"><span>${esc(title)}</span><span>Vuelve</span></div></div>
   </body></html>`;
   w.document.open();w.document.write(html);w.document.close();
 }

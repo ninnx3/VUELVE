@@ -113,7 +113,7 @@ function render(){
   if(!EST.abierta)note+=`<div class="note soon"><span class="e">🌱</span><div>${ADMIN?D.soonAdmin:D.soon}</div></div>`;
   if(EST.abierta||ADMIN){if(!EST.stripe)note+=`<div class="note test"><span class="e">🔌</span><div>${D.noStripe}</div></div>`;else if(EST.modo==='test')note+=`<div class="note test"><span class="e">🧪</span><div>${D.test}</div></div>`}
   document.getElementById('note').innerHTML=note;
-  document.getElementById('list').innerHTML=P.length?P.map(p=>`<button class="card" data-p="${esc(p.slug)}">${cover(p)}<div class="b"><div class="t">${esc(nm(p))}</div><div class="d">${esc(ds(p))}</div><div class="f"><span class="price">${eur(p.precio_cent)}</span><span class="kind">${p.tipo==='fisico'?D.ph:D.dl}</span></div></div></button>`).join(''):`<div class="empty" style="grid-column:1/-1"><div class="e">🛍️</div>${D.empty}</div>`;
+  document.getElementById('list').innerHTML=P.length?P.map(p=>`<button class="card" data-p="${esc(p.slug)}">${cover(p)}<div class="b"><div class="t">${esc(nm(p))}</div><div class="d">${esc(ds(p))}</div><div class="f"><span class="price">${eur(p.precio_cent)}</span><span class="kind" ${p.oculto?'style="background:#fff6e0;color:#6a5320"':''}>${p.oculto?(L==='en'?'Hidden · admins':'Oculto · admin'):(p.tipo==='fisico'?D.ph:D.dl)}</span></div></div></button>`).join(''):`<div class="empty" style="grid-column:1/-1"><div class="e">🛍️</div>${D.empty}</div>`;
   document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>open(b.dataset.p));
 }
 function open(slug){
@@ -137,6 +137,8 @@ document.querySelectorAll('.lang button').forEach(b=>b.onclick=()=>{L=b.dataset.
     fn({accion:'estado'}).then(r=>r.data).catch(()=>null)]);
   P=Array.isArray(pr)?pr:[];if(es&&!es.error)EST=es;
   if(token()){try{const r=await fetch(SB_URL+'/rest/v1/admins?select=user_id',{headers:h});const j=await r.json();ADMIN=Array.isArray(j)&&j.length>0}catch(e){}}
+  if(ADMIN){try{const r=await fetch(SB_URL+'/rest/v1/productos?select=*&order=orden.asc,nombre.asc',{headers:h});const all=await r.json();
+    if(Array.isArray(all))P=all.map(p=>({...p,n_archivos:(p.archivos||[]).length,oculto:!p.activo}))}catch(e){}}
   render();const q=new URLSearchParams(location.search).get('p');if(q)open(q);
 })();
 </script>
