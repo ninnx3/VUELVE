@@ -59,9 +59,12 @@ label.f{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin
 .ok .big{font-size:46px;line-height:1;margin-bottom:12px}
 .ok h3{font-size:24px;font-weight:800;color:var(--ink);margin-bottom:8px}
 .ok p{color:var(--muted)}
-.ok .pill{display:inline-block;margin-top:18px;background:#e3efe9;color:var(--em);font-weight:700;font-size:13px;padding:8px 14px;border-radius:999px}
-.social{display:flex;justify-content:center;gap:10px;margin-top:16px;flex-wrap:wrap}
-.social a{display:inline-flex;align-items:center;gap:6px;padding:10px 14px;border-radius:999px;background:#fff;border:1.5px solid var(--line);font-weight:700;font-size:13px;text-decoration:none}
+.ok .pill{display:inline-block;margin-top:20px;background:#e3efe9;color:var(--em);font-weight:700;font-size:13px;padding:8px 14px;border-radius:999px}
+.ctas{display:grid;gap:10px;margin:22px auto 0;max-width:380px}
+.cta{display:flex;align-items:center;gap:12px;padding:13px 16px;border-radius:14px;background:#fff;border:1.5px solid var(--line);font-weight:700;font-size:14px;text-decoration:none;color:var(--ink);transition:border-color .15s,transform .1s}
+.cta:hover{border-color:var(--plum)}.cta:active{transform:scale(.99)}
+.cta .e{font-size:20px;width:26px;text-align:center}.cta .t{flex:1;text-align:left}.cta .a{color:var(--plum);font-weight:800}
+.cta.main{background:var(--plum);border-color:var(--plum);color:#fff}.cta.main .a{color:#fff}
 .foot{text-align:center;font-size:12px;color:var(--muted);padding:0 22px 28px}
 .strip{display:none}
 @media(min-width:900px){
@@ -117,7 +120,7 @@ const T={
   lNom:'Tu nombre (opcional)',lEm:'Tu email',
   consent:'Quiero recibir emails de Vuelve sobre el lanzamiento y novedades. Puedo darme de baja cuando quiera.',
   btn:'Apuntarme',eEm:'Ese email no parece válido.',eCon:'Marca la casilla para poder escribirte.',eNet:'No se ha podido guardar. Inténtalo de nuevo en un momento.',
-  okT:'¡Ya estás dentro!',okP:'Te escribiremos cuando abramos. Mientras, acompáñanos en el proceso.',okPill:'Sin spam. Solo lo importante.',
+  okT:'¡Ya estás dentro!',okP:'Te escribiremos cuando abramos. Mientras, acompáñanos en el proceso.',okPill:'Sin spam. Solo lo importante.',cApp:'Conoce la app Vuelve',cMail:'Escríbenos',
   privT:'Privacidad',
   priv:c=>`Responsables: el equipo de Vuelve. Usamos tu email, tu nombre (si lo das) y tus intereses solo para avisarte del lanzamiento y de novedades de Vuelve, con tu consentimiento como base. Se guardan en servidores de la UE (Irlanda) hasta que te des de baja. Puedes pedir acceso, corrección o borrado ${c?`escribiendo a <a href="mailto:${c}">${c}</a>`:'escribiéndonos por mensaje directo en nuestras redes'}, y reclamar ante la AEPD.`,
   foot:'Vuelve · Siempre se puede volver.'},
@@ -127,7 +130,7 @@ const T={
   lNom:'Your name (optional)',lEm:'Your email',
   consent:'I want to receive emails from Vuelve about the launch and news. I can unsubscribe anytime.',
   btn:'Join the list',eEm:'That email doesn\'t look valid.',eCon:'Tick the box so we can email you.',eNet:'Couldn\'t save it. Please try again in a moment.',
-  okT:'You\'re in!',okP:'We\'ll email you when we open. Meanwhile, follow along with our journey.',okPill:'No spam. Only what matters.',
+  okT:'You\'re in!',okP:'We\'ll email you when we open. Meanwhile, follow along with our journey.',okPill:'No spam. Only what matters.',cApp:'Discover the Vuelve app',cMail:'Email us',
   privT:'Privacy',
   priv:c=>`Controller: the Vuelve team. We use your email, your name (if given) and your interests only to tell you about Vuelve's launch and news, based on your consent. They're stored on EU servers (Ireland) until you unsubscribe. You can ask for access, correction or deletion ${c?`by writing to <a href="mailto:${c}">${c}</a>`:'by sending us a direct message on our socials'}, and complain to the Spanish data protection authority (AEPD).`,
   foot:'Vuelve · You can always come back.'}};
@@ -143,9 +146,17 @@ function render(){
 }
 document.querySelectorAll('.lang button').forEach(b=>b.onclick=()=>{L=b.dataset.l;try{localStorage.setItem('vuelve_lang',L)}catch(e){}render()});
 document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{const i=c.dataset.i;sel.has(i)?sel.delete(i):sel.add(i);c.classList.toggle('on',sel.has(i));c.setAttribute('aria-pressed',sel.has(i))});
+function ctasHTML(){
+  const D=T[L],R=REDES,c=[[ '../','🌿',D.cApp,'main']];
+  if(/^https:\/\//.test(R.instagram))c.push([R.instagram,'📸','Instagram']);
+  if(/^https:\/\//.test(R.youtube))c.push([R.youtube,'▶️','YouTube']);
+  if(/^https:\/\//.test(R.tiktok))c.push([R.tiktok,'🎵','TikTok']);
+  if(/^[^@\s]+@[^@\s]+$/.test(CONTACTO))c.push(['mailto:'+CONTACTO,'✉️',D.cMail]);
+  return `<div class="ctas">${c.map(([u,e,t,k])=>`<a class="cta ${k||''}" href="${u}" ${u.startsWith('http')?'target="_blank" rel="noopener"':''}><span class="e">${e}</span><span class="t">${t}</span><span class="a">→</span></a>`).join('')}</div>`;
+}
 function showOk(){
-  const D=T[L];const links=Object.entries(REDES).filter(([,u])=>/^https:\/\//.test(u));
-  document.getElementById('f').outerHTML=`<div class="ok" id="f"><div class="big">💜</div><h3>${D.okT}</h3><p>${D.okP}</p>${links.length?`<div class="social">${links.map(([k,u])=>`<a href="${u}" target="_blank" rel="noopener">${{instagram:'📸 Instagram',tiktok:'🎵 TikTok',youtube:'▶️ YouTube'}[k]}</a>`).join('')}</div>`:''}<span class="pill">${D.okPill}</span></div>`;
+  const D=T[L];
+  document.getElementById('f').outerHTML=`<div class="ok" id="f"><div class="big">💜</div><h3>${D.okT}</h3><p>${D.okP}</p>${ctasHTML()}<span class="pill">${D.okPill}</span></div>`;
 }
 document.getElementById('f').addEventListener('submit',async e=>{
   e.preventDefault();const D=T[L],err=document.getElementById('err'),go=document.getElementById('go');err.textContent='';
