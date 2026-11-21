@@ -49,6 +49,10 @@ nav.tabs{transform:translateZ(0)}
 .animos button.on{background:var(--abg);border-color:var(--afg);color:var(--afg)}
 .apill{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-weight:700;font-size:13px}.apill.sm{padding:3px 9px;font-size:11.5px}
 #balcard .ar{width:34px;height:34px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:15px}
+.cprow{display:flex;align-items:center;gap:10px;justify-content:space-between;background:var(--tile);border:1.5px solid var(--line);border-radius:14px;padding:10px 12px;margin:8px 0}
+.cprow small{display:block;font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--soft)}.cprow code{font-size:12px;word-break:break-all;color:var(--ink)}
+.psteps{margin:10px 0 0 18px;line-height:1.6;font-size:14px}.psteps li{margin-top:8px}.psteps code{background:var(--tile);padding:1px 5px;border-radius:6px;font-size:12px}
+.pstate{margin-top:12px;background:#eef6f1;border:1.5px solid #cfe5d8;color:#2f5f48;border-radius:14px;padding:10px 14px;font-weight:600;font-size:13px}
 .blist{margin-top:10px}.bday{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}.bday.fut{opacity:.4}
 .bday .bd{width:38px;text-align:center;flex-shrink:0}.bday .bd b{display:block;font-size:12px}.bday .bd small{color:var(--muted);font-size:11px}.bday .bc{flex:1;min-width:0}
 
@@ -670,6 +674,7 @@ async function sbLoadUser(user){
   delete u.pass;u.email=email;u.logs=u.logs||{};u.weights=u.weights||[];u.favs=u.favs||[];u.custom=u.custom||[];
   MEM={users:{[email]:u},session:email,retos:{}};saveLocal();
   CLOUD.db='sb';CLOUD.res={};setSync('cloud');
+  setTimeout(()=>pasosAutoSync().catch(()=>{}),400);
   await sbLoadRetos();flush();
 }
 async function sbPushResumen(){
@@ -2155,6 +2160,59 @@ function maybeBalanceSemana(){
   setTimeout(go,1200);
 }
 
+/* ---------- Pasos automáticos (Atajo de iPhone) ---------- */
+const PAUTO={token:null,estado:null,checked:false};
+async function pasosAutoSync(){
+  if(!SERVER||!SB||!SBUID)return false;
+  const desde=addDays(today(),-45);
+  const {data,error}=await SB.from('pasos_auto').select('fecha,pasos,updated_at').gte('fecha',desde);
+  if(error||!data)return false;
+  const u=me();if(!u)return false;let ch=false;
+  for(const r of data){const l=dayLog(u,r.fecha);
+    if(l.pasos===r.pasos&&l.pasosAuto)continue;
+    if(!l.pasos||l.pasosAuto||r.pasos>=l.pasos){const antes=l.pasos||0;l.pasos=r.pasos;l.pasosAuto=true;ch=true;
+      if(r.fecha===today()&&antes<(u.profile?.objPasos||8000)&&r.pasos>=(u.profile?.objPasos||8000)&&!l.pasosCelebrado){l.pasosCelebrado=true;setTimeout(()=>celebrate('👟','¡Objetivo de pasos cumplido!',`${fmt(r.pasos)} pasos hoy`,{n:110,ms:3200}),900)}}}
+  if(ch){save();if(!SCREEN.busy&&$('#view')&&!document.querySelector('.modal'))renderApp()}
+  return ch;
+}
+async function pasosEstado(){
+  if(!SERVER||!SB)return null;const {data}=await SB.from('pasos_token').select('creado,ultimo_uso').maybeSingle();PAUTO.estado=data||null;PAUTO.checked=true;return data;
+}
+function abrirPasosAuto(){
+  const ep=SUPABASE_URL+'/rest/v1/rpc/registrar_pasos';
+  const m=modal(`<div class="top"><b>⚡ Pasos automáticos</b><button class="close">✕</button></div><div id="pab"></div>`,'wide');
+  const cp=(id,val,lab)=>`<div class="cprow"><div><small>${lab}</small><code id="${id}">${esc(val)}</code></div><button class="btn soft sm" data-cp="${id}">Copiar</button></div>`;
+  const draw=()=>{const est=PAUTO.estado;
+    m.querySelector('#pab').innerHTML=`<p class="muted" style="margin-top:10px;line-height:1.6">Con un <b>Atajo de iPhone</b>, tus pasos de la app Salud llegan solos a Vuelve varias veces al día. Se configura una vez (unos 3 minutos) y luego no tienes que tocar nada.</p>
+      <div class="pstate">${est?`✅ Conectado${est.ultimo_uso?` · último envío: ${new Date(est.ultimo_uso).toLocaleString('es-ES',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}`:' · aún no ha llegado ningún envío'}`:'Aún no está conectado.'}</div>
+      <p class="eyebrow" style="margin-top:20px">1 · Tu código personal</p>
+      ${PAUTO.token?`<p class="small muted" style="margin-top:6px">Cópialo ahora: por seguridad solo se muestra una vez.</p>${cp('ptk',PAUTO.token,'Código')}`:
+        `<p class="small muted" style="margin-top:6px">${est?'Ya tienes un código. Si creas uno nuevo, el anterior deja de funcionar y tendrás que cambiarlo en el atajo.':'Crea tu código para que el atajo envíe los pasos solo a tu cuenta.'}</p><button class="btn block" style="margin-top:10px" id="pgen">${est?'Crear un código nuevo':'Crear mi código'}</button>`}
+      <p class="eyebrow" style="margin-top:22px">2 · Crea el atajo</p>
+      <ol class="psteps">
+        <li>Abre la app <b>Atajos</b> → <b>+</b> (nuevo atajo) y llámalo <b>Pasos a Vuelve</b>.</li>
+        <li>Añade la acción <b>Buscar muestras de salud</b>: tipo <b>Pasos</b>, añade el filtro <b>Fecha de inicio · es hoy</b> y en <b>Agrupar por</b> elige <b>Día</b>.</li>
+        <li>Añade <b>Calcular estadísticas</b>: <b>Suma</b> de <i>Muestras de salud</i>.</li>
+        <li>Añade <b>Obtener contenido de URL</b> y pega esta dirección:${cp('pep',ep,'URL')}</li>
+        <li>En esa acción toca <b>Mostrar más</b>: Método <b>POST</b>. En <b>Cabeceras</b> añade:${cp('pak',SUPABASE_KEY,'apikey')}y otra cabecera <code>Content-Type</code> = <code>application/json</code>.</li>
+        <li>En <b>Cuerpo de la solicitud</b> elige <b>JSON</b> y añade dos campos: <code>p_token</code> (Texto) = tu código, y <code>p_pasos</code> (Número) = la variable <i>Estadísticas</i>.</li>
+        <li>Pulsa ▶︎ para probarlo. La primera vez te pedirá permiso para leer Salud: <b>Permitir</b>. Si todo va bien verás <b>"OK · 8.450 pasos el 21/11"</b>.</li>
+      </ol>
+      <p class="eyebrow" style="margin-top:22px">3 · Que se envíe solo</p>
+      <ol class="psteps">
+        <li>En Atajos ve a <b>Automatización</b> → <b>+</b> → <b>Hora del día</b>.</li>
+        <li>Elige por ejemplo <b>23:30</b>, <b>Diariamente</b>, y marca <b>Ejecutar inmediatamente</b> (sin preguntar).</li>
+        <li>Selecciona el atajo <b>Pasos a Vuelve</b>. Si quieres verlos durante el día, crea otras a las <b>14:00</b> y <b>19:00</b>.</li>
+      </ol>
+      <p class="tiny muted" style="margin-top:12px">Si llevas Apple Watch y el número no coincide con Salud, revisa que en el paso 2 esté "Agrupar por: Día". Los pasos que lleguen solos sustituyen a los que escribiste a mano ese día si son más. Solo funciona en iPhone.</p>
+      <button class="btn soft block" style="margin-top:14px" id="pref">Comprobar ahora</button>`;
+    m.querySelectorAll('[data-cp]').forEach(b=>b.onclick=async()=>{const t=m.querySelector('#'+b.dataset.cp).textContent;try{await navigator.clipboard.writeText(t);b.textContent='¡Copiado!';setTimeout(()=>b.textContent='Copiar',1500)}catch(e){toast('Mantén pulsado el texto para copiarlo')}});
+    const g=m.querySelector('#pgen');if(g)g.onclick=async()=>{g.disabled=true;g.textContent='Creando…';const {data,error}=await SB.rpc('crear_token_pasos');if(error){toast(sbErr(error));g.disabled=false;return}PAUTO.token=data;await pasosEstado();draw()};
+    m.querySelector('#pref').onclick=async()=>{await pasosEstado();const ch=await pasosAutoSync();draw();toast(ch?'Pasos actualizados ✓':PAUTO.estado?.ultimo_uso?'Todo al día ✓':'Aún no ha llegado ningún envío')};
+  };
+  draw();pasosEstado().then(draw);
+}
+
 /* ---------- Bienvenida diaria ---------- */
 function maybeWelcome(){
   const u=me();if(!u||!u.profile)return;
@@ -2249,7 +2307,8 @@ function vMov(){
     <div class="row" style="margin-top:10px;gap:8px"><input class="in" id="ppas" type="text" inputmode="numeric" placeholder="Ej. 8500" value="${pasos||''}" style="font-size:20px;font-weight:800">
       <button class="btn" id="psave" style="padding:12px 16px">Guardar</button></div>
     <div class="minibar" style="margin-top:12px"><i style="width:${Math.min(pasos/objP*100,100)}%;background:${pasos>=objP?'var(--base)':'var(--plum)'}"></i></div>
-    <p class="small muted" style="margin-top:8px">${pasos?`${fmt(pasos)} pasos · ${fmt1(pasosKm(u,pasos))} km · ${fmt(pasosKcal(u,log))} kcal${pasos>=objP?' · 🎉 ¡objetivo cumplido!':` · te faltan ${fmt(objP-pasos)}`}`:'Copia los pasos que marca la app Salud de tu iPhone o tu reloj.'}</p>
+    <p class="small muted" style="margin-top:8px">${log.pasosAuto?'⚡ ':''}${pasos?`${fmt(pasos)} pasos · ${fmt1(pasosKm(u,pasos))} km · ${fmt(pasosKcal(u,log))} kcal${pasos>=objP?' · 🎉 ¡objetivo cumplido!':` · te faltan ${fmt(objP-pasos)}`}`:'Copia los pasos que marca la app Salud de tu iPhone o tu reloj.'}</p>
+    ${SERVER?`<button class="btn ghost block" style="margin-top:12px" id="pauto">⚡ ${PAUTO.estado?'Pasos automáticos activados':'Que lleguen solos desde mi iPhone'}</button>`:''}
   </div>
   <button class="btn block" style="margin-top:14px" id="madd">+ Añadir actividad</button>
   <div class="card"><p class="eyebrow">Actividad del día</p>
@@ -2259,6 +2318,8 @@ function vMov(){
   </div><p class="foot">Calorías estimadas con fórmulas del ACSM y valores MET, según tu peso (${fmt1(+u.profile.peso)} kg). Si tu máquina marca calorías, puedes usar las suyas.</p>`;
   bindArrows(()=>UI.date=addDays(UI.date,-1),()=>UI.date=addDays(UI.date,1),vMov);
   $('#madd').onclick=openActividad;
+  if($('#pauto'))$('#pauto').onclick=abrirPasosAuto;
+  if(SERVER&&!PAUTO.checked)pasosEstado().then(e=>{if(e&&UI.view==='movimiento'&&$('#pauto'))$('#pauto').textContent='⚡ Pasos automáticos activados'});
   const savePasos=()=>{const v=Math.round(num($('#ppas').value)||0);if(v<0||v>150000){toast('Número de pasos no válido');return}
     const lg=dayLog(u,UI.date),antes=lg.pasos||0,obj=u.profile.objPasos||8000;lg.pasos=v||undefined;save();vMov();
     if(v>=obj&&antes<obj)celebrate('👟','¡Objetivo de pasos cumplido!',`${fmt(v)} pasos hoy`,{n:110,ms:3200});else toast(v?'Pasos guardados ✓':'Pasos borrados')};
@@ -2974,6 +3035,7 @@ let LAST_REFRESH=0;
 async function refreshFromServer(){
   if(!SERVER||!SB||!SBUID||!CLOUD.db||CLOUD.timer||CLOUD.busy||SCREEN.busy||document.querySelector('.modal'))return;
   if(Date.now()-LAST_REFRESH<20000)return;LAST_REFRESH=Date.now();
+  pasosAutoSync().catch(()=>{});
   try{const {data}=await SB.from('user_docs').select('id,body');if(!data)return;
     const changed=data.some(r=>{const l=CLOUD.last[r.id];return !l||JSON.parse(l).json!==r.body?.json});
     if(!changed||CLOUD.timer||CLOUD.busy||document.querySelector('.modal'))return;
