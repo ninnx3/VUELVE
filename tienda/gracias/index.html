@@ -41,11 +41,11 @@ const qs=new URLSearchParams(location.search),S=qs.get('s')||'';
 let L=qs.get('l')==='en'?'en':qs.get('l')==='es'?'es':(()=>{try{const s=localStorage.getItem('vuelve_lang');if(s==='es'||s==='en')return s}catch(e){}return /^es\b/i.test(navigator.language||'es')?'es':'en'})();
 const T={es:{wait:'Confirmando tu pago…',ok:'¡Gracias por tu compra!',okP:e=>`Ya puedes descargarlo. El recibo de Stripe llegará a <b>${e}</b>.`,
   tips:'<b>Guarda esta página</b> en favoritos para volver a descargarlo. Si creas tu cuenta en Vuelve con este mismo email, lo tendrás siempre en <b>Mis descargas</b>.',
-  slow:'Tu pago se está procesando. Si ya te han cobrado, recarga esta página en un minuto.',bad:'No encontramos esta compra. Si te han cobrado, escríbenos y lo solucionamos.',
+  slow:'Tu pago se está procesando. Si ya te han cobrado, recarga esta página en un minuto.',bad:'No encontramos esta compra. Si te han cobrado, escríbenos a <a href="mailto:vuelve.contact@gmail.com">vuelve.contact@gmail.com</a> y lo solucionamos.',
   noFiles:'Aún estamos preparando los archivos de este producto. Te escribiremos en cuanto estén.',shop:'Volver a la tienda',test:'Compra de prueba',dl:'Descargar'},
  en:{wait:'Confirming your payment…',ok:'Thank you for your purchase!',okP:e=>`You can download it now. Stripe's receipt is on its way to <b>${e}</b>.`,
   tips:'<b>Bookmark this page</b> to download again later. If you create a Vuelve account with this same email, you\'ll always find it in <b>My downloads</b>.',
-  slow:'Your payment is being processed. If you\'ve been charged, reload this page in a minute.',bad:'We couldn\'t find this purchase. If you were charged, write to us and we\'ll sort it out.',
+  slow:'Your payment is being processed. If you\'ve been charged, reload this page in a minute.',bad:'We couldn\'t find this purchase. If you were charged, email <a href="mailto:vuelve.contact@gmail.com">vuelve.contact@gmail.com</a> and we\'ll sort it out.',
   noFiles:'We\'re still preparing this product\'s files. We\'ll email you as soon as they\'re ready.',shop:'Back to the shop',test:'Test purchase',dl:'Download'}};
 const D=T[L];document.documentElement.lang=L;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -59,7 +59,7 @@ async function go(intento=0){
   const name=(L==='en'&&j.producto.nombre_en)||j.producto.nombre;
   c.innerHTML=`<div class="big">💜</div><h1>${D.ok}</h1><p><b style="color:var(--ink)">${esc(name)}</b></p><p style="margin-top:6px">${D.okP(esc(j.email))}</p>${j.modo==='test'?`<span class="test">${D.test}</span>`:''}
    ${j.archivos.length?`<div class="files">${j.archivos.map(f=>`<a class="file" href="${esc(f.url)}" rel="noopener"><span class="e">${icon(f.nombre)}</span><span class="n">${esc(f.nombre)}</span><span class="go">${D.dl} ↓</span></a>`).join('')}</div>`:`<p style="margin-top:16px">${D.noFiles}</p>`}
-   <div class="tips">${D.tips}</div><a class="btn" href="../">${D.shop}</a>`;
+   <div class="tips">${D.tips}</div><a class="btn" href="../">${D.shop}</a><p style="margin-top:14px;font-size:12px">${L==='en'?'Questions?':'¿Dudas?'} <a href="mailto:vuelve.contact@gmail.com">vuelve.contact@gmail.com</a></p>`;
 }
 go();
 </script>
