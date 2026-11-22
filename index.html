@@ -169,7 +169,7 @@ nav.tabs button.on{background:var(--lilac)}
 nav.tabs button:not(.on){color:var(--muted)}
 
 /* Hero */
-.hero{padding-top:34px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.hero{padding-top:34px;display:flex;justify-content:space-between;align-items:center;gap:12px}
 .hero .eyebrow{margin-bottom:8px}
 .strip{display:flex;justify-content:space-between;align-items:center;background:var(--lilac);border-radius:12px;padding:12px 16px;margin-top:22px;font-size:13px;color:var(--muted);font-weight:500}
 .strip small{font-size:10px}
@@ -327,7 +327,7 @@ table.calc td:last-child{text-align:right;font-weight:700}
 .plato .pie{width:66px;height:66px;border-radius:50%;box-shadow:inset 0 0 0 3px rgba(255,255,255,.55)}
 @media(min-width:900px){.plato{width:96px;height:96px}.plato .pie{width:72px;height:72px}}
 .emac{margin-top:10px}.ebar2{display:flex;height:8px;border-radius:999px;overflow:hidden;background:var(--line);gap:2px}.ebar2 i{display:block;height:100%}
-.emt{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:6px;font-size:11.5px;color:var(--muted);font-weight:600}.emt b{color:var(--ink);font-weight:800}.emt i{font-style:normal;font-weight:800}
+.emt{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;line-height:1.2;margin-top:6px;font-size:11.5px;color:var(--muted);font-weight:600}.emt b{color:var(--ink);font-weight:800;font-size:15px}.emt span{display:inline-flex;align-items:center;gap:3px}.emt i{font-style:normal;font-weight:800}
 .enfopts{margin-top:16px}
 @media(min-width:900px){#view.v-plan>.card.enfcard{grid-column:1/-1}.enfopts{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.enfopts .opt{height:100%;box-sizing:border-box}}
 .plan{border-radius:16px;padding:18px;background:var(--tile);margin-top:12px}
@@ -1327,7 +1327,7 @@ function obInvitesHTML(){
   const u=me(),inv=pendingInvites(u),joined=OB_JOINED.map(id=>load().retos?.[id]).filter(Boolean);
   if(!inv.length&&!joined.length)return '';
   const quien=r=>esc(r.nombres?.[r.owner]||load().users[r.owner]?.nombre||r.owner.split('@')[0]);
-  return inv.map(r=>`<div class="card obinv"><div class="row" style="align-items:flex-start;gap:12px"><span style="font-size:30px">${ico('menu-invitar','mi')}</span><div style="flex:1">
+  return inv.map(r=>`<div class="card obinv"><div class="row" style="align-items:center;gap:12px"><span style="font-size:30px">${ico('menu-invitar','mi')}</span><div style="flex:1">
       <b>${quien(r)} te ha invitado a «${esc(r.nombre)}»</b>
       <p class="small muted" style="margin-top:4px">${RETO_TIPOS[r.tipo].ic} ${RETO_TIPOS[r.tipo].t} · ${fmtD(r.inicio)} – ${fmtD(retoFin(r))} · ${r.dias} días</p>
       <div class="row" style="gap:8px;margin-top:10px;flex-wrap:wrap"><button class="btn sm" data-objoin="${r.id}">Unirme al reto</button><button class="btn ghost sm" data-oblater="${r.id}">Más tarde</button></div></div></div></div>`).join('')
@@ -2231,7 +2231,7 @@ function animoCardHTML(u,date){
   const l=u.logs[date];if(!l||(!l.animo&&!l.nota))return '';
   const a=animoOf(l.animo);
   return `<div class="card animocard"><div class="row between"><p class="eyebrow">Cómo te fue</p><button class="btn ghost sm" id="aned">✎ Editar</button></div>
-    <div class="row" style="gap:12px;margin-top:10px;align-items:flex-start">${a?`<span class="apill" style="background:${a[3]};color:${a[4]}">${a[1]} ${a[2]}</span>`:''}</div>
+    <div class="row" style="gap:12px;margin-top:10px;align-items:center">${a?`<span class="apill" style="background:${a[3]};color:${a[4]}">${a[1]} ${a[2]}</span>`:''}</div>
     ${l.nota?`<p style="margin-top:10px;line-height:1.6;white-space:pre-wrap">${esc(l.nota)}</p>`:''}</div>`;
 }
 // Balance de una semana (lunes a domingo)
