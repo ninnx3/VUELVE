@@ -423,6 +423,7 @@ textarea.in{min-height:90px;resize:vertical;font-size:11px;font-family:ui-monosp
 .wgrid .rh span{font-size:20px}
 .dish{background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px;cursor:pointer;display:flex;flex-direction:column;gap:6px;transition:transform .12s,box-shadow .12s;text-align:left;min-height:118px;position:relative}
 .dish:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(55,35,51,.08);border-color:var(--lilac-b)}
+.hasfoto{background-size:cover!important;background-position:center!important;font-size:0!important}.rthumb{width:48px;height:48px;border-radius:12px;background:#eee center/cover;flex-shrink:0;display:inline-block}
 .dish .ph{width:100%;aspect-ratio:16/10;border-radius:11px;display:grid;place-items:center;font-size:30px}
 .dish b{font-size:11.5px;line-height:1.25;font-weight:700}
 .dish small{font-size:10px;color:var(--muted);font-weight:600}
@@ -2777,7 +2778,7 @@ function vMenu(){
   const rows=[...pr.comidas];const hasCap=plan.semana.some(s=>s.capricho);if(hasCap)rows.push('Capricho');
   const mealIc=n=>n==='Capricho'?ico('comida-capricho','mi'):n==='Cheatmeal'?ico('comida-cheatmeal','mi'):MEALS.find(m=>m[0]===n)?.[1]||ico('comida-almuerzo','mi');
   const dish=(id,slot)=>{const r=R_(id);if(!r)return `<div class="dish empty">—</div>`;const k=plan.recetas.indexOf(r)%5;
-    return `<button class="dish ${r.cheat||slot==='Capricho'?'cheat':''}" data-rec="${r.id}">${r.cheat||slot==='Capricho'?'<span class="badge">'+ico('comida-capricho','mi')+' capricho</span>':''}<div class="ph ph${k}">${esc(r.emoji)}</div><b>${esc(r.nombre)}</b><small>${r.kcal} kcal · ${r.p}g P</small></button>`};
+    return `<button class="dish ${r.cheat||slot==='Capricho'?'cheat':''}" data-rec="${r.id}">${r.cheat||slot==='Capricho'?'<span class="badge">'+ico('comida-capricho','mi')+' capricho</span>':''}${recPh(r,'ph ph'+k)}<b>${esc(r.nombre)}</b><small>${r.kcal} kcal · ${r.p}g P</small></button>`};
   const ws=weekStart(today());
   const MOBV=innerWidth<=640;
   if(MP.day==null)MP.day=(new Date().getDay()+6)%7;
@@ -2787,7 +2788,7 @@ function vMenu(){
     <div class="card" style="padding:16px"><div class="row between"><div><b style="font-size:17px">${s.dia}</b>${addDays(ws,MP.day)===today()?' <span class="pill">hoy</span>':''}</div><span class="small" style="font-weight:700;color:${ok?'var(--green)':'#a86a2d'}">${fmt(t.k)} / ${fmt(tg.kcal)} kcal</span></div>
     <p class="tiny muted" style="margin-top:4px">P ${t.p}/${tg.p} g · C ${t.c}/${tg.c} g · G ${t.g}/${tg.g} g</p>
     <div class="mplist">${items.map(([slot,id])=>{const r=R_(id);if(!r)return '';const k=plan.recetas.indexOf(r)%5,ch=r.cheat||slot==='Capricho';
-      return `<button class="dish ${ch?'cheat':''}" data-rec="${r.id}">${ch?'<span class="badge">🍫 capricho</span>':''}<div class="ph ph${k}">${esc(r.emoji)}</div><div style="min-width:0"><div class="slot">${mealIc(slot)} ${slot}</div><b style="display:block;margin-top:2px">${esc(r.nombre)}</b><small>${r.kcal} kcal · P ${r.p} · C ${r.c} · G ${r.g}</small></div></button>`}).join('')}</div></div>
+      return `<button class="dish ${ch?'cheat':''}" data-rec="${r.id}">${ch?'<span class="badge">🍫 capricho</span>':''}${recPh(r,'ph ph'+k)}<div style="min-width:0"><div class="slot">${mealIc(slot)} ${slot}</div><b style="display:block;margin-top:2px">${esc(r.nombre)}</b><small>${r.kcal} kcal · P ${r.p} · C ${r.c} · G ${r.g}</small></div></button>`}).join('')}</div></div>
     <p class="tiny muted" style="margin-top:6px">Toca un día para ver su menú · toca un plato para ver la receta. Verde = día dentro de ±5% de tus calorías.</p>`};
   $('#view').innerHTML=photoHero(imgBase()+'img/menu-cover.webp','Tu plan de comidas','Tu semana,','preparada.',`${esc(u.nombre)} · Objetivo de ${fmt(targetFor(u,today()).kcal)} kcal/día`,`<button class="btn pbtn" id="mpre">Ajustar preferencias</button>`)+`
   <div class="strip"><span>Mealprep · ${pr.comidas.join(', ')}${pr.cheatDias.length?' · '+pr.cheatDias.length+' día'+(pr.cheatDias.length>1?'s':'')+' de capricho':''}</span><small>Creado el ${fmtD(mp.creado)}</small></div>
@@ -2812,7 +2813,7 @@ function vMenu(){
       try{await navigator.clipboard.writeText(t);toast('Lista copiada ✓')}catch(e){toast('No se pudo copiar')}}};
   if($('#notas'))$('#notas').onclick=()=>modal(`<div class="top"><b>${ico('consejo','mi')} Consejos de batch cooking</b><button class="close">✕</button></div><p style="margin-top:14px;line-height:1.6">${esc(plan.notas)}</p>`);
   $('#recs').onclick=()=>{const m=modal(`<div class="top"><b>📖 Recetas de la semana</b><button class="close">✕</button></div>
-    <div style="margin-top:12px">${plan.recetas.map(r=>`<div class="rcard" data-r2="${r.id}"><div class="row"><span style="font-size:26px">${esc(r.emoji)}</span><div><b>${esc(r.nombre)}</b><small>${esc(r.tipo)} · ${r.kcal} kcal · P ${r.p} · C ${r.c} · G ${r.g}</small></div></div><span class="plus" style="display:grid;place-items:center">›</span></div>`).join('')}</div>`);
+    <div style="margin-top:12px">${plan.recetas.map(r=>`<div class="rcard" data-r2="${r.id}"><div class="row">${recThumb(r)}<div><b>${esc(r.nombre)}</b><small>${esc(r.tipo)} · ${r.kcal} kcal · P ${r.p} · C ${r.c} · G ${r.g}</small></div></div><span class="plus" style="display:grid;place-items:center">›</span></div>`).join('')}</div>`);
     m.querySelectorAll('[data-r2]').forEach(b=>b.onclick=()=>{m.remove();openRecipe(R_(b.dataset.r2))})};
 }
 
@@ -2820,7 +2821,7 @@ function openRecipe(r){
   if(!r)return;
   const u=me(),k=me().mealprep.plan.recetas.indexOf(r)%5;
   const m=modal(`<div class="recipe"><div class="top"><b>${esc(r.tipo||'Receta')}${r.cheat?' · 🍫 capricho':''}</b><button class="close">✕</button></div>
-    <div class="hero-ph ph${k}">${esc(r.emoji)}</div>
+    ${recPh(r,'hero-ph ph'+k)}
     <h3 class="h2" style="font-size:24px;margin-top:16px">${esc(r.nombre)}</h3>
     ${r.descripcion?`<p class="muted small" style="margin-top:6px">${esc(r.descripcion)}</p>`:''}
     <div class="plan" style="margin-top:14px"><div class="kc" style="font-size:32px">${r.kcal}<small> kcal / ración</small></div>
@@ -3100,7 +3101,7 @@ function packPDF(recs,title,sub){
   .cover h1{font-size:40pt;line-height:1.02;font-weight:800;letter-spacing:-1px}.cover p{font-size:14pt;margin-top:5mm;opacity:.92}.cover .n{display:inline-block;margin-top:9mm;border:1px solid rgba(255,255,255,.6);border-radius:99px;padding:2mm 5mm;font-size:10pt;font-weight:700;letter-spacing:1.5px;text-transform:uppercase}
   .ey{font-size:9pt;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#744a69}h2{font-size:24pt;font-weight:800;line-height:1.1;margin:2mm 0 6mm}
   .idx li{display:flex;gap:4mm;align-items:baseline;padding:3mm 0;border-bottom:1px solid #e2d4de;font-size:11.5pt}.idx li span:nth-child(2){flex:1}.idx .k{color:#744a69;font-weight:700;font-size:10pt}
-  .rh{display:flex;gap:5mm;align-items:center}.rh .em{font-size:34pt}.desc{color:#5d4a59;font-size:11pt;margin-top:2mm}
+  .rh{display:flex;gap:5mm;align-items:center}.rfoto{width:34mm;height:34mm;border-radius:6mm;object-fit:cover;flex-shrink:0}.rh .em{font-size:34pt}.desc{color:#5d4a59;font-size:11pt;margin-top:2mm}
   .mac{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm;margin:7mm 0}.mac div{background:#f1e8f1;border-radius:4mm;padding:3.5mm;text-align:center}.mac b{display:block;font-size:16pt;color:#744a69}.mac span{font-size:8.5pt;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#5d4a59}.mac div:first-child{background:#744a69}.mac div:first-child b,.mac div:first-child span{color:#fff}
   .meta{font-size:9.5pt;color:#5d4a59;margin-bottom:6mm}.cols{display:grid;grid-template-columns:62mm 1fr;gap:9mm}
   h3{font-size:10pt;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#744a69;margin-bottom:3mm}
@@ -3114,7 +3115,7 @@ function packPDF(recs,title,sub){
   <div class="pg cover"><div class="in"><img src="${BASE}img/logo/vuelve-logo-blanco.svg" alt="Vuelve"><h1>${esc(title)}</h1>${sub?`<p>${esc(sub)}</p>`:''}<span class="n">${recs.length} ${recs.length===1?"receta":"recetas"} · macros por ración</span></div></div>
   <div class="pg"><div class="ey">Índice</div><h2>Lo que vas a cocinar</h2><ol class="idx" style="list-style:none;padding:0">${recs.map((r,i)=>`<li><span>${r.emoji}</span><span>${esc(r.nombre)}</span><span class="k">${r.kcal} kcal · ${esc(r.tipo)}</span></li>`).join('')}</ol>
   <div class="tip" style="margin-top:10mm"><b>Cómo usar este pack.</b> Cada receta está pensada para 1 ración, con sus calorías y macros. Si usas Vuelve, regístrala en tu diario y ajusta la cantidad a tu objetivo.</div><div class="ft"><span>Vuelve</span><span>Siempre se puede volver</span></div></div>
-  ${recs.map((r,i)=>`<div class="pg"><div class="ey">${esc(r.tipo)} · ${i+1}/${recs.length}</div><div class="rh"><span class="em">${r.emoji}</span><div><h2 style="margin:1mm 0 0">${esc(r.nombre)}</h2>${r.descripcion?`<p class="desc">${esc(r.descripcion)}</p>`:''}</div></div>
+  ${recs.map((r,i)=>`<div class="pg"><div class="ey">${esc(r.tipo)} · ${i+1}/${recs.length}</div><div class="rh">${recFotoRel(r)?`<img class="rfoto" src="${/^https?:/.test(recFotoRel(r))?recFotoRel(r):BASE+recFotoRel(r)}" alt="">`:`<span class="em">${r.emoji}</span>`}<div><h2 style="margin:1mm 0 0">${esc(r.nombre)}</h2>${r.descripcion?`<p class="desc">${esc(r.descripcion)}</p>`:''}</div></div>
    <div class="mac"><div><b>${Math.round(r.kcal)}</b><span>kcal</span></div><div><b>${n1(r.p)} g</b><span>Proteína</span></div><div><b>${n1(r.c)} g</b><span>Carbos</span></div><div><b>${n1(r.g)} g</b><span>Grasa</span></div></div>
    <p class="meta">⏱ ${r.prep_min||0} min de preparación · ${r.coccion_min||0} min de cocción${r.raciones_lote>1?` · ideal para preparar ${r.raciones_lote} raciones`:''}</p>
    <div class="cols"><div><h3>Ingredientes · 1 ración</h3><ul class="ing">${(r.ingredientes||[]).map(x=>`<li>${ing(x)}</li>`).join('')}</ul></div><div><h3>Preparación</h3><ol>${(r.pasos||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ol>
@@ -3152,6 +3153,12 @@ async function vLista(){
     try{await navigator.clipboard.writeText(t);toast('CSV copiado ✓')}catch(e){toast('No se pudo copiar')}};
 }
 
+/* Fotos de las recetas de la biblioteca (img/recetas/<archivo>.webp) */
+const RECETA_FOTOS={"Tortilla de claras con espinacas y tostada":"receta-tortilla-claras-espinacas","Tostada de pavo, queso fresco y tomate":"receta-tostada-pavo-queso-tomate","Bowl de skyr, plátano y crema de cacahuete":"receta-bowl-skyr-platano-cacahuete","Tostadas de aguacate y huevo":"receta-tostadas-aguacate-huevo"};
+const recFotoRel=r=>{if(!r)return '';if(r.foto)return r.foto;const f=RECETA_FOTOS[String(r.nombre||'').trim()];return f?'img/recetas/'+f+'.webp':''};
+const recFoto=r=>{const f=recFotoRel(r);return !f?'':/^https?:|^\//.test(f)?f:imgBase()+f};
+const recPh=(r,cls)=>{const u=recFoto(r);return u?`<div class="${cls} hasfoto" style="background-image:url('${u}')"></div>`:`<div class="${cls}">${esc(r.emoji)}</div>`};
+const recThumb=r=>{const u=recFoto(r);return u?`<span class="rthumb" style="background-image:url('${u}')"></span>`:`<span style="font-size:26px">${esc(r.emoji)}</span>`};
 // Panel de la biblioteca (solo administradoras)
 const LIBUI={filtro:'Todas',q:''};
 async function vBiblio(){
@@ -3165,7 +3172,7 @@ async function vBiblio(){
   <p class="small muted" style="margin-top:12px">Cuando alguien crea su Mealprep, Vuelve elige recetas publicadas que encajan con sus gustos y alergias y ajusta las cantidades a sus calorías. Escribe cada receta para <b>1 ración</b>.</p>
   <div class="tags" style="margin-top:12px">${['Todas',...LIB_TIPOS].map(t=>`<button class="tag ${LIBUI.filtro===t?'on':''}" data-lf="${t}">${t} · ${cnt(t)}</button>`).join('')}</div>
   <input class="in" id="lbq" placeholder="Buscar receta…" value="${esc(LIBUI.q)}" style="margin-top:10px">
-  <div class="card" style="margin-top:12px;padding:6px 14px">${list.length?list.map(r=>`<div class="rcard" data-le="${r.id}" style="cursor:pointer"><div class="row"><span style="font-size:26px">${esc(r.emoji)}</span><div><b>${esc(r.nombre)}</b><small>${esc(r.tipo)} · ${r.kcal} kcal · P ${r.p} · C ${r.c} · G ${r.g}</small></div></div><span class="pill ${r.publicada?'':'warn'}">${r.publicada?'Publicada':'Borrador'}</span></div>`).join(''):'<p class="muted" style="padding:14px 0">No hay recetas aquí todavía.</p>'}</div>
+  <div class="card" style="margin-top:12px;padding:6px 14px">${list.length?list.map(r=>`<div class="rcard" data-le="${r.id}" style="cursor:pointer"><div class="row">${recThumb(r)}<div><b>${esc(r.nombre)}</b><small>${esc(r.tipo)} · ${r.kcal} kcal · P ${r.p} · C ${r.c} · G ${r.g}</small></div></div><span class="pill ${r.publicada?'':'warn'}">${r.publicada?'Publicada':'Borrador'}</span></div>`).join(''):'<p class="muted" style="padding:14px 0">No hay recetas aquí todavía.</p>'}</div>
   <div class="card" style="margin-top:14px"><div class="h3">Importar recetas</div><p class="small muted" style="margin-top:4px">Pega el JSON de un menú creado con IA (botón “Copiar recetas para la biblioteca” del Menú en la versión de Claude). Entran como borradores para que las revises.</p>
   <textarea class="in" id="lbimp" style="min-height:80px;font-family:monospace;font-size:12px;margin-top:10px" placeholder='{"recetas":[...]}'></textarea><button class="btn soft block" style="margin-top:10px" id="lbimpb">Importar como borradores</button></div>`;
   $$('[data-lf]').forEach(b=>b.onclick=()=>{LIBUI.filtro=b.dataset.lf;vBiblio()});
