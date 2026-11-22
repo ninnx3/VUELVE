@@ -571,6 +571,14 @@ nav.tabs button.on{color:var(--plum);font-weight:700}
 .seg button .mi{width:22px;height:22px;vertical-align:-5px}
 .mtabs button.on svg,.seg button.on svg{color:#fff;fill:#fff}.mtabs button.on svg path,.seg button.on svg path{fill:#fff}
 .cmbars{gap:10px}.cmmac{background:color-mix(in srgb,var(--mc) 9%,#fff);border:1.5px solid color-mix(in srgb,var(--mc) 22%,#fff);border-radius:16px;padding:12px 14px}.cmmac .l{display:block;font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--mc)}.cmmac b{display:block;margin-top:4px;font-size:22px;font-weight:800;color:var(--mc);letter-spacing:-.5px}.cmmac b small{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:0}.cmb{height:8px;border-radius:99px;background:color-mix(in srgb,var(--mc) 15%,#fff);margin-top:8px;overflow:hidden}.cmb i{display:block;height:100%;border-radius:99px;background:var(--mc)}
+.ccard{display:block;width:100%;text-align:left;margin-top:16px}.cinvrow{display:flex;gap:14px;align-items:center}.cic{width:52px;height:52px;border-radius:16px;background:#fbe9ee;color:#c45c72;display:flex;align-items:center;justify-content:center;flex-shrink:0}.cic .mi{width:32px;height:32px}
+.cnow{display:flex;align-items:center;gap:16px;cursor:pointer;background:linear-gradient(135deg,var(--fb) 0%,#fff 85%);border:1.5px solid color-mix(in srgb,var(--fc) 25%,#fff);font:inherit;color:inherit}.cnow:hover{box-shadow:0 10px 30px -18px var(--fc)}.cmini{flex-shrink:0;display:flex}.ctx{flex:1;min-width:0}.ctl{font-size:19px;font-weight:800;letter-spacing:-.4px;margin-top:4px;color:var(--ink)}.cmeta{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;margin-top:6px;font-size:13px;color:var(--muted)}.cmeta>span{display:inline-flex;align-items:center;gap:6px}.cgo{font-size:28px;color:var(--fc);flex-shrink:0}
+.cener{display:inline-flex;gap:3px;vertical-align:middle}.cener i{width:7px;height:14px;border-radius:3px;background:#eadde6}.cener i.on{background:currentColor}.cnow .cener,.chead .cener{color:var(--fc)}
+.chead{display:flex;gap:18px;align-items:center;margin-top:14px;padding:16px;border-radius:20px;background:linear-gradient(135deg,var(--fb),#fff)}.chead svg{display:block}
+.csec{margin-top:16px;padding-top:14px;border-top:1px solid #f1e7ef}.csec h3{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:800;color:#6b4462}.csec h3 .mi{width:26px;height:26px}.csec p{margin-top:6px;font-size:14px;line-height:1.55}
+.cchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.cchip{background:#faf4f8;border:1px solid #ead9e5;border-radius:99px;padding:6px 12px;font-size:13px;font-weight:600}
+.cfases{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:18px}.cfases div{border-radius:12px;padding:8px;background:#faf6f9;text-align:center;opacity:.7}.cfases div.on{opacity:1;background:color-mix(in srgb,var(--c) 14%,#fff);outline:1.5px solid var(--c)}.cfases i{display:block;height:5px;border-radius:9px;background:var(--c);margin-bottom:6px}.cfases b{display:block;font-size:12px}.cfases small{font-size:10.5px;color:var(--muted)}
+@media(max-width:420px){.cnow{gap:12px}.cmini svg{width:76px;height:76px}.ctl{font-size:17px}}
 </style>
 </head>
 <body>
@@ -1370,6 +1378,122 @@ function microCardHTML(u,log){
     <p class="tiny muted" style="margin-top:12px">${cov<100?`Calculado con el ${cov}% de lo que has comido (en calorías): las entradas rápidas y algunos productos escaneados no traen micronutrientes. `:''}Valores de referencia diarios de la UE para adultos (vitamina D: EFSA). Datos: USDA SR28 y etiquetas de Open Food Facts. Es una estimación orientativa.</p></div>`;
 }
 
+/* ---------- Tu ciclo ---------- */
+const CICLO_FASES={
+  menstrual:{n:'Menstrual',col:'#c45c72',bg:'#fbe9ee',e:2,lema:'Tiempo de bajar el ritmo',
+    hor:'Los estrógenos y la progesterona están en su punto más bajo.',
+    energia:'Es normal tener menos energía, sobre todo los primeros días.',
+    animo:'Puedes sentirte más introspectiva o sensible. Date permiso para ir más despacio y descansar más.',
+    cuerpo:'Pierdes algo de hierro con el sangrado. Si tienes dolores, el calor local, moverte suave y beber agua suelen ayudar.',
+    come:['Lentejas (cocidas)','Espinacas','Ternera magra','Sardinas en lata','Salmón','Naranja','Chocolate negro 85%','Almendras'],
+    porque:'Hierro (lentejas, espinacas, carne) con vitamina C (naranja, kiwi, pimiento) para absorberlo mejor; omega‑3 (salmón, sardinas) y magnesio (chocolate negro, almendras), que podrían aliviar molestias.',
+    mueve:'Paseos, yoga, estiramientos o fuerza ligera si te apetece. Escucha a tu cuerpo.'},
+  folicular:{n:'Folicular',col:'#7b5ea7',bg:'#efe9f6',e:4,lema:'La energía va subiendo',
+    hor:'Los estrógenos suben poco a poco.',
+    energia:'Muchas mujeres notan más energía, ganas de hacer cosas y mejor ánimo día a día.',
+    animo:'Buen momento para empezar retos nuevos, planificar la semana o probar recetas.',
+    cuerpo:'Sueles tolerar mejor los entrenamientos intensos y te recuperas bien.',
+    come:['Yogur proteico (skyr)','Huevo entero','Pechuga de pollo','Quinoa (cocida)','Brócoli','Copos de avena','Fresas','Kiwi'],
+    porque:'Proteína para construir músculo, carbohidratos de calidad (avena, quinoa) para entrenar con energía y fruta y verdura fresca.',
+    mueve:'Ideal para fuerza y entrenos más exigentes: aprovecha para subir cargas.'},
+  ovulatoria:{n:'Ovulatoria',col:'#d4a72c',bg:'#faf3df',e:5,lema:'Tu pico de energía',
+    hor:'Los estrógenos llegan a su pico y la LH se dispara.',
+    energia:'Suele ser el momento de más energía, más fuerza y más ganas de socializar.',
+    animo:'Te puedes sentir más segura y comunicativa. ¡Aprovéchalo!',
+    cuerpo:'Algunas mujeres notan un pequeño dolor en un lado del bajo vientre o más flujo. Es normal.',
+    come:['Brócoli','Coliflor','Frambuesas','Arándanos azules','Salmón','Garbanzos (cocidos)','Aguacate','Tomate'],
+    porque:'Fibra y verduras crucíferas (brócoli, coliflor), frutos rojos antioxidantes y grasas buenas.',
+    mueve:'Buen momento para tus mejores marcas, HIIT o entrenos en grupo. Calienta bien.'},
+  lutea:{n:'Lútea',col:'#9a7c93',bg:'#f2ebf0',e:3,lema:'Cuídate un poco más',
+    hor:'Sube la progesterona; al final de la fase bajan las dos hormonas.',
+    energia:'La energía se mantiene al principio y va bajando hacia el final.',
+    animo:'Al final de la fase puede aparecer irritabilidad, ansiedad o más sensibilidad (síntomas premenstruales). No eres tú: son las hormonas.',
+    cuerpo:'Es normal tener algo más de hambre y antojos: los estudios ven que de media se come algo más en esta fase y el gasto en reposo sube un poco. También puede haber hinchazón o retención de líquidos.',
+    come:['Boniato (asado)','Plátano','Garbanzos (cocidos)','Yogur natural','Almendras','Chocolate negro 85%','Pan integral','Pavo (fiambre)'],
+    porque:'Carbohidratos complejos (boniato, pan integral) para la saciedad y el ánimo, magnesio y vitamina B6 (plátano, garbanzos, chocolate negro), calcio (yogur) y menos sal y cafeína si notas hinchazón.',
+    mueve:'Fuerza moderada, pilates, caminar o nadar. Si te notas más cansada, baja un poco la intensidad sin culpa.'},
+};
+function cicloDe(u){const c=u.profile&&u.profile.ciclo;return c&&c.activo&&(c.inicios||[]).length?c:null}
+function cicloDia(u,date){
+  const c=cicloDe(u);if(!c)return null;
+  const ini=[...c.inicios].sort().filter(d=>d<=date);if(!ini.length)return null;
+  const L=ini[ini.length-1],dur=Math.min(40,Math.max(21,+c.dur||28)),reg=Math.min(8,Math.max(2,+c.reg||5));
+  const dia=Math.round((parse(date)-parse(L))/864e5)+1,ov=dur-14;
+  let f='lutea';if(dia<=reg)f='menstrual';else if(dia<ov-1)f='folicular';else if(dia<=ov+1)f='ovulatoria';
+  const tarde=dia>dur,prox=addDays(L,dur),faltan=Math.round((parse(prox)-parse(date))/864e5);
+  return {c,L,dur,reg,ov,dia,f,F:CICLO_FASES[f],tarde,prox,faltan,pre:f==='lutea'&&faltan<=5&&faltan>=0};
+}
+function cicloMedia(inicios){const s=[...new Set(inicios)].sort(),d=[];for(let i=1;i<s.length;i++){const x=Math.round((parse(s[i])-parse(s[i-1]))/864e5);if(x>=18&&x<=45)d.push(x)}const last=d.slice(-6);return last.length?Math.round(last.reduce((a,b)=>a+b,0)/last.length):null}
+function cicloRueda(cd,size=120){
+  const r=size/2-10,C=2*Math.PI*r,seg=(a,b,col)=>{const len=(b-a+1)/cd.dur*C;return `<circle r="${r}" fill="none" stroke="${col}" stroke-width="12" stroke-dasharray="${Math.max(0,len-3).toFixed(1)} ${C.toFixed(1)}" stroke-dashoffset="${(-(a-1)/cd.dur*C).toFixed(1)}"/>`};
+  const ang=((Math.min(cd.dia,cd.dur)-0.5)/cd.dur)*2*Math.PI-Math.PI/2;
+  return `<svg viewBox="${-size/2} ${-size/2} ${size} ${size}" width="${size}" height="${size}" aria-hidden="true"><g transform="rotate(-90)">${seg(1,cd.reg,'#c45c72')}${seg(cd.reg+1,cd.ov-2,'#7b5ea7')}${seg(cd.ov-1,cd.ov+1,'#d4a72c')}${seg(cd.ov+2,cd.dur,'#b9a3b4')}</g>
+    <circle cx="${(r*Math.cos(ang)).toFixed(1)}" cy="${(r*Math.sin(ang)).toFixed(1)}" r="9" fill="#fff" stroke="${cd.F.col}" stroke-width="4"/>
+    <text y="2" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="${size/4.2}" font-weight="800" fill="#3a2f38">${cd.dia}</text><text y="${size/6.5}" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="${size/13}" font-weight="700" letter-spacing="1" fill="#9a7c93">DÍA</text></svg>`;
+}
+const cicloEnergia=n=>`<span class="cener" aria-label="Energía ${n} de 5">${[1,2,3,4,5].map(i=>`<i class="${i<=n?'on':''}"></i>`).join('')}</span>`;
+function cicloCardHTML(u,date){
+  if(u.profile.sexo!=='Mujer')return '';
+  const c=u.profile.ciclo;
+  if(!c||!c.activo){if(c&&c.oculto)return '';
+    return `<div class="card ccard cinv"><div class="cinvrow"><span class="cic">${ico('corazon','mi')}</span><div style="flex:1;min-width:0"><p class="cj">Nuevo · Tu ciclo</p><h2 class="ct" style="font-size:19px">Entiende tu energía según tu ciclo</h2><p class="small muted" style="margin-top:4px">Indica cuándo empezó tu última regla y te diremos en qué fase estás, cómo puede estar tu energía y qué alimentos te pueden sentar mejor.</p></div></div>
+      <div class="row" style="gap:8px;margin-top:14px;flex-wrap:wrap"><button class="btn" id="cset">Sincronizar mi ciclo</button><button class="btn ghost" id="cno">Ahora no</button></div></div>`}
+  const cd=cicloDia(u,date);if(!cd)return '';
+  if(c.anti)return `<div class="card ccard"><div class="cinvrow"><span class="cic">${ico('corazon','mi')}</span><div style="flex:1"><p class="cj">Tu ciclo</p><p class="small" style="margin-top:4px">Con anticoncepción hormonal no hay fases naturales, así que no mostramos predicciones. Puedes cambiarlo en <a href="#" id="cset">Ajustar mi ciclo</a>.</p></div></div></div>`;
+  return `<button class="card ccard cnow" id="copen" style="--fc:${cd.F.col};--fb:${cd.F.bg}">
+    <div class="cmini">${cicloRueda(cd,92)}</div>
+    <div class="ctx"><p class="cj" style="color:${cd.F.col}">Tu ciclo · ${cd.tarde?'Tu regla podría llegar ya':'Fase '+cd.F.n.toLowerCase()}</p>
+      <div class="ctl">${cd.tarde?'¿Te ha bajado?':esc(cd.pre?'Días premenstruales':cd.F.lema)}</div>
+      <div class="cmeta"><span>Energía ${cicloEnergia(cd.F.e)}</span><span>${cd.tarde?`Llevas ${cd.dia-cd.dur} día${cd.dia-cd.dur>1?'s':''} de retraso`:cd.faltan===0?'Tu regla podría llegar hoy':`Próxima regla en ${cd.faltan} día${cd.faltan>1?'s':''}`}</span></div></div>
+    <span class="cgo">›</span></button>`;
+}
+function bindCiclo(u){
+  const r=()=>{if(UI.view==='diario')vDiario()};
+  const s=$('#cset');if(s)s.onclick=e=>{e.preventDefault();openCicloAjustes(r)};
+  const n=$('#cno');if(n)n.onclick=()=>{u.profile.ciclo={...(u.profile.ciclo||{}),activo:false,oculto:true};save();r();toast('Puedes activarlo cuando quieras desde tu avatar → Tu ciclo')};
+  const o=$('#copen');if(o)o.onclick=()=>openCiclo(UI.date);
+}
+function openCicloAjustes(after){
+  const u=me(),c=u.profile.ciclo||{},last=(c.inicios||[]).slice().sort().pop()||'';
+  const m=modal(`<div class="top"><b>${ico('corazon','mi')} Ajustar mi ciclo</b><button class="close">✕</button></div>
+    <label class="f" style="margin-top:14px"><span>Primer día de tu última regla</span><input class="in" type="date" id="cl" max="${today()}" value="${last}"></label>
+    <div class="grid2"><label class="f"><span>Duración de tu ciclo (días)</span><input class="in dec" id="cdur" inputmode="numeric" value="${c.dur||28}"></label><label class="f"><span>Días de regla</span><input class="in dec" id="creg" inputmode="numeric" value="${c.reg||5}"></label></div>
+    <p class="tiny muted">Si no lo sabes, deja 28 y 5. Cada vez que marques «Me ha bajado la regla», calculamos tu media real.</p>
+    <label class="chk" style="margin-top:12px;display:flex;gap:10px;align-items:center"><input type="checkbox" id="canti" ${c.anti?'checked':''}> <span class="small">Uso anticoncepción hormonal (píldora, anillo, DIU hormonal, implante…)</span></label>
+    <p class="tiny muted" style="margin-top:12px">Tus datos del ciclo se guardan en tu cuenta igual que tu diario y solo los ves tú. Vuelve no es un método anticonceptivo ni de diagnóstico.</p>
+    <p class="err" id="cerr"></p>
+    <button class="btn block" id="csv" style="margin-top:12px">Guardar</button>
+    ${c.activo?'<button class="btn ghost block" id="coff" style="margin-top:8px">Desactivar el seguimiento del ciclo</button>':''}`);
+  m.querySelector('#csv').onclick=()=>{const L=m.querySelector('#cl').value,dur=Math.round(num(m.querySelector('#cdur').value)||28),reg=Math.round(num(m.querySelector('#creg').value)||5);
+    if(!L){m.querySelector('#cerr').textContent='Indica el primer día de tu última regla.';return}
+    if(L>today()){m.querySelector('#cerr').textContent='La fecha no puede ser futura.';return}
+    if(dur<21||dur>40||reg<2||reg>8){m.querySelector('#cerr').textContent='Revisa los días: el ciclo suele durar entre 21 y 40 días y la regla entre 2 y 8.';return}
+    const ini=[...new Set([...(c.inicios||[]).filter(d=>d!==last),L])].sort();
+    u.profile.ciclo={activo:true,inicios:ini.slice(-24),dur,reg,anti:m.querySelector('#canti').checked};save();m.remove();toast('Ciclo sincronizado ✓');after&&after()};
+  const off=m.querySelector('#coff');if(off)off.onclick=()=>{u.profile.ciclo={...c,activo:false,oculto:true};save();m.remove();toast('Seguimiento del ciclo desactivado');after&&after()};
+}
+function openCiclo(date){
+  const u=me(),cd=cicloDia(u,date||today());if(!cd)return openCicloAjustes(()=>{if(UI.view==='diario')vDiario()});
+  const F=cd.F,chip=n=>{const f=FOODS.find(x=>x.n===n);return f?`<span class="cchip">${esc(n.replace(/ \(.*\)$/,''))}</span>`:''};
+  const fases=['menstrual','folicular','ovulatoria','lutea'];
+  const m=modal(`<div class="top"><b>${ico('corazon','mi')} Tu ciclo</b><button class="close">✕</button></div>
+    <div class="chead" style="--fc:${F.col};--fb:${F.bg}"><div>${cicloRueda(cd,132)}</div><div style="min-width:0"><p class="cj" style="color:${F.col}">Fase ${F.n.toLowerCase()}${cd.pre?' · premenstrual':''}</p><h2 class="ct">${esc(cd.tarde?'Tu regla podría llegar ya':F.lema)}</h2>
+      <p class="small" style="margin-top:6px">Energía ${cicloEnergia(F.e)}</p><p class="small muted" style="margin-top:4px">${cd.tarde?`Esperábamos tu regla el ${fmtD(cd.prox)}.`:`Próxima regla hacia el ${fmtD(cd.prox)}`} · ciclo de ${cd.dur} días</p></div></div>
+    <button class="btn block" id="cbaja" style="margin-top:14px">${ico('corazon','mi')} Me ha bajado la regla hoy</button>
+    <div class="csec"><h3>${ico('consejo','mi')} Tus hormonas</h3><p>${F.hor}</p></div>
+    <div class="csec"><h3>${ico('act-alta','mi')} Tu energía</h3><p>${F.energia}</p></div>
+    <div class="csec"><h3>${ico('animo-muy-bien','mi')} Tu ánimo</h3><p>${F.animo}</p></div>
+    <div class="csec"><h3>${ico('corazon','mi')} Tu cuerpo</h3><p>${F.cuerpo}</p></div>
+    <div class="csec"><h3>${ico('comida-almuerzo','mi')} Alimentos que te pueden ayudar</h3><div class="cchips">${F.come.map(chip).join('')}</div><p style="margin-top:8px">${F.porque}</p></div>
+    <div class="csec"><h3>${ico('act-fuerza','mi')} Movimiento</h3><p>${F.mueve}</p></div>
+    <div class="cfases">${fases.map(k=>`<div class="${k===cd.f?'on':''}" style="--c:${CICLO_FASES[k].col}"><i></i><b>${CICLO_FASES[k].n}</b><small>${k==='menstrual'?'Días 1–'+cd.reg:k==='folicular'?'Días '+(cd.reg+1)+'–'+(cd.ov-2):k==='ovulatoria'?'Días '+(cd.ov-1)+'–'+(cd.ov+1):'Días '+(cd.ov+2)+'–'+cd.dur}</small></div>`).join('')}</div>
+    <p class="tiny muted" style="margin-top:14px">Las fases son una estimación a partir de tus fechas: cada cuerpo y cada ciclo es distinto. Son consejos orientativos, no médicos; la evidencia sobre comer distinto en cada fase todavía es limitada. Si tienes dolor intenso, ciclos muy irregulares o síntomas que te preocupan, consulta con tu ginecóloga.</p>
+    <button class="btn ghost block" id="cadj" style="margin-top:12px">Ajustar mi ciclo</button>`);
+  m.querySelector('#cadj').onclick=()=>{m.remove();openCicloAjustes(()=>{if(UI.view==='diario')vDiario()})};
+  m.querySelector('#cbaja').onclick=()=>{const c=u.profile.ciclo,t=today();if(!(c.inicios||[]).includes(t))c.inicios=[...(c.inicios||[]),t].sort().slice(-24);
+    const med=cicloMedia(c.inicios);if(med)c.dur=Math.min(40,Math.max(21,med));save();m.remove();toast('Anotado ✓ · Día 1 de tu ciclo'+(med?' · media '+c.dur+' días':''));if(UI.view==='diario')vDiario()};
+}
+
 /* ---------- Plan ---------- */
 function planCard(m,titulo){
   const pc=R(m.p*4/m.kcal*100),cc=R(m.c*4/m.kcal*100),gc=R(m.g*9/m.kcal*100);
@@ -1484,6 +1608,7 @@ function toggleDD(){
   const dd=document.createElement('div');dd.className='dd';
   dd.innerHTML=`<div class="me"><div class="avatar" style="box-shadow:none">${esc((u.nombre[0]||'?').toUpperCase())}</div><div><b>${esc(u.nombre)}</b><small>${esc(u.email)}</small></div></div>
     <button class="it" data-go="espacio"><span class="ic" style="background:var(--lilac)">${ico('menu-espacio')}</span><div>Mi Espacio<small>Tus datos, compromiso y copias</small></div></button>
+    ${u.profile.sexo==='Mujer'?`<button class="it" data-go="ciclo"><span class="ic" style="background:#fbe9ee">${ico('corazon')}</span><div>Tu ciclo<small>Fase, energía y alimentos para ti</small></div></button>`:''}
     <button class="it" data-go="invitar"><span class="ic" style="background:var(--pink)">${ico('menu-invitar')}</span><div>Añadir amigo a Vuelve<small>Invítale a un reto en conjunto</small></div></button>
     <button class="it" data-go="retos"><span class="ic" style="background:var(--beige)">${ico('menu-retos')}</span><div>Retos con amigos${inv.length?` <span class="pill warn" style="margin-left:4px">${inv.length} nuevo${inv.length>1?'s':''}</span>`:''}<small>Clasificación y progreso</small></div></button>
     <button class="it" data-go="tienda"><span class="ic" style="background:var(--pink)">${ico('menu-tienda')}</span><div>Tienda<small>Recetas, rutinas y merch</small></div></button>
@@ -1501,6 +1626,7 @@ function toggleDD(){
   dd.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{close();const g=b.dataset.go;
     if(g==='tienda'){window.open(TIENDA_URL,'_blank','noopener')}
     else if(g==='espacio'||g==='retos'||g==='biblio'||g==='lista'||g==='descargas'||g==='productos'){UI.view=g;renderApp();scrollTo(0,0);if(g==='retos'&&SERVER)sbLoadRetos().then(()=>{if(UI.view==='retos')renderApp()})}
+    else if(g==='ciclo'){const c=u.profile.ciclo;if(c&&c.activo)openCiclo(today());else openCicloAjustes(()=>{UI.view='diario';UI.date=today();UI.range='dia';renderApp()})}
     else if(g==='invitar')openInvite();
     else if(g==='cambiar'){d.session=null;save();renderAuth('login')}
     else if(g==='salir')logout()});
@@ -1775,6 +1901,7 @@ function vDiario(){
   const mb=(v,t,col)=>`<div class="mb"><i style="width:${Math.min(v/t*100||0,100)}%;background:${col}"></i></div>`;
   $('#view').innerHTML=head+`
   <div class="datenav"><button class="ar" id="dp">←</button><div class="t"><b>${dateTitle(UI.date)}</b><small>${UI.date===today()?'Tu resumen de hoy':'Tu resumen del día'}</small></div><button class="ar" id="dn">→</button></div>
+  ${UI.range==='dia'?cicloCardHTML(u,UI.date):''}
   <div class="card daycard"><div class="dcols"><div class="dcol dl">
     <div class="who"><span class="av">${esc((u.nombre[0]||'?').toUpperCase())}</span>${esc(u.nombre)}</div>
     <div class="sum">
@@ -1820,6 +1947,7 @@ function vDiario(){
   ${cd}
   <p class="foot">Vuelve por encima de perfección. Cada registro cuenta.</p>`;
   {const md=$('.mdet');if(md)md.ontoggle=()=>{UI.microOpen=md.open}}
+  bindCiclo(u);
   bindRange();
   bindArrows(()=>UI.date=addDays(UI.date,-1),()=>UI.date=addDays(UI.date,1),vDiario);
   $('#add').onclick=()=>openAdd(null);
