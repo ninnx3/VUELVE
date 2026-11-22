@@ -228,6 +228,7 @@ details.how[open] summary::before{content:'▾ '}
 .back{font-size:10px;color:var(--muted);margin-top:8px;font-weight:600}
 .back:hover{color:var(--plum)}
 .opt .ic .mi{width:30px;height:30px}
+.actic{width:50px;flex-shrink:0;display:flex;align-items:flex-start}.actic .mi{width:42px;height:42px;vertical-align:0}
 .mi{width:1.25em;height:1.25em;vertical-align:-.25em;color:var(--plum);display:inline-block}
 .mealpick button span .mi{width:26px;height:26px}
 .mealtog button span .mi{width:34px;height:34px}
@@ -2383,7 +2384,7 @@ function vMov(){
   </div>
   <button class="btn block" style="margin-top:14px" id="madd">+ Añadir actividad</button>
   <div class="card"><p class="eyebrow">Actividad del día</p>
-    ${log.mov.length?log.mov.map((x,i)=>{const A=ACTS[x.tipo];return `<div class="item" style="align-items:flex-start"><span style="font-size:22px;width:30px">${A?A.ic:ico('act-ligera','mi')}</span><div class="n"><b>${esc(x.t)}</b><small>${esc(movDetail(x))}</small>
+    ${log.mov.length?log.mov.map((x,i)=>{const A=ACTS[x.tipo];return `<div class="item" style="align-items:flex-start"><span class="actic">${A?A.ic:ico('act-ligera','mi')}</span><div class="n"><b>${esc(x.t)}</b><small>${esc(movDetail(x))}</small>
       ${(x.ej||[]).length?`<small style="margin-top:4px">${x.ej.map(e=>`${esc(e.n)}${e.s?' '+e.s+'×'+(e.r||'?'):''}${e.kg?' · '+dec(e.kg)+' kg':''}`).join('<br>')}</small>`:''}${x.n?`<small style="font-style:italic">${esc(x.n)}</small>`:''}</div>
       <span class="k">${fmt(exKcalM(u,x))} kcal</span><button class="x" data-edm="${i}" title="Editar" style="color:var(--plum)">✎</button><button class="x" data-del="${i}">✕</button></div>`}).join(''):'<p class="muted small" style="margin-top:8px">Aún no hay nada. ¡Hasta un paseo cuenta!</p>'}
   </div><p class="foot">Calorías estimadas con fórmulas del ACSM y valores MET, según tu peso (${fmt1(+u.profile.peso)} kg). Si tu máquina marca calorías, puedes usar las suyas.</p>`;
