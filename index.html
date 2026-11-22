@@ -2221,7 +2221,7 @@ function programarPromoFotos(){
 function abrirPromoFotos(){
   const u=me();u.fotosPromoAt=today();save();
   const pics=[...IMG_VUELVE].sort(()=>Math.random()-.5).slice(0,3).map(imgVuelve);
-  const m=modal(`<div class="top"><b>📸 Tu motivación, a tu manera</b><button class="close">✕</button></div>
+  const m=modal(`<div class="top"><b>${ico('fotos','mi')} Tu motivación, a tu manera</b><button class="close">✕</button></div>
     <div class="promopics">${pics.map(s=>`<img src="${s}" alt="">`).join('')}</div>
     <h3 class="h2" style="font-size:24px;margin-top:16px">¿Y si cada vez que entras <span>te ves a ti?</span></h3>
     <p class="muted" style="margin-top:8px;line-height:1.6">Cada vez que abres Vuelve te saludamos con una imagen. Puedes subir tus propias fotos: tu viaje soñado, tu ropa favorita, tu perro, tu "por qué"… y saldrán junto a las de Vuelve.</p>
@@ -2870,13 +2870,13 @@ function vMenu(){
   $('#mpre').onclick=()=>{MP.prefs=JSON.parse(JSON.stringify(pr));MP.step=0;MP.screen='wizard';vMenu();scrollTo(0,0)};
   $$('[data-rec]').forEach(b=>b.onclick=()=>openRecipe(R_(b.dataset.rec)));
   $$('.mpdays [data-day]').forEach(b=>b.onclick=()=>{MP.day=+b.dataset.day;vMenu()});
-  $('#shop').onclick=()=>{modal(`<div class="top"><b>🛒 Lista de la compra</b><button class="close">✕</button></div>
+  $('#shop').onclick=()=>{modal(`<div class="top"><b>${ico('lista-compra','mi')} Lista de la compra</b><button class="close">✕</button></div>
     ${plan.lista_compra.length?plan.lista_compra.map(s=>`<p class="eyebrow" style="margin-top:16px">${esc(s.seccion)}</p>${(s.items||[]).map(i=>`<label class="wk" style="justify-content:flex-start;gap:10px;cursor:pointer"><input type="checkbox"> ${esc(i)}</label>`).join('')}`).join(''):'<p class="muted" style="margin-top:12px">No hay lista para este menú.</p>'}
     <button class="btn soft block" style="margin-top:16px" id="cpl">Copiar lista</button>`).querySelector('#cpl').onclick=async()=>{
       const t=plan.lista_compra.map(s=>s.seccion+'\n'+(s.items||[]).map(i=>'- '+i).join('\n')).join('\n\n');
       try{await navigator.clipboard.writeText(t);toast('Lista copiada ✓')}catch(e){toast('No se pudo copiar')}}};
   if($('#notas'))$('#notas').onclick=()=>modal(`<div class="top"><b>${ico('consejo','mi')} Consejos de batch cooking</b><button class="close">✕</button></div><p style="margin-top:14px;line-height:1.6">${esc(plan.notas)}</p>`);
-  $('#recs').onclick=()=>{const m=modal(`<div class="top"><b>📖 Recetas de la semana</b><button class="close">✕</button></div>
+  $('#recs').onclick=()=>{const m=modal(`<div class="top"><b>${ico('menu-biblioteca','mi')} Recetas de la semana</b><button class="close">✕</button></div>
     <div style="margin-top:12px">${plan.recetas.map(r=>`<div class="rcard" data-r2="${r.id}"><div class="row">${recThumb(r)}<div><b>${esc(r.nombre)}</b><small>${esc(r.tipo)} · ${r.kcal} kcal · P ${r.p} · C ${r.c} · G ${r.g}</small></div></div><span class="plus" style="display:grid;place-items:center">›</span></div>`).join('')}</div>`);
     m.querySelectorAll('[data-r2]').forEach(b=>b.onclick=()=>{m.remove();openRecipe(R_(b.dataset.r2))})};
 }
