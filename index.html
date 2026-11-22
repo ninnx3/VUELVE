@@ -525,6 +525,11 @@ nav.tabs button.on{color:var(--plum);font-weight:700}
 .phero .pdesc{margin-top:10px;font-size:14px;line-height:1.6;color:var(--muted)}
 .phero .psub{margin-top:8px;font-weight:600;font-size:16px;color:var(--ink)}
 .btn.pbtn{margin-top:16px;background:#fff;color:var(--ink);border:1.5px solid #d9c8e3;border-radius:999px;padding:13px 22px;font-weight:700}
+.fcard{margin-top:22px;border-radius:28px;padding:24px 22px;background:linear-gradient(135deg,#f4f1ea 0%,#eef3ee 60%,#e8f1ec 100%);border:1.5px solid #d9e7de}
+.fc-top{display:flex;gap:18px;align-items:center}.fc-img{width:104px;height:104px;border-radius:26px;flex-shrink:0;background:#d9e7de center/cover;box-shadow:0 10px 24px rgba(47,111,93,.18)}
+.fc-tx{min-width:0}.fcard .eyebrow{color:#3d4a46}.fc-t{font-size:26px;font-weight:800;line-height:1.1;letter-spacing:-.5px;color:#2f3a37;margin-top:6px}.fc-s{color:#56645f;font-size:14px;margin-top:6px;line-height:1.45}
+.fc-btn{margin-top:20px;background:#3a4542;padding:16px;font-size:16px;border-radius:14px}.fc-btn:hover{background:#2c3533}
+@media(max-width:380px){.fc-img{width:84px;height:84px;border-radius:22px}.fc-t{font-size:22px}}
 .wcard{margin-top:22px;border-radius:28px;padding:26px 24px;background:linear-gradient(135deg,#f3e2ea 0%,#ece3f4 70%,#f3efe9 100%);border:1.5px solid #e6d6e3}
 .wcard .eyebrow{color:#8b6b3e}.wcard .h2{margin-top:10px;font-size:26px}
 .wbig{font-size:84px;font-weight:800;letter-spacing:-4px;color:#6b4462;line-height:1;margin-top:14px}.wbig small{font-size:26px;font-weight:500;letter-spacing:0;color:#6b4462;margin-left:8px}
@@ -2626,7 +2631,7 @@ function medidasCard(u){
 function vPlan(){
   const u=me(),pf=u.profile,r=calcular(pf),e=ENFOQUES[pf.enfoque];
   $('#view').innerHTML=heroHTML('Mi plan','Tus números,','tu enfoque.')+`
-  <div class="card" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap"><span style="font-size:28px">${ico('plan-calorias-exactas','mi')}</span><div style="flex:1;min-width:180px"><p class="eyebrow">Tus calorías</p><div class="h3" style="margin-top:4px">${esc(ajusteLabel(pf))}</div><p class="small muted">${r.ajuste.kgSem>0.03?'≈ −'+fmt1(r.ajuste.kgSem)+' kg por semana':r.ajuste.kgSem<-0.03?'≈ +'+fmt1(-r.ajuste.kgSem)+' kg por semana':'Mantenimiento'} · media ${fmt(r.ajuste.kcal)} kcal/día</p></div><button class="btn" id="ajb">Ajustar calorías</button></div>
+  <div class="fcard"><div class="fc-top"><div class="fc-img" style="background-image:url('${imgBase()}img/motivacion/pesaje-matutino.webp')"></div><div class="fc-tx"><p class="eyebrow">Tus calorías</p><div class="fc-t">${esc(ajusteLabel(pf))}</div><p class="fc-s">${r.ajuste.kgSem>0.03?'≈ −'+fmt1(r.ajuste.kgSem)+' kg por semana':r.ajuste.kgSem<-0.03?'≈ +'+fmt1(-r.ajuste.kgSem)+' kg por semana':'Mantenimiento'} · media ${fmt(r.ajuste.kcal)} kcal/día</p></div></div><button class="btn block fc-btn" id="ajb">Ajustar calorías →</button></div>
   <div class="card"><div class="opt" style="border:0;padding:0;background:none"><span class="ic enf enf${pf.enfoque}">${e.ic}</span><div><b>${e.t}</b><small>${e.s}</small></div></div>
   ${r.plan.normal?planCard(r.plan.normal):planCard(r.plan.entreno,'Días de entreno · carga de glucógeno')+planCard(r.plan.descanso,'Días de descanso · oxidación de grasas')}</div>
   <div class="card"><p class="eyebrow">Cómo lo hemos calculado</p>${calcTable(r,pf)}</div>
