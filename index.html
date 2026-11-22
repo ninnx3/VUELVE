@@ -1897,11 +1897,11 @@ function vDiario(){
   const act=retosOf(u).filter(r=>r.inicio<=today()&&retoFin(r)>=today());
   if(act.length){const r=act[0],sc=r.miembros.map(e=>({e,...retoScore(r,e)})).sort((a,b)=>b.pts-a.pts),pos=sc.findIndex(s=>s.e===u.email)+1;
     cd+=`<button class="card" id="gor" style="display:flex;width:100%;align-items:center;gap:14px;text-align:left"><span style="font-size:30px">🏆</span><div style="flex:1"><p class="eyebrow">Reto en curso</p><div class="h3">${esc(r.nombre)}</div><p class="small muted">Vas ${pos}ª de ${sc.length} · ${sc[pos-1].pts} puntos</p></div><span class="plus" style="display:grid;place-items:center">›</span></button>`}
+  if(UI.range==='dia')cd+=cicloCardHTML(u,UI.date);
   if(pf.meta&&pf.meta>=today()){const md=parse(pf.meta);cd+=`<div class="cdcard"><p class="eyebrow">Tu cuenta atrás</p><h2 class="h2">${esc(pf.metaNombre||'Tu meta')} · <span>el ${md.getDate()}.</span></h2><p class="small muted" style="margin-top:6px">Pequeños pasos cada día. Lista para el ${md.getDate()}.</p><div class="cd" id="cd"></div><p class="tiny muted" style="margin-top:12px;letter-spacing:1px;text-transform:uppercase">${md.getDate()} ${MONL[md.getMonth()]} ${md.getFullYear()} · hora de Madrid</p></div>`}
   const mb=(v,t,col)=>`<div class="mb"><i style="width:${Math.min(v/t*100||0,100)}%;background:${col}"></i></div>`;
   $('#view').innerHTML=head+`
   <div class="datenav"><button class="ar" id="dp">←</button><div class="t"><b>${dateTitle(UI.date)}</b><small>${UI.date===today()?'Tu resumen de hoy':'Tu resumen del día'}</small></div><button class="ar" id="dn">→</button></div>
-  ${UI.range==='dia'?cicloCardHTML(u,UI.date):''}
   <div class="card daycard"><div class="dcols"><div class="dcol dl">
     <div class="who"><span class="av">${esc((u.nombre[0]||'?').toUpperCase())}</span>${esc(u.nombre)}</div>
     <div class="sum">
