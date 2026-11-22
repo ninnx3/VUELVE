@@ -570,6 +570,7 @@ nav.tabs button.on{color:var(--plum);font-weight:700}
 .cmbars{display:grid;gap:12px;margin-top:16px}@media(min-width:760px){.cmbars{grid-template-columns:1fr 1fr 1fr}}
 .seg button .mi{width:22px;height:22px;vertical-align:-5px}
 .mtabs button.on svg,.seg button.on svg{color:#fff;fill:#fff}.mtabs button.on svg path,.seg button.on svg path{fill:#fff}
+.cmbars{gap:10px}.cmmac{background:color-mix(in srgb,var(--mc) 9%,#fff);border:1.5px solid color-mix(in srgb,var(--mc) 22%,#fff);border-radius:16px;padding:12px 14px}.cmmac .l{display:block;font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--mc)}.cmmac b{display:block;margin-top:4px;font-size:22px;font-weight:800;color:var(--mc);letter-spacing:-.5px}.cmmac b small{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:0}.cmb{height:8px;border-radius:99px;background:color-mix(in srgb,var(--mc) 15%,#fff);margin-top:8px;overflow:hidden}.cmb i{display:block;height:100%;border-radius:99px;background:var(--mc)}
 </style>
 </head>
 <body>
@@ -2965,15 +2966,15 @@ function vComida(){
   $('#cmleft').onclick=()=>{CM.modo='enfoque';CM.kcal=left;CM.res=null;vComida()};
   $('#cmgo').onclick=()=>{const T2=cmTargets(u);CM.res=cmSolve(CM.ings.map(i=>({...i,f:fb(i.fid)})),T2);drawOut();$('#cmout').scrollIntoView({behavior:'smooth',block:'start'})};
   const drawOut=()=>{const el=$('#cmout');const R=CM.res;if(!R){el.innerHTML='';return}
-    const {t,T}=R,dif=(a,b)=>b?Math.abs(a-b)/b:0,bad=[['p','proteína'],['c','carbohidratos'],['g','grasa']].filter(([m])=>dif(t[m],T[m])>0.15&&Math.abs(t[m]-T[m])>4);
+    const {t,T}=R,dif=(a,b)=>b?Math.abs(a-b)/b:0,bad=[['p','la proteína'],['c','los carbohidratos'],['g','la grasa']].filter(([m])=>dif(t[m],T[m])>0.15&&Math.abs(t[m]-T[m])>4);
     const used=R.items.filter(i=>i.q>0),zero=R.items.filter(i=>!(i.q>0));
     const mi=dayMicro(u,used.map(i=>({fid:i.f.id,q:i.q,k:i.f.k*i.q/100})));
-    const bar=(m,col,lab)=>`<div><div class="row between small"><span>${lab}</span><b>${fmt1(t[m])} <small class="muted">/ ${fmt(T[m])} g</small></b></div>${cmMb(t[m],T[m],col)}</div>`;
+    const bar=(m,col,lab)=>`<div class="cmmac" style="--mc:${col}"><span class="l">${lab}</span><b>${fmt1(t[m])}<small> / ${fmt(T[m])} g</small></b><div class="cmb"><i style="width:${Math.min(t[m]/(T[m]||1)*100,100)}%"></i></div></div>`;
     el.innerHTML=`<div class="card cmres"><p class="cj">Tu comida</p><div class="row between" style="align-items:center;margin-top:6px;gap:10px;flex-wrap:wrap"><h2 class="h2" style="margin:0">${fmt(t.k)} <small style="font-size:16px;font-weight:600">kcal</small></h2><span class="small muted">objetivo ${fmt(T.k)} kcal</span></div>
       <div class="cmamts">${used.map(i=>`<div class="cmamt"><span class="n">${esc(i.f.n)}${i.fixed!=null?' <small class="pill">fijo</small>':''}</span><b>${fmt(i.q)} g</b>${i.f.ug&&i.f.un?`<small class="muted">≈ ${dec(Math.round(i.q/i.f.ug*10)/10)} ${esc(Math.abs(i.q/i.f.ug-1)<0.05?i.f.un:i.f.unp)}</small>`:'<small></small>'}</div>`).join('')}</div>
       ${zero.length?`<p class="tiny muted" style="margin-top:8px">No hace falta: ${zero.map(i=>esc(i.f.n)).join(', ')} (con el resto ya llegas a tus números).</p>`:''}
       <div class="cmbars">${bar('p','var(--p)','Proteínas')}${bar('c','var(--c)','Carbohidratos')}${bar('g','var(--g)','Grasas')}</div>
-      ${bad.length?`<p class="small" style="margin-top:12px;color:#a86a2d;font-weight:600">${ico('aviso','mi')} Con estos ingredientes no se puede cuadrar del todo la ${bad.map(b=>b[1]).join(' ni la ')}. ${bad.some(b=>b[0]==='p'&&t.p<T.p)?'Prueba a añadir una fuente de proteína (pollo, atún, claras, skyr…).':bad.some(b=>b[0]==='c'&&t.c<T.c)?'Prueba a añadir un carbohidrato (arroz, pan, patata, avena…).':bad.some(b=>b[0]==='g'&&t.g<T.g)?'Prueba a añadir una grasa (aceite, aguacate, frutos secos…).':'Prueba a quitar algún ingrediente o fijar menos cantidad.'}</p>`:''}
+      ${bad.length?`<p class="small" style="margin-top:12px;color:#a86a2d;font-weight:600">${ico('aviso','mi')} Con estos ingredientes no se puede cuadrar del todo ${bad.map(b=>b[1]).join(bad.length>2?', ':' ni ').replace(/, ([^,]*)$/,' ni $1')}. ${bad.some(b=>b[0]==='p'&&t.p<T.p)?'Prueba a añadir una fuente de proteína (pollo, atún, claras, skyr…).':bad.some(b=>b[0]==='c'&&t.c<T.c)?'Prueba a añadir un carbohidrato (arroz, pan, patata, avena…).':bad.some(b=>b[0]==='g'&&t.g<T.g)?'Prueba a añadir una grasa (aceite, aguacate, frutos secos…).':'Prueba a quitar algún ingrediente o fijar menos cantidad.'}</p>`:''}
       ${mi.t.fib!=null?`<p class="tiny muted" style="margin-top:12px">Fibra ${fmt1(mi.t.fib||0)} g · Sal ${dec(Math.round((mi.t.sal||0)*100)/100)} g · Calcio ${fmt(mi.t.ca||0)} mg · Hierro ${fmt1(mi.t.fe||0)} mg · Vitamina C ${fmt(mi.t.vc||0)} mg</p>`:''}
       <label class="f" style="margin-top:16px"><span>Nombre (opcional)</span><input class="in" id="cmn" placeholder="Ej. Bowl de pollo y arroz" value="${esc(CM.nombre)}"></label>
       <button class="btn block" id="cmadd" style="margin-top:12px">${MEALS.find(x=>x[0]===CM.meal)[1]} Añadir a ${CM.meal} de hoy</button>
