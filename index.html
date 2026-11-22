@@ -601,6 +601,9 @@ nav.tabs button.on{color:var(--plum);font-weight:700}
 .fmac{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}.fmac .cmmac{padding:10px 10px 11px}.fmac .cmmac .l{font-size:9.5px;letter-spacing:1px}.fmac .cmmac b{font-size:20px;margin-top:2px}.fmac .mk{display:block;font-size:11px;color:var(--muted);margin-top:1px}
 .fhero .pp{max-width:500px}@media(max-width:380px){.fmac .cmmac b{font-size:17px}.fmac .cmmac .l{letter-spacing:.4px}}
 .fmac .lS{display:none}@media(max-width:520px){.fmac .lL{display:none}.fmac .lS{display:inline}}.fmac .cmmac{min-width:0;overflow:hidden}
+.msub{font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--soft)}.mtit{display:flex;align-items:center;gap:10px;margin:0}.mtit .mi{width:32px;height:32px}
+.mlist .bday{align-items:center}.mpills{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}@media(min-width:520px){.mpills{grid-template-columns:repeat(4,minmax(0,1fr))}}.mpill{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;padding:6px 10px;border-radius:12px;background:#faf4f8;border:1px solid #f0e4ec}.mpill small{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#9a7c93}.mpill b{font-size:15px;font-weight:800;line-height:1.2}.mpill b i{font-style:normal;font-size:11px;font-weight:600;color:var(--muted)}.mpill em{font-style:normal;font-size:10.5px;font-weight:700}.mpill em.dn{color:var(--green)}.mpill em.up{color:#a86a2d}
+.mdel{border:0;background:none;cursor:pointer;font-size:16px;color:#9a7c93;align-self:center}.mdel:hover{background:#faf4f8}
 </style>
 </head>
 <body>
@@ -3097,11 +3100,16 @@ function medidasCard(u){
   const M=u.medidas||[];
   if(!M.length)return `<div class="card"><div class="row between"><p class="eyebrow">Medidas</p><button class="btn soft sm" id="ci2">${ico('medidas','mi')} Añadir</button></div><p class="muted small" style="margin-top:10px">Cada viernes te recordaremos pesarte y medirte. Las medidas enseñan cambios que la báscula no ve.</p></div>`;
   const firstOf=id=>M.find(x=>x[id]!=null),lastOf=id=>[...M].reverse().find(x=>x[id]!=null);
-  return `<div class="card"><div class="row between"><p class="eyebrow">Medidas</p><button class="btn soft sm" id="ci2">${ico('medidas','mi')} Añadir</button></div>
+  return `<div class="card"><div class="row between" style="align-items:center"><h2 class="ct mtit">${ico('medidas','mi')} Medidas</h2><button class="btn soft sm" id="ci2">${ico('medidas','mi')} Añadir</button></div>
     <div class="grid4 medgrid" style="margin-top:12px">${MEDIDAS.map(([id,lab])=>{const a=firstOf(id),b=lastOf(id);if(!b)return `<div class="stat"><b>—</b><small>${lab}</small></div>`;
       const df=a&&a!==b?Math.round((b[id]-a[id])*10)/10:null;
       return `<div class="stat"><b>${fmt1(b[id])}<span style="font-size:12px;font-weight:600"> cm</span></b><small>${lab}</small>${df!=null?`<small style="color:${df<=0?'var(--green)':'#a86a2d'};font-weight:700">${df>0?'+':''}${dec(df)} cm</small>`:''}</div>`}).join('')}</div>
-    <div style="margin-top:12px">${M.slice().reverse().slice(0,6).map(x=>`<div class="wk"><span>${parse(x.date).getDate()} ${MON[parse(x.date).getMonth()]} ${parse(x.date).getFullYear()}</span><span class="small">${MEDIDAS.filter(([id])=>x[id]!=null).map(([id,lab])=>`${lab.slice(0,3)}. ${dec(x[id])}`).join(' · ')} <button class="x" data-dm="${x.date}" title="Borrar">✕</button></span></div>`).join('')}</div>
+    <p class="msub" style="margin-top:20px">Historial</p>
+    <div class="blist mlist">${M.slice().reverse().slice(0,6).map((x,i,arr)=>{const d=parse(x.date),prev=M[M.length-2-i];
+      return `<div class="bday ${i===0?'hoy':''}"><div class="bd"><b>${d.getDate()}</b><small>${MON[d.getMonth()]}</small></div>
+        <div class="bc"><div class="mpills">${MEDIDAS.filter(([id])=>x[id]!=null).map(([id,lab])=>{const df=prev&&prev[id]!=null?Math.round((x[id]-prev[id])*10)/10:null;return `<span class="mpill"><small>${lab}</small><b>${dec(x[id])}<i> cm</i></b>${df?`<em class="${df<0?'dn':'up'}">${df>0?'+':''}${dec(df)}</em>`:''}</span>`}).join('')}</div>
+        ${d.getFullYear()!==new Date().getFullYear()?`<small class="muted" style="font-size:11px">${d.getFullYear()}</small>`:''}</div>
+        <button class="bed mdel" data-dm="${x.date}" title="Borrar" aria-label="Borrar medida">✕</button></div>`}).join('')}</div>
     ${M.length>1?'<p class="tiny muted" style="margin-top:8px">Cambio desde tu primera medida.</p>':''}</div>`;
 }
 
