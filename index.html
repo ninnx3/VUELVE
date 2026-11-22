@@ -3030,6 +3030,7 @@ function vProgreso(){
   if(SERVER&&!PFOTO.loaded)pesoFotoLoad().then(url=>{if(url&&UI.view==='progreso'&&$('#wfoto'))vProgreso()});
   const wfu=$('#wfup');if(wfu)wfu.onchange=async e=>{const f=e.target.files[0];if(!f)return;toast('Subiendo foto…');try{await pesoFotoSubir(f);toast('Foto guardada ✓ · solo la ves tú');vProgreso()}catch(er){toast(sbErr(er))}};
   const wfd=$('#wfdel');if(wfd)wfd.onclick=async()=>{try{await pesoFotoQuitar();toast('Foto quitada');vProgreso()}catch(er){toast(sbErr(er))}};
+  {const mt=$('#medtog');if(mt)mt.onclick=()=>{UI.medOpen=!UI.medOpen;vProgreso();setTimeout(()=>$('.mtit')&&$('.mtit').scrollIntoView({block:'start'}),0)}}
   $$('[data-dm]').forEach(b=>b.onclick=()=>{u.medidas=(u.medidas||[]).filter(x=>x.date!==b.dataset.dm);save();vProgreso()});
   $$('[data-dw]').forEach(b=>b.onclick=()=>{u.weights=u.weights.filter(w=>w.date!==b.dataset.dw);save();vProgreso()});
 }
@@ -3104,8 +3105,8 @@ function medidasCard(u){
     <div class="grid4 medgrid" style="margin-top:12px">${MEDIDAS.map(([id,lab])=>{const a=firstOf(id),b=lastOf(id);if(!b)return `<div class="stat"><b>—</b><small>${lab}</small></div>`;
       const df=a&&a!==b?Math.round((b[id]-a[id])*10)/10:null;
       return `<div class="stat"><b>${fmt1(b[id])}<span style="font-size:12px;font-weight:600"> cm</span></b><small>${lab}</small>${df!=null?`<small style="color:${df<=0?'var(--green)':'#a86a2d'};font-weight:700">${df>0?'+':''}${dec(df)} cm</small>`:''}</div>`}).join('')}</div>
-    <p class="msub" style="margin-top:20px">Historial</p>
-    <div class="blist mlist">${M.slice().reverse().slice(0,6).map((x,i,arr)=>{const d=parse(x.date),prev=M[M.length-2-i];
+    <div class="row between" style="align-items:center;margin-top:20px"><p class="msub">${UI.medOpen||M.length<2?'Historial':'Última medida'}</p>${M.length>1?`<button class="btn ghost sm" id="medtog">${UI.medOpen?'Ocultar historial':'Ver historial ('+M.length+')'}</button>`:''}</div>
+    <div class="blist mlist">${M.slice().reverse().slice(0,UI.medOpen?52:1).map((x,i,arr)=>{const d=parse(x.date),prev=M[M.length-2-i];
       return `<div class="bday ${i===0?'hoy':''}"><div class="bd"><b>${d.getDate()}</b><small>${MON[d.getMonth()]}</small></div>
         <div class="bc"><div class="mpills">${MEDIDAS.filter(([id])=>x[id]!=null).map(([id,lab])=>{const df=prev&&prev[id]!=null?Math.round((x[id]-prev[id])*10)/10:null;return `<span class="mpill"><small>${lab}</small><b>${dec(x[id])}<i> cm</i></b>${df?`<em class="${df<0?'dn':'up'}">${df>0?'+':''}${dec(df)}</em>`:''}</span>`}).join('')}</div>
         ${d.getFullYear()!==new Date().getFullYear()?`<small class="muted" style="font-size:11px">${d.getFullYear()}</small>`:''}</div>
