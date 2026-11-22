@@ -1085,7 +1085,7 @@ function renderAuth(mode,prefill=''){
       <blockquote>Vuelve por encima de <span>perfección.</span><br><span style="font-size:16px;letter-spacing:0;font-weight:500;color:var(--muted)">Cada registro cuenta.</span></blockquote>
     </div>
     <div class="box">
-      <div class="row between"><div class="logo">${LOGO}<div><b>VUELVE</b><small data-notr>Hacia ti</small></div></div>${LANGSW()}</div>
+      <div class="row between"><div class="logo">${LOGO}<div><b>VUELVE</b><small data-notr>A tu ritmo, hacia ti</small></div></div>${LANGSW()}</div>
       <p class="eyebrow" style="margin-top:36px">${mode==='registro'?'Empieza hoy':'Bienvenida de nuevo'}</p>
       <h1 class="h1" style="margin-top:8px">${mode==='registro'?'Crea tu <span>cuenta.</span>':'Hola <span>otra vez.</span>'}</h1>
       <div class="seg"><button data-m="registro" class="${mode==='registro'?'on':''}">Crear cuenta</button><button data-m="login" class="${mode==='login'?'on':''}">Iniciar sesión</button></div>
@@ -1117,7 +1117,7 @@ function renderAuth(mode,prefill=''){
         if(mode==='registro'){
           const {data,error}=await SB.auth.signUp({email,password:pass,options:{data:{nombre:f.get('nombre').trim()},emailRedirectTo:APP_URL}});
           if(error)throw error;
-          if(!data.session){$('.box').innerHTML=`<div class="logo">${LOGO}<div><b>VUELVE</b><small data-notr>Hacia ti</small></div></div>
+          if(!data.session){$('.box').innerHTML=`<div class="logo">${LOGO}<div><b>VUELVE</b><small data-notr>A tu ritmo, hacia ti</small></div></div>
             <div style="font-size:48px;margin-top:36px;color:var(--plum)">${ico('menu-invitar','celico')}</div><h1 class="h1" style="margin-top:8px">Revisa tu <span>email.</span></h1>
             <p class="muted" style="margin-top:10px">Te hemos enviado un enlace a <b>${esc(email)}</b> para confirmar tu cuenta. Ábrelo desde este mismo móvil. Si no llega, mira en spam.</p>
             <button class="btn soft block" style="margin-top:20px" id="back">Ya lo he confirmado → Iniciar sesión</button>`;
@@ -1214,7 +1214,7 @@ function renderOB(){
     <label class="f"><span>Nombre de la meta</span><input class="in" data-k="metaNombre" value="${esc(d.metaNombre||'')}" placeholder="Ej. Vacaciones de verano"></label>`;
   }
   $('#root').innerHTML=`<div class="ob">
-    <div class="ob-top"><div class="row between"><div class="logo">${LOGO}<div><b>VUELVE</b><small data-notr>Hacia ti</small></div></div>
+    <div class="ob-top"><div class="row between"><div class="logo">${LOGO}<div><b>VUELVE</b><small data-notr>A tu ritmo, hacia ti</small></div></div>
       ${OB.editing?'<button class="btn ghost" id="obx">Cancelar</button>':`<span class="small muted" style="font-weight:600">${OB.step+1} / ${tot}</span>`}</div>
       ${OB.step>(OB.editing?1:0)?'<button class="back" id="obb2" style="margin-top:8px;font-size:12px">← Paso anterior</button>':''}
       <div class="pbar"><i style="width:${(OB.step+1)/tot*100}%"></i></div></div>
@@ -1300,7 +1300,7 @@ function renderResult(){
   SCREEN.busy=true;
   const u=me(),pf=u.profile,r=calcular(pf),e=ENFOQUES[pf.enfoque];
   $('#root').innerHTML=`<div class="ob" style="padding-top:24px">
-    <div class="logo">${LOGO}<div><b>VUELVE</b><small data-notr>Hacia ti</small></div></div>
+    <div class="logo">${LOGO}<div><b>VUELVE</b><small data-notr>A tu ritmo, hacia ti</small></div></div>
     <p class="eyebrow" style="margin-top:34px">Tu plan está listo</p>
     <h2 class="h1" style="margin-top:8px">${e.t.split(' ').slice(0,-1).join(' ')} <span>${e.t.split(' ').slice(-1)}.</span></h2>
     <p class="muted" style="margin-top:6px">${e.ic} ${e.s}</p>
@@ -1340,7 +1340,7 @@ function renderApp(){
   const u=me();
   $('#root').innerHTML=`
   <header class="app"><div class="in2">
-    <a class="logo" id="home" href="#" title="Ir al Diario">${LOGO}<div><b>VUELVE</b><small data-notr>Hacia ti</small></div></a>
+    <a class="logo" id="home" href="#" title="Ir al Diario">${LOGO}<div><b>VUELVE</b><small data-notr>A tu ritmo, hacia ti</small></div></a>
     <div class="row" style="gap:0"><span id="sync" class="${CLOUD.state}">${SYNC_TXT[CLOUD.state]}</span>
       <div class="dd-wrap"><button class="avatar" id="av" title="Mi cuenta">${esc((u.nombre[0]||'?').toUpperCase())}<i>⌄</i>${pendingInvites(u).length?'<span class="dot"></span>':''}</button></div></div>
   </div></header>
