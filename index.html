@@ -325,7 +325,9 @@ table.calc td:last-child{text-align:right;font-weight:700}
 .plantop{display:flex;align-items:center;justify-content:space-between;gap:12px}.plantop .kc{white-space:nowrap}
 .plato{width:88px;height:88px;border-radius:50%;background:#fff;box-shadow:0 6px 18px rgba(94,58,85,.14),inset 0 0 0 1px #eadfe8;display:grid;place-items:center;flex-shrink:0}
 .plato .pie{width:66px;height:66px;border-radius:50%;box-shadow:inset 0 0 0 3px rgba(255,255,255,.55)}
-@media(min-width:900px){.plato{width:128px;height:128px}.plato .pie{width:96px;height:96px}}
+@media(min-width:900px){.plato{width:96px;height:96px}.plato .pie{width:72px;height:72px}}
+.emac{margin-top:10px}.ebar2{display:flex;height:8px;border-radius:999px;overflow:hidden;background:var(--line);gap:2px}.ebar2 i{display:block;height:100%}
+.emt{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:6px;font-size:11.5px;color:var(--muted);font-weight:600}.emt b{color:var(--ink);font-weight:800}.emt i{font-style:normal;font-weight:800}
 .enfopts{margin-top:16px}
 @media(min-width:900px){#view.v-plan>.card.enfcard{grid-column:1/-1}.enfopts{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.enfopts .opt{height:100%;box-sizing:border-box}}
 .plan{border-radius:16px;padding:18px;background:var(--tile);margin-top:12px}
@@ -2648,6 +2650,9 @@ function medidasCard(u){
 }
 
 /* ---------- Mi plan ---------- */
+function enfMacros(pf,k){try{const rr=calcular({...pf,enfoque:+k}),m=rr.plan.normal||rr.plan.entreno;if(!m||!m.kcal)return '';
+  const pk=m.p*4,ck=m.c*4,gk=m.g*9,t=pk+ck+gk||1,P=x=>Math.round(x/t*100);
+  return `<div class="emac"><div class="ebar2" role="img" aria-label="Proteínas ${P(pk)}%, carbohidratos ${P(ck)}%, grasas ${P(gk)}%"><i style="width:${P(pk)}%;background:var(--p)"></i><i style="width:${P(ck)}%;background:var(--c)"></i><i style="width:${100-P(pk)-P(ck)}%;background:var(--g)"></i></div><div class="emt"><b>${fmt(m.kcal)} kcal</b><span><i style="color:var(--p)">P</i> ${m.p}g</span><span><i style="color:var(--c)">C</i> ${m.c}g</span><span><i style="color:var(--g)">G</i> ${m.g}g</span></div></div>`}catch(e){return ''}}
 function vPlan(){
   const u=me(),pf=u.profile,r=calcular(pf),e=ENFOQUES[pf.enfoque];
   $('#view').innerHTML=heroHTML('Mi plan','Tus números,','tu enfoque.')+`
@@ -2656,7 +2661,7 @@ function vPlan(){
   ${r.plan.normal?planCard(r.plan.normal):planCard(r.plan.entreno,'Días de entreno · carga de glucógeno')+planCard(r.plan.descanso,'Días de descanso · oxidación de grasas')}</div>
   <div class="card"><p class="eyebrow">Cómo lo hemos calculado</p>${calcTable(r,pf)}</div>
   <div class="card enfcard"><p class="cj">Recomposición corporal</p><h2 class="ct">Cambiar enfoque</h2><div class="opts enfopts">
-    ${Object.entries(ENFOQUES).map(([k,x])=>`<button class="opt ${pf.enfoque==k?'on':''}" data-en="${k}"><span class="ic enf enf${k}">${x.ic}</span><div><b>${x.t}</b><small>${x.s}</small></div></button>`).join('')}
+    ${Object.entries(ENFOQUES).map(([k,x])=>`<button class="opt ${pf.enfoque==k?'on':''}" data-en="${k}"><span class="ic enf enf${k}">${x.ic}</span><div style="flex:1;min-width:0"><b>${x.t}</b><small>${x.s}</small>${enfMacros(pf,k)}</div></button>`).join('')}
   </div></div>
   <button class="btn soft block" style="margin-top:14px" id="redo">Repetir el walkthrough completo</button>`;
   $$('[data-en]').forEach(b=>b.onclick=()=>{pf.enfoque=+b.dataset.en;save();toast('Enfoque actualizado ✓');vPlan()});
