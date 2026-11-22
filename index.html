@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=2"><link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2"><link rel="shortcut icon" href="favicon.ico?v=2">
 <link rel="manifest" href="manifest.webmanifest">
 <title>Vuelve · Contador de calorías y macros a tu ritmo | Recomposición corporal</title>
-<meta name="description" content="Vuelve es tu diario de calorías y macros a tu ritmo: recomposición corporal, perder grasa sin dietas extremas, recetas con macros, mealprep y retos con amigas.">
+<meta name="description" content="Vuelve es tu diario de calorías y macros para ponerte en forma junto a tu amiga: tu día, el de tu compañera y una meta semanal en común. Recomposición corporal, recetas con macros, mealprep y tu ciclo.">
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://ninnx3.github.io/VUELVE/">
 <meta property="og:type" content="website">
@@ -162,7 +162,7 @@ header.app .in2{max-width:1000px;margin:0 auto;padding:0 20px;height:72px;displa
 
 /* Bottom nav */
 nav.tabs{position:fixed;bottom:0;left:0;right:0;background:rgba(255,254,254,.96);backdrop-filter:blur(8px);box-shadow:0 -4px 25px rgba(64,40,60,.05);z-index:20;padding:8px 12px calc(8px + env(safe-area-inset-bottom))}
-nav.tabs .in2{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+nav.tabs .in2{max-width:820px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
 nav.tabs button{padding:7px 4px;border-radius:12px;font-size:11px;color:var(--plum);display:flex;flex-direction:column;align-items:center;gap:3px}
 nav.tabs button svg{width:24px;height:24px}
 nav.tabs button.on{background:var(--lilac)}
@@ -580,6 +580,23 @@ nav.tabs button.on{color:var(--plum);font-weight:700}
 .cfases{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:18px}.cfases div{border-radius:12px;padding:8px;background:#faf6f9;text-align:center;opacity:.7}.cfases div.on{opacity:1;background:color-mix(in srgb,var(--c) 14%,#fff);outline:1.5px solid var(--c)}.cfases i{display:block;height:5px;border-radius:9px;background:var(--c);margin-bottom:6px}.cfases b{display:block;font-size:12px}.cfases small{font-size:10.5px;color:var(--muted)}
 @media(max-width:420px){.cnow{gap:12px}.cmini svg{width:76px;height:76px}.ctl{font-size:17px}}
 .logo.bootlogo .wm{height:50px}@media(max-width:400px){.logo.bootlogo .wm{height:35px}}
+.jcard{margin-top:16px}.jrow{display:flex;gap:14px;align-items:center}.jic{width:52px;height:52px;border-radius:16px;background:#efe6f3;color:#6b4462;display:flex;align-items:center;justify-content:center;flex-shrink:0}.jic .mi{width:32px;height:32px}
+.javs{display:inline-flex;flex-shrink:0}.javs i{width:44px;height:44px;border-radius:50%;color:#fff;font:800 17px Montserrat,sans-serif;font-style:normal;display:flex;align-items:center;justify-content:center;border:3px solid #fff;margin-left:-12px}.javs i:first-child{margin-left:0}.javs.big i{width:58px;height:58px;font-size:22px}
+.jon{background:linear-gradient(135deg,#f6edf3,#fff 70%);border:1.5px solid #e6d3e1}.jfire{color:#c45c72}
+.jmini{margin-top:12px}.jmini b{font-size:13px}.jchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.jchips span{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:5px 10px;border-radius:99px;background:#f4eef2;color:#9c8b98}.jchips span.on{background:#e4f1ea;color:#2f6f5d}.jchips .mi{width:18px;height:18px}
+.jnew{margin-top:12px;display:flex;flex-direction:column;gap:6px}.jtl{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:#fbe9ee;margin-top:8px}.jtl .mi{width:28px;height:28px;color:#c45c72;flex-shrink:0}.jtl div{flex:1;min-width:0;display:flex;flex-direction:column}.jtl b{font-size:13px}.jtl span{font-size:14px}.jtl small{color:var(--muted);font-size:11px}
+.jav{margin-top:12px;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:#6b4462}.jav .mi{width:22px;height:22px;flex-shrink:0}.jav.big{margin-top:16px;background:#fff;border:1.5px solid #ead9e5;border-radius:18px;padding:14px 16px;flex-wrap:wrap}.jav.big span{flex:1;min-width:180px}
+.jhero{background:linear-gradient(135deg,#6b4462 0%,#8a5a7c 55%,#a47a9a 100%);color:#fff;border:0}.jhx h2{font-size:clamp(24px,5vw,32px);font-weight:800;letter-spacing:-.8px;margin-top:12px;line-height:1.15}.jhx p{margin-top:8px;opacity:.9;line-height:1.55}
+.jstreak{display:flex;align-items:baseline;gap:10px;margin-top:16px}.jstreak b{font-size:54px;font-weight:800;letter-spacing:-2px;line-height:1}.jstreak span{font-weight:600;opacity:.9}.jper{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px;font-size:13px;opacity:.9}
+.jgrid{display:grid;gap:16px;margin-top:16px}.jgrid .card{margin-top:0}@media(min-width:760px){.jgrid{grid-template-columns:1fr 1fr}}
+.jday{border-top:4px solid var(--jc)}.jwho{display:flex;align-items:center;gap:10px}.jwho i{width:36px;height:36px;border-radius:50%;background:var(--jc);color:#fff;font:800 15px Montserrat,sans-serif;font-style:normal;display:flex;align-items:center;justify-content:center}
+.jbar{display:flex;height:14px;border-radius:99px;background:#f1e7ef;overflow:hidden;margin-top:14px}.jbar i{display:block;height:100%}
+.jleg{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:8px;font-size:12px;color:var(--muted);align-items:center}.jleg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}.jleg .mi{width:16px;height:16px;vertical-align:-3px}
+.jweek{display:grid;grid-template-columns:auto repeat(7,1fr);gap:6px;align-items:center;margin-top:12px}.jweek small{text-align:center;font-weight:700;color:var(--muted);font-size:12px}.jweek small.hoy{color:#6b4462}.jweek b{font-size:13px;padding-right:6px}.jweek span{aspect-ratio:1;max-height:40px;border-radius:10px;background:#f4eef2;display:flex;align-items:center;justify-content:center}.jweek span.reg{background:#d9cbe8}.jweek span.ok{background:#2f6f5d;color:#fff}.jweek span.fut{background:none;border:1.5px dashed #ead9e5}.jweek .mi{width:18px;height:18px}
+.jtoq{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.jtoq button{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:14px 10px;border-radius:16px;border:1.5px solid #ead9e5;background:#fff;font:600 13px Montserrat,sans-serif;color:var(--ink);cursor:pointer}.jtoq button:hover{background:#faf4f8}.jtoq .mi{width:34px;height:34px;color:#6b4462}
+.jnewc{border:1.5px solid #f0c9d4}
+.cpi{display:flex;gap:10px;align-items:center;margin-top:10px;background:#faf4f8;border-radius:14px;padding:10px 12px}.cpi .mi{width:26px;height:26px;flex-shrink:0;color:#6b4462}.cpi p{margin:0}
+.jweek span.ok svg path{fill:#fff}
 </style>
 </head>
 <body>
@@ -760,11 +777,12 @@ async function sbLoadUser(user){
 }
 async function sbPushResumen(){
   const u=me();if(!u||!u.profile)return;CLOUD.res=CLOUD.res||{};const rows=[];
-  for(const d of Object.keys(u.logs)){const c=dayStatus(u,d)==='ok',m=!!(u.logs[d].mov||[]).length,k=(c?1:0)+(m?2:0);
-    if(CLOUD.res[d]!==k)rows.push({user_id:SBUID,fecha:d,cumplido:c,movimiento:m})}
+  for(const d of Object.keys(u.logs)){const L=u.logs[d],row={user_id:SBUID,fecha:d,cumplido:dayStatus(u,d)==='ok',movimiento:!!(L.mov||[]).length,registrado:!!(L.foods||[]).length,cerrado:!!L.cerrado,animo:L.animo||null,mov_min:Math.min(1440,Math.round((L.mov||[]).reduce((a,m)=>a+(+m.min||0),0)))},k=[row.cumplido,row.movimiento,row.registrado,row.cerrado,row.animo,row.mov_min].join('|');
+    if(CLOUD.res[d]!==k){row.actualizado=new Date().toISOString();row._k=k;rows.push(row)}}
   if(!rows.length)return;
+  const keys=rows.map(r=>{const k=r._k;delete r._k;return k});
   const {error}=await SB.from('dia_resumen').upsert(rows);if(error)throw error;
-  rows.forEach(r=>CLOUD.res[r.fecha]=(r.cumplido?1:0)+(r.movimiento?2:0));
+  rows.forEach((r,i)=>CLOUD.res[r.fecha]=keys[i]);
 }
 async function sbLoadRetos(){
   if(!SERVER||!SB)return;
@@ -781,8 +799,8 @@ async function sbLoadRetos(){
     ms.forEach(x=>{if(x.user_id&&x.user_id!==SBUID&&x.estado==='miembro')uids.add(x.user_id)});
     if(!minIni||r.inicio<minIni)minIni=r.inicio}
   for(const k in RES)delete RES[k];
-  if(uids.size){const {data:res}=await SB.from('dia_resumen').select('user_id,fecha,cumplido,movimiento').in('user_id',[...uids]).gte('fecha',minIni);
-    (res||[]).forEach(x=>{(RES[x.user_id]=RES[x.user_id]||{})[x.fecha]={c:x.cumplido,m:x.movimiento}})}
+  if(uids.size){const {data:res}=await SB.from('dia_resumen').select('user_id,fecha,cumplido,movimiento,registrado,cerrado,animo,mov_min').in('user_id',[...uids]).gte('fecha',Object.values(d.retos).some(r=>r.tipo==='juntas')?addDays(today(),-70):minIni);
+    (res||[]).forEach(x=>{(RES[x.user_id]=RES[x.user_id]||{})[x.fecha]={c:x.cumplido,m:x.movimiento,r:x.registrado,z:x.cerrado,a:x.animo,n:x.mov_min}})}
   saveLocal();
 }
 async function sbRun(fn,ok){
@@ -1454,12 +1472,33 @@ function bindCiclo(u){
   const n=$('#cno');if(n)n.onclick=()=>{u.profile.ciclo={...(u.profile.ciclo||{}),activo:false,oculto:true};save();r();toast('Puedes activarlo cuando quieras desde tu avatar → Tu ciclo')};
   const o=$('#copen');if(o)o.onclick=()=>openCiclo(UI.date);
 }
+function cicloPatrones(u){
+  const c=cicloDe(u);if(!c||c.anti)return null;
+  const first=[...c.inicios].sort()[0];if(!first)return {pocos:true};
+  const F={menstrual:{k:[],m:0,n:0,mal:0,an:0,w:[]},folicular:{k:[],m:0,n:0,mal:0,an:0,w:[]},ovulatoria:{k:[],m:0,n:0,mal:0,an:0,w:[]},lutea:{k:[],m:0,n:0,mal:0,an:0,w:[]},pre:{w:[]}};
+  const wmap=Object.fromEntries((u.weights||[]).map(w=>[w.date,w.kg]));let dias=0;
+  for(let d=first;d<today();d=addDays(d,1)){const cd=cicloDia(u,d);if(!cd||cd.tarde)continue;const f=F[cd.f],L=u.logs[d]||{};
+    if((L.foods||[]).length){const k=totals(L.foods).k;if(k>300){f.k.push(k);dias++}}
+    f.n++;if((L.mov||[]).length)f.m++;if(L.animo){f.an++;if(L.animo==='mal'||L.animo==='muy_mal')f.mal++}
+    if(wmap[d]!=null){(cd.pre?F.pre:f).w.push(wmap[d])}}
+  const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null,out=[];
+  const kF=F.folicular.k.length>=3?avg(F.folicular.k):null,kL=F.lutea.k.length>=3?avg(F.lutea.k):null;
+  if(kF&&kL&&Math.abs(kL-kF)>=60)out.push(['comida-capricho',kL>kF?`En tu fase lútea comes de media <b>${fmt(kL-kF)} kcal más al día</b> que en la folicular. Es muy habitual: tu cuerpo gasta un poco más y el hambre sube. Planifica un snack saciante para esos días.`:`En tu fase folicular comes de media <b>${fmt(kF-kL)} kcal más al día</b> que en la lútea.`]);
+  const wPre=avg(F.pre.w),wFol=avg(F.folicular.w);
+  if(F.pre.w.length>=2&&F.folicular.w.length>=2&&wPre-wFol>=0.3)out.push(['peso',`Antes de la regla tu peso suele estar <b>${fmt1(wPre-wFol)} kg más alto</b> que en tu fase folicular. Es retención de líquidos, no grasa: no te agobies con la báscula esos días.`]);
+  const pm=Object.entries(F).filter(([k,x])=>k!=='pre'&&x.n>=4).map(([k,x])=>[k,x.m/x.n]);
+  if(pm.length>=2){pm.sort((a,b)=>b[1]-a[1]);const [top,p1]=pm[0],[low,p2]=pm[pm.length-1];if(p1-p2>=0.2)out.push(['act-fuerza',`Te mueves más en tu fase <b>${CICLO_FASES[top].n.toLowerCase()}</b> (${Math.round(p1*100)}% de los días) que en la ${CICLO_FASES[low].n.toLowerCase()} (${Math.round(p2*100)}%). Aprovecha esa fase para tus entrenos más intensos.`])}
+  const pa=Object.entries(F).filter(([k,x])=>k!=='pre'&&x.an>=3).map(([k,x])=>[k,x.mal/x.an]);
+  if(pa.length>=2){pa.sort((a,b)=>b[1]-a[1]);if(pa[0][1]>=0.4&&pa[0][1]-pa[pa.length-1][1]>=0.25)out.push(['animo-mal',`Los días que te sientes peor se concentran en tu fase <b>${CICLO_FASES[pa[0][0]].n.toLowerCase()}</b>. Saberlo ayuda: esos días, más descanso y menos exigencia.`])}
+  return {pocos:!out.length,out,dias};
+}
 function openCicloAjustes(after){
   const u=me(),c=u.profile.ciclo||{},last=(c.inicios||[]).slice().sort().pop()||'';
   const m=modal(`<div class="top"><b>${ico('corazon','mi')} Ajustar mi ciclo</b><button class="close">✕</button></div>
     <label class="f" style="margin-top:14px"><span>Primer día de tu última regla</span><input class="in" type="date" id="cl" max="${today()}" value="${last}"></label>
     <div class="grid2"><label class="f"><span>Duración de tu ciclo (días)</span><input class="in dec" id="cdur" inputmode="numeric" value="${c.dur||28}"></label><label class="f"><span>Días de regla</span><input class="in dec" id="creg" inputmode="numeric" value="${c.reg||5}"></label></div>
     <p class="tiny muted">Si no lo sabes, deja 28 y 5. Cada vez que marques «Me ha bajado la regla», calculamos tu media real.</p>
+    <label class="chk" style="margin-top:12px;display:flex;gap:10px;align-items:center"><input type="checkbox" id="cadj2" ${c.ajusta?'checked':''}> <span class="small">Ajustar mis calorías a mi ciclo: <b>+100 kcal en la fase lútea</b> (sobre todo carbohidratos), cuando el cuerpo gasta un poco más y el hambre sube.</span></label>
     <label class="chk" style="margin-top:12px;display:flex;gap:10px;align-items:center"><input type="checkbox" id="canti" ${c.anti?'checked':''}> <span class="small">Uso anticoncepción hormonal (píldora, anillo, DIU hormonal, implante…)</span></label>
     <p class="tiny muted" style="margin-top:12px">Tus datos del ciclo se guardan en tu cuenta igual que tu diario y solo los ves tú. Vuelve no es un método anticonceptivo ni de diagnóstico.</p>
     <p class="err" id="cerr"></p>
@@ -1470,7 +1509,7 @@ function openCicloAjustes(after){
     if(L>today()){m.querySelector('#cerr').textContent='La fecha no puede ser futura.';return}
     if(dur<21||dur>40||reg<2||reg>8){m.querySelector('#cerr').textContent='Revisa los días: el ciclo suele durar entre 21 y 40 días y la regla entre 2 y 8.';return}
     const ini=[...new Set([...(c.inicios||[]).filter(d=>d!==last),L])].sort();
-    u.profile.ciclo={activo:true,inicios:ini.slice(-24),dur,reg,anti:m.querySelector('#canti').checked};save();m.remove();toast('Ciclo sincronizado ✓');after&&after()};
+    u.profile.ciclo={activo:true,inicios:ini.slice(-24),dur,reg,anti:m.querySelector('#canti').checked,ajusta:m.querySelector('#cadj2').checked};save();m.remove();toast('Ciclo sincronizado ✓');after&&after()};
   const off=m.querySelector('#coff');if(off)off.onclick=()=>{u.profile.ciclo={...c,activo:false,oculto:true};save();m.remove();toast('Seguimiento del ciclo desactivado');after&&after()};
 }
 function openCiclo(date){
@@ -1479,7 +1518,7 @@ function openCiclo(date){
   const fases=['menstrual','folicular','ovulatoria','lutea'];
   const m=modal(`<div class="top"><b>${ico('corazon','mi')} Tu ciclo</b><button class="close">✕</button></div>
     <div class="chead" style="--fc:${F.col};--fb:${F.bg}"><div>${cicloRueda(cd,132)}</div><div style="min-width:0"><p class="cj" style="color:${F.col}">Fase ${F.n.toLowerCase()}${cd.pre?' · premenstrual':''}</p><h2 class="ct">${esc(cd.tarde?'Tu regla podría llegar ya':F.lema)}</h2>
-      <p class="small" style="margin-top:6px">Energía ${cicloEnergia(F.e)}</p><p class="small muted" style="margin-top:4px">${cd.tarde?`Esperábamos tu regla el ${fmtD(cd.prox)}.`:`Próxima regla hacia el ${fmtD(cd.prox)}`} · ciclo de ${cd.dur} días</p></div></div>
+      <p class="small" style="margin-top:6px">Energía ${cicloEnergia(F.e)}</p>${cd.f==='lutea'&&cd.c.ajusta&&!cd.tarde?'<p class="small" style="margin-top:4px;font-weight:600;color:#2f6f5d">+100 kcal en tu objetivo de hoy</p>':''}<p class="small muted" style="margin-top:4px">${cd.tarde?`Esperábamos tu regla el ${fmtD(cd.prox)}.`:`Próxima regla hacia el ${fmtD(cd.prox)}`} · ciclo de ${cd.dur} días</p></div></div>
     <button class="btn block" id="cbaja" style="margin-top:14px">${ico('corazon','mi')} Me ha bajado la regla hoy</button>
     <div class="csec"><h3>${ico('consejo','mi')} Tus hormonas</h3><p>${F.hor}</p></div>
     <div class="csec"><h3>${ico('act-alta','mi')} Tu energía</h3><p>${F.energia}</p></div>
@@ -1487,12 +1526,180 @@ function openCiclo(date){
     <div class="csec"><h3>${ico('corazon','mi')} Tu cuerpo</h3><p>${F.cuerpo}</p></div>
     <div class="csec"><h3>${ico('comida-almuerzo','mi')} Alimentos que te pueden ayudar</h3><div class="cchips">${F.come.map(chip).join('')}</div><p style="margin-top:8px">${F.porque}</p></div>
     <div class="csec"><h3>${ico('act-fuerza','mi')} Movimiento</h3><p>${F.mueve}</p></div>
+    ${(()=>{const pt=cicloPatrones(u);if(!pt)return '';return `<div class="csec cpat"><h3>${ico('consejo','mi')} Tus patrones</h3>${pt.pocos?`<p>Cuando lleves un ciclo completo registrando comidas, peso, movimiento y ánimo, aquí verás <b>tus propios patrones</b>: cuándo tienes más hambre, cómo cambia tu peso antes de la regla y en qué fase rindes mejor.</p>`:pt.out.map(([i,t])=>`<div class="cpi">${ico(i,'mi')}<p>${t}</p></div>`).join('')}</div>`})()}
     <div class="cfases">${fases.map(k=>`<div class="${k===cd.f?'on':''}" style="--c:${CICLO_FASES[k].col}"><i></i><b>${CICLO_FASES[k].n}</b><small>${k==='menstrual'?'Días 1–'+cd.reg:k==='folicular'?'Días '+(cd.reg+1)+'–'+(cd.ov-2):k==='ovulatoria'?'Días '+(cd.ov-1)+'–'+(cd.ov+1):'Días '+(cd.ov+2)+'–'+cd.dur}</small></div>`).join('')}</div>
     <p class="tiny muted" style="margin-top:14px">Las fases son una estimación a partir de tus fechas: cada cuerpo y cada ciclo es distinto. Son consejos orientativos, no médicos; la evidencia sobre comer distinto en cada fase todavía es limitada. Si tienes dolor intenso, ciclos muy irregulares o síntomas que te preocupan, consulta con tu ginecóloga.</p>
     <button class="btn ghost block" id="cadj" style="margin-top:12px">Ajustar mi ciclo</button>`);
   m.querySelector('#cadj').onclick=()=>{m.remove();openCicloAjustes(()=>{if(UI.view==='diario')vDiario()})};
   m.querySelector('#cbaja').onclick=()=>{const c=u.profile.ciclo,t=today();if(!(c.inicios||[]).includes(t))c.inicios=[...(c.inicios||[]),t].sort().slice(-24);
     const med=cicloMedia(c.inicios);if(med)c.dur=Math.min(40,Math.max(21,med));save();m.remove();toast('Anotado ✓ · Día 1 de tu ciclo'+(med?' · media '+c.dur+' días':''));if(UI.view==='diario')vDiario()};
+}
+
+/* ---------- Juntas ---------- */
+const JT={toques:[],meta:null,loaded:false,loading:null,sent:{}};
+const TOQUES={vamos:['¡Vamos, tú puedes!','act-alta'],cierra:['Cierra tu día, que ya queda poco','cerrar-dia'],orgullo:['Estoy orgullosa de ti','corazon'],mueve:['¿Nos movemos hoy?','act-caminar'],agua:['Acuérdate de beber agua','consejo'],juntas:['Juntas es más fácil','compartido']};
+const J_METAS={mov:['Entrenos','días con movimiento','act-fuerza'],ok:['Días en objetivo','días dentro de vuestras calorías','dia-cerrado'],reg:['Días registrados','días con comidas apuntadas','nav-diario']};
+const J_COL=['#6b4462','#c45c72','#7b5ea7','#d4a72c'];
+function juntasDe(u){return Object.values(load().retos||{}).find(r=>r.tipo==='juntas'&&(r.miembros.includes(u.email)||r.owner===u.email))||null}
+function juntasInv(u){return Object.values(load().retos||{}).filter(r=>r.tipo==='juntas'&&r.invitados.includes(u.email)&&!r.miembros.includes(u.email)&&!(r.rechazados||[]).includes(u.email))}
+const jCompas=(u,r)=>r.miembros.filter(e=>e!==u.email);
+const jNombre=(r,e)=>(r.nombres&&r.nombres[e])||e.split('@')[0];
+const jIni=n=>esc((n||'?')[0].toUpperCase());
+function jDia(u,r,e,d){
+  if(e===u.email){const l=u.logs[d]||{};return {reg:!!(l.foods||[]).length,ok:dayStatus(u,d)==='ok',mov:!!(l.mov||[]).length,cer:!!l.cerrado,animo:l.animo||null,min:(l.mov||[]).reduce((a,m)=>a+(+m.min||0),0)}}
+  const x=(RES[r.uids&&r.uids[e]]||{})[d];
+  return x?{reg:!!x.r,ok:!!x.c,mov:!!x.m,cer:!!x.z,animo:x.a||null,min:x.n||0}:{reg:false,ok:false,mov:false,cer:false,animo:null,min:0};
+}
+function jRacha(u,r,e){let n=0,d=today();if(!jDia(u,r,e,d).reg)d=addDays(d,-1);while(n<999&&jDia(u,r,e,d).reg){n++;d=addDays(d,-1)}return n}
+function jRachaJuntas(u,r){const all=x=>r.miembros.length>1&&r.miembros.every(e=>jDia(u,r,e,x).reg);let n=0,d=today();if(!all(d))d=addDays(d,-1);while(n<999&&d>=r.inicio&&all(d)){n++;d=addDays(d,-1)}return n}
+function jMetaProg(u,r){const m=JT.meta;if(!m)return null;const ws=weekStart(today()),k={mov:'mov',ok:'ok',reg:'reg'}[m.tipo];
+  const por=r.miembros.map(e=>{let n=0;for(let i=0;i<7;i++){const d=addDays(ws,i);if(d>today())break;if(jDia(u,r,e,d)[k])n++}return {e,n}});
+  const tot=por.reduce((a,x)=>a+x.n,0);return {m,por,tot,pc:Math.min(100,tot/m.objetivo*100),hecho:tot>=m.objetivo};
+}
+async function jLoad(force){
+  if(!SERVER||!SB)return;
+  if(JT.loading&&!force)return JT.loading;
+  JT.loading=(async()=>{try{await sbLoadRetos();const u=me(),r=juntasDe(u);
+    if(r){const ws=weekStart(today());
+      const [t,m]=await Promise.all([SB.from('toques').select('*').order('created_at',{ascending:false}).limit(40),SB.from('metas_semana').select('*').eq('reto_id',r.id).eq('semana',ws)]);
+      JT.toques=(t&&t.data)||[];JT.meta=((m&&m.data)||[])[0]||null}
+  }catch(e){console.warn('juntas',e)}JT.loaded=true;JT.loading=null})();
+  return JT.loading;
+}
+const jNuevos=()=>JT.toques.filter(t=>t.para===SBUID&&!t.visto);
+async function jVistos(){const n=jNuevos();if(!n.length)return;n.forEach(t=>t.visto=true);try{await SB.from('toques').update({visto:true}).eq('para',SBUID).eq('visto',false)}catch(e){}}
+async function jToque(u,r,email,tipo){
+  const uid=r.uids&&r.uids[email];if(!uid){toast('Tu compañera aún no ha aceptado');return}
+  const key=email+tipo;if(JT.sent[key]&&Date.now()-JT.sent[key]<10*60e3){toast('Ya se lo has enviado hace un momento 💜');return}
+  const {error}=await SB.from('toques').insert({para:uid,tipo,de_nombre:u.nombre});
+  if(error){toast(/Demasiados/.test(error.message||'')?'Ya le has enviado muchos toques hoy 🙂':sbErr(error));return}
+  JT.sent[key]=Date.now();JT.toques.unshift({de:SBUID,para:uid,tipo,created_at:new Date().toISOString(),visto:false});
+  toast(`Toque enviado a ${jNombre(r,email)} 💜`);
+}
+function openToques(u,r,email){
+  const m=modal(`<div class="top"><b>${ico('compartido','mi')} Enviar un toque a ${esc(jNombre(r,email))}</b><button class="close">✕</button></div>
+    <p class="small muted" style="margin-top:6px">Le aparecerá la próxima vez que abra Vuelve.</p>
+    <div class="jtoq">${Object.entries(TOQUES).map(([k,[t,i]])=>`<button data-tq="${k}">${ico(i,'mi')}<span>${t}</span></button>`).join('')}</div>`);
+  m.querySelectorAll('[data-tq]').forEach(b=>b.onclick=async()=>{b.disabled=true;await jToque(u,r,email,b.dataset.tq);m.remove();if(UI.view==='juntas')vJuntas()});
+}
+function jChips(x){return `<div class="jchips">
+  <span class="${x.reg?'on':''}">${ico('nav-diario','mi')} ${x.reg?'Ha registrado':'Sin registrar'}</span>
+  <span class="${x.ok?'on':''}">${ico('dia-cerrado','mi')} ${x.ok?'En objetivo':'Objetivo pendiente'}</span>
+  <span class="${x.mov?'on':''}">${ico('act-fuerza','mi')} ${x.mov?(x.min?x.min+' min de movimiento':'Se ha movido'):'Sin movimiento'}</span>
+  ${x.cer?`<span class="on">${ico('cerrar-dia','mi')} Día cerrado</span>`:''}
+  ${x.animo?`<span class="on">${(ANIMOS.find(a=>a[0]===x.animo)||[])[1]||''} ${(ANIMOS.find(a=>a[0]===x.animo)||[])[2]||''}</span>`:''}</div>`}
+function jAviso(u,r){
+  const yo=jDia(u,r,u.email,today()),c=jCompas(u,r).map(e=>({e,x:jDia(u,r,e,today())}));
+  const cerr=c.find(o=>o.x.cer);const mov=c.find(o=>o.x.mov);const reg=c.find(o=>o.x.reg);
+  if(cerr&&!yo.cer)return `${esc(jNombre(r,cerr.e))} ya ha cerrado su día. ¡Te toca!`;
+  if(mov&&!yo.mov)return `${esc(jNombre(r,mov.e))} ya se ha movido hoy. ¿Te animas tú también?`;
+  if(reg&&!yo.reg)return `${esc(jNombre(r,reg.e))} ya ha apuntado sus comidas. ¿Y tú?`;
+  if(yo.cer&&c.length&&c.every(o=>o.x.cer))return '¡Las dos habéis cerrado el día! Así se hace 💜';
+  if(yo.reg&&c.length&&c.some(o=>!o.x.reg))return `${esc(jNombre(r,c.find(o=>!o.x.reg).e))} aún no ha registrado. ¿Le mandas un toque?`;
+  return '';
+}
+function jToqueLinea(r,t){const de=Object.entries(r.uids||{}).find(([e,id])=>id===t.de);const n=t.de_nombre||(de?jNombre(r,de[0]):'Tu compañera');const [txt,i]=TOQUES[t.tipo]||['💜','corazon'];
+  return `<div class="jtl">${ico(i,'mi')}<div><b>${esc(n)}</b><span>${txt}</span></div><small>${new Date(t.created_at).toLocaleDateString('es-ES',{day:'numeric',month:'short'})}</small></div>`}
+function juntasCardHTML(u){
+  if(!SERVER)return '';
+  const r=juntasDe(u),inv=juntasInv(u);
+  if(inv.length){const i=inv[0];return `<div class="card jcard jinv"><div class="jrow"><span class="javs"><i style="background:${J_COL[1]}">${jIni(jNombre(i,i.owner))}</i></span><div style="flex:1;min-width:0"><p class="cj">Juntas</p><h2 class="ct" style="font-size:19px">${esc(jNombre(i,i.owner))} te invita a ser compañeras</h2><p class="small muted" style="margin-top:4px">Veréis cada día cómo vais, os mandaréis ánimos y tendréis una meta semanal juntas.</p></div></div>
+    <div class="row" style="gap:8px;margin-top:14px;flex-wrap:wrap"><button class="btn" data-jacc="${i.id}">Aceptar</button><button class="btn ghost" data-jrej="${i.id}">Ahora no</button></div></div>`}
+  if(!r){if(u.juntasOculto)return '';return `<div class="card jcard"><div class="jrow"><span class="jic">${ico('compartido','mi')}</span><div style="flex:1;min-width:0"><p class="cj">Juntas</p><h2 class="ct" style="font-size:19px">Ponte en forma con una amiga</h2><p class="small muted" style="margin-top:4px">Invita a tu compañera: veréis vuestro día, os mandaréis toques y tendréis una meta semanal juntas.</p></div></div>
+    <div class="row" style="gap:8px;margin-top:14px;flex-wrap:wrap"><button class="btn" id="jgo">Invitar a mi compañera</button><button class="btn ghost" id="jhide">Ahora no</button></div></div>`}
+  const comp=jCompas(u,r);
+  if(!comp.length)return `<button class="card jcard" id="jgo" style="width:100%;text-align:left"><div class="jrow"><span class="jic">${ico('compartido','mi')}</span><div style="flex:1"><p class="cj">Juntas</p><div class="ct" style="font-size:18px">Esperando a que ${esc(r.invitados.filter(e=>e!==u.email).map(e=>e.split('@')[0]).join(', ')||'tu compañera')} acepte</div><p class="small muted" style="margin-top:4px">Toca para volver a enviarle la invitación.</p></div><span class="cgo">›</span></div></button>`;
+  const nuevos=jNuevos(),av=jAviso(u,r),rj=jRachaJuntas(u,r);
+  return `<div class="card jcard jon">
+    <div class="jrow"><span class="javs">${[u.email,...comp].map((e,i)=>`<i style="background:${J_COL[i%4]}">${jIni(e===u.email?u.nombre:jNombre(r,e))}</i>`).join('')}</span>
+      <div style="flex:1;min-width:0"><p class="cj">Juntas · hoy</p><div class="ct" style="font-size:18px">${comp.map(e=>esc(jNombre(r,e))).join(' y ')}${rj>1?` · <span class="jfire">${rj} días seguidas</span>`:''}</div></div>
+      <button class="btn soft sm" id="jgo">Ver ›</button></div>
+    ${comp.map(e=>{const x=jDia(u,r,e,today());return `<div class="jmini">${comp.length>1?`<b>${esc(jNombre(r,e))}</b>`:''}${jChips(x)}</div>`}).join('')}
+    ${nuevos.length?`<div class="jnew">${nuevos.slice(0,2).map(t=>jToqueLinea(r,t)).join('')}</div>`:''}
+    ${av?`<p class="jav">${ico('consejo','mi')} ${av}</p>`:''}
+    <div class="row" style="gap:8px;margin-top:12px;flex-wrap:wrap">${comp.map(e=>`<button class="btn soft sm" data-jtq="${esc(e)}">${ico('compartido','mi')} Toque a ${esc(jNombre(r,e))}</button>`).join('')}</div></div>`;
+}
+function bindJuntas(u){
+  const go=()=>{UI.view='juntas';renderApp();scrollTo(0,0)};
+  $$('#jgo').forEach(b=>b.onclick=go);
+  const h=$('#jhide');if(h)h.onclick=()=>{u.juntasOculto=true;save();renderApp();toast('Lo tienes cuando quieras en la pestaña Juntas')};
+  $$('[data-jacc]').forEach(b=>b.onclick=async()=>{await RETOS_API.aceptar(b.dataset.jacc,u);await jLoad(true);toast('¡Ya sois compañeras! 💜');renderApp()});
+  $$('[data-jrej]').forEach(b=>b.onclick=async()=>{await RETOS_API.rechazar(b.dataset.jrej,u);renderApp()});
+  const r=juntasDe(u);$$('[data-jtq]').forEach(b=>b.onclick=()=>openToques(u,r,b.dataset.jtq));
+}
+function jInviteText(u,para){return `¡Hola!\n\n${u.nombre} quiere ponerse en forma contigo en Vuelve 💜\n\nSeremos compañeras: veremos cada día cómo vamos (sin pesos ni números, solo constancia), nos mandaremos ánimos y tendremos una meta semanal juntas.\n\nCrea tu cuenta ${para?'con tu email '+para:'con el email con el que te he invitado'} aquí: ${APP_URL}\n\nJuntas es más fácil. Un día a la vez.`}
+function jShareInvite(u,email){const txt=jInviteText(u,email);
+  if(CAN_SHARE){navigator.share({title:'Vuelve · Juntas',text:txt}).catch(()=>{});return}
+  navigator.clipboard.writeText(txt).then(()=>toast('Invitación copiada ✓ Pégala en WhatsApp o Instagram'),()=>modal(`<div class="top"><b>Tu invitación</b><button class="close">✕</button></div><textarea class="in" style="min-height:220px;margin-top:10px" readonly>${esc(txt)}</textarea>`))}
+function vJuntas(){
+  const u=me();
+  if(!SERVER){$('#view').innerHTML=heroHTML('Juntas','Juntas','es más fácil.')+`<div class="card"><p>Juntas funciona con tu cuenta en la nube. Entra en tu web para usarlo.</p></div>`;return}
+  if(!JT.loaded){$('#view').innerHTML=heroHTML('Juntas','Juntas','es más fácil.')+'<p class="muted">Cargando…</p>';jLoad().then(()=>{if(UI.view==='juntas')vJuntas()});return}
+  const r=juntasDe(u),inv=juntasInv(u);
+  if(!r){
+    $('#view').innerHTML=heroHTML('Juntas','Juntas','es más fácil.')+`
+    ${inv.length?juntasCardHTML(u):''}
+    <div class="card jhero"><div class="jhx"><p class="cj" style="color:#fff;opacity:.85">Tu compañera de Vuelve</p><h2>Dos amigas, un mismo objetivo.</h2><p>Os ayudáis a ser constantes: veis cada día cómo va la otra, os mandáis toques de ánimo y tenéis una meta semanal juntas. Nunca se comparten pesos, medidas ni fotos: solo constancia.</p></div></div>
+    <div class="card"><p class="cj">Invita a tu compañera</p><h2 class="ct">¿Con quién lo vas a hacer?</h2>
+      <label class="f" style="margin-top:12px"><span>Email de tu compañera</span><input class="in" id="jem" type="email" placeholder="amiga@email.com" autocomplete="off"></label>
+      <label class="f"><span>Nombre de vuestro dúo (opcional)</span><input class="in" id="jnm" placeholder="Ej. Nina y Mica" maxlength="60"></label>
+      <p class="err" id="jerr"></p>
+      <button class="btn block" id="jcrear" style="margin-top:8px">Crear nuestro espacio e invitar</button>
+      <p class="tiny muted" style="margin-top:10px">Le prepararemos un mensaje para que se lo mandes por WhatsApp o Instagram. Cuando cree su cuenta con ese email, le aparecerá tu invitación.</p></div>
+    <div class="grid3" style="margin-top:16px"><div class="stat"><b>${ico('compartido','mi')}</b><small>vuestro día, juntas</small></div><div class="stat"><b>${ico('corazon','mi')}</b><small>toques de ánimo</small></div><div class="stat"><b>${ico('celebrar-trofeo','mi')}</b><small>meta semanal</small></div></div>`;
+    bindJuntas(u);
+    $('#jcrear').onclick=async()=>{const em=$('#jem').value.trim().toLowerCase(),err=$('#jerr');
+      if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){err.textContent='Ese email no parece válido.';return}
+      if(em===u.email){err.textContent='Ese es tu propio email 🙂';return}
+      const b=$('#jcrear');b.disabled=true;b.textContent='Creando…';
+      try{await RETOS_API.crear({nombre:($('#jnm').value.trim()||(u.nombre+' y '+em.split('@')[0])).slice(0,80),tipo:'juntas',inicio:today(),dias:3660,invitados:[em]},u);await jLoad(true);vJuntas();jShareInvite(u,em)}
+      catch(e){err.textContent=sbErr(e);b.disabled=false;b.textContent='Crear nuestro espacio e invitar'}};
+    return;
+  }
+  const comp=jCompas(u,r),pend=r.invitados.filter(e=>e!==u.email&&!r.miembros.includes(e)&&!(r.rechazados||[]).includes(e));
+  const todas=[u.email,...comp],ws=weekStart(today()),rj=jRachaJuntas(u,r),mp=jMetaProg(u,r),nuevos=jNuevos(),av=jAviso(u,r);
+  const recibidos=JT.toques.filter(t=>t.para===SBUID).slice(0,6);
+  const dias=[...Array(7)].map((_,i)=>addDays(ws,i));
+  $('#view').innerHTML=heroHTML('Juntas','Juntas','es más fácil.')+`
+  <div class="card jhero"><div class="jhx">
+    <span class="javs big">${todas.map((e,i)=>`<i style="background:${J_COL[i%4]}">${jIni(e===u.email?u.nombre:jNombre(r,e))}</i>`).join('')}</span>
+    <h2>${esc(r.nombre)}</h2><p>Juntas desde el ${fmtD(r.inicio)}</p>
+    <div class="jstreak"><b>${rj}</b><span>${rj===1?'día seguido':'días seguidos'} registrando las dos</span></div>
+    <div class="jper">${todas.map(e=>`<span>${esc(e===u.email?'Tú':jNombre(r,e))}: <b>${jRacha(u,r,e)}</b> ${jRacha(u,r,e)===1?'día':'días'} de racha</span>`).join('')}</div></div></div>
+  ${!comp.length?`<div class="card"><p class="cj">Esperando a tu compañera</p><h2 class="ct">${esc(pend.join(', ')||'Invita a alguien')}</h2><p class="small muted" style="margin-top:6px">Cuando cree su cuenta con ese email y acepte, empezaréis a veros aquí.</p><button class="btn block" id="jreinv" style="margin-top:12px">Volver a enviar la invitación</button></div>`:''}
+  ${av?`<div class="jav big">${ico('consejo','mi')} <span>${av}</span>${UI.date!==today()||!jDia(u,r,u.email,today()).cer?'<button class="btn sm" id="jdiario">Ir a mi diario</button>':''}</div>`:''}
+  ${nuevos.length?`<div class="card jnewc"><p class="cj">Te han mandado</p>${nuevos.map(t=>jToqueLinea(r,t)).join('')}</div>`:''}
+  <div class="jgrid">${todas.map((e,i)=>{const x=jDia(u,r,e,today());return `<div class="card jday" style="--jc:${J_COL[i%4]}"><div class="row between" style="align-items:center"><div class="jwho"><i>${jIni(e===u.email?u.nombre:jNombre(r,e))}</i><b>${esc(e===u.email?'Tú':jNombre(r,e))}</b></div>${e!==u.email?`<button class="btn soft sm" data-jtq="${esc(e)}">${ico('compartido','mi')} Toque</button>`:''}</div>${jChips(x)}</div>`}).join('')}</div>
+  <div class="card jmeta"><div class="row between" style="align-items:center;gap:10px;flex-wrap:wrap"><div><p class="cj">Meta de la semana</p><h2 class="ct">${mp?`${J_METAS[mp.m.tipo][0]}: ${mp.tot} de ${mp.m.objetivo}`:'Poneos una meta juntas'}</h2></div><button class="btn soft sm" id="jmeta">${mp?'Cambiar':'Elegir meta'}</button></div>
+    ${mp?`<div class="jbar">${mp.por.map((p,i)=>`<i style="width:${Math.min(100,p.n/mp.m.objetivo*100)}%;background:${J_COL[todas.indexOf(p.e)%4]}"></i>`).join('')}</div>
+      <div class="jleg">${mp.por.map(p=>`<span><i style="background:${J_COL[todas.indexOf(p.e)%4]}"></i>${esc(p.e===u.email?'Tú':jNombre(r,p.e))}: ${p.n}</span>`).join('')}</div>
+      <p class="small" style="margin-top:10px;font-weight:600;color:${mp.hecho?'var(--green)':'var(--muted)'}">${mp.hecho?'¡Meta cumplida! Sois un equipazo 💜':`Os ${mp.m.objetivo-mp.tot===1?'falta':'faltan'} ${mp.m.objetivo-mp.tot} ${J_METAS[mp.m.tipo][1]} entre las dos.`}</p>`
+      :`<p class="small muted" style="margin-top:6px">Por ejemplo: 6 entrenos entre las dos esta semana. Lo que hace cada una suma para el equipo.</p>`}</div>
+  <div class="card"><p class="cj">Esta semana</p><div class="jweek"><div></div>${dias.map(d=>`<small class="${d===today()?'hoy':''}">${'LMXJVSD'[(parse(d).getDay()+6)%7]}</small>`).join('')}
+    ${todas.map((e,i)=>`<b>${esc(e===u.email?'Tú':jNombre(r,e))}</b>${dias.map(d=>{if(d>today())return '<span class="fut"></span>';const x=jDia(u,r,e,d);return `<span class="${x.ok?'ok':x.reg?'reg':''}" title="${x.ok?'En objetivo':x.reg?'Registrado':'Sin registrar'}${x.mov?' · movimiento':''}">${x.mov?ico('act-fuerza','mi'):''}</span>`}).join('')}`).join('')}</div>
+    <div class="jleg" style="margin-top:10px"><span><i style="background:#2f6f5d"></i>En objetivo</span><span><i style="background:#d9cbe8"></i>Registrado</span><span>${ico('act-fuerza','mi')} Movimiento</span></div></div>
+  ${recibidos.length?`<div class="card"><p class="cj">Toques recibidos</p>${recibidos.map(t=>jToqueLinea(r,t)).join('')}</div>`:''}
+  <div class="card"><p class="cj">Vuestro espacio</p><p class="small muted" style="margin-top:6px">Solo compartís si habéis registrado, si estáis en objetivo, si os habéis movido, si habéis cerrado el día y vuestro ánimo. Nunca pesos, medidas, comidas ni fotos.</p>
+    <div class="row" style="gap:8px;margin-top:12px;flex-wrap:wrap"><button class="btn ghost sm" id="jmas">+ Invitar a otra amiga</button><button class="btn ghost sm" id="jsalir" style="color:var(--warn)">Salir de este espacio</button></div></div>`;
+  bindJuntas(u);jVistos();
+  const jd=$('#jdiario');if(jd)jd.onclick=()=>{UI.view='diario';UI.date=today();UI.range='dia';renderApp();scrollTo(0,0)};
+  const ri=$('#jreinv');if(ri)ri.onclick=()=>jShareInvite(u,pend[0]);
+  $('#jmeta').onclick=()=>{const cur=JT.meta||{tipo:'mov',objetivo:6};
+    const m=modal(`<div class="top"><b>${ico('celebrar-trofeo','mi')} Meta de la semana</b><button class="close">✕</button></div>
+      <p class="small muted" style="margin-top:6px">Lo que hace cada una suma para el equipo. Se reinicia cada lunes.</p>
+      <div class="opts" style="margin-top:12px">${Object.entries(J_METAS).map(([k,[t,d,i]])=>`<button class="opt ${cur.tipo===k?'on':''}" data-mt2="${k}"><span class="ic">${ico(i,'mi')}</span><div><b>${t}</b><small>Contamos los ${d}</small></div></button>`).join('')}</div>
+      <label class="f" style="margin-top:12px"><span>¿Cuántos entre las dos?</span><input class="in dec" id="jobj" inputmode="numeric" value="${cur.objetivo}"></label>
+      <button class="btn block" id="jmsv" style="margin-top:12px">Guardar meta</button>`);
+    let tipo=cur.tipo;m.querySelectorAll('[data-mt2]').forEach(b=>b.onclick=()=>{tipo=b.dataset.mt2;m.querySelectorAll('[data-mt2]').forEach(x=>x.classList.toggle('on',x===b));const s={mov:6,ok:8,reg:12}[tipo]*Math.max(1,todas.length)/2;m.querySelector('#jobj').value=Math.round(s)});
+    m.querySelector('#jmsv').onclick=async()=>{const o=Math.round(num(m.querySelector('#jobj').value)||0);if(o<1||o>60){toast('Elige un número entre 1 y 60');return}
+      const row={reto_id:r.id,semana:ws,tipo,objetivo:o,updated_at:new Date().toISOString()};const {error}=await SB.from('metas_semana').upsert(row);if(error){toast(sbErr(error));return}
+      JT.meta=row;m.remove();toast('Meta guardada ✓ ¡A por ello!');vJuntas()}};
+  $('#jmas').onclick=()=>{const m=modal(`<div class="top"><b>Invitar a otra amiga</b><button class="close">✕</button></div><label class="f" style="margin-top:12px"><span>Email</span><input class="in" id="jem2" type="email"></label><p class="err" id="jer2"></p><button class="btn block" id="jinv2" style="margin-top:8px">Invitar</button>`);
+    m.querySelector('#jinv2').onclick=async()=>{const em=m.querySelector('#jem2').value.trim().toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){m.querySelector('#jer2').textContent='Ese email no parece válido.';return}
+      if(r.miembros.length+pend.length>=4){m.querySelector('#jer2').textContent='Juntas es para grupos pequeños: máximo 4 personas.';return}
+      await RETOS_API.invitar(r.id,em);m.remove();await jLoad(true);vJuntas();jShareInvite(u,em)}};
+  $('#jsalir').onclick=()=>{const m=modal(`<div class="top"><b>¿Salir de ${esc(r.nombre)}?</b><button class="close">✕</button></div><p style="margin-top:10px">Dejaréis de veros el día a día. Tu diario no se toca.</p><div class="row" style="gap:8px;margin-top:16px"><button class="btn ghost" id="no">Cancelar</button><button class="btn" id="si" style="background:var(--warn)">Salir</button></div>`);
+    m.querySelector('#no').onclick=()=>m.remove();m.querySelector('#si').onclick=async()=>{m.remove();if(r.owner===u.email)await RETOS_API.borrar(r.id);else await RETOS_API.salir(r.id,u);JT.meta=null;JT.toques=[];await jLoad(true);vJuntas()}};
 }
 
 /* ---------- Plan ---------- */
@@ -1574,8 +1781,10 @@ function isTrainDay(u,date){
 }
 function targetFor(u,date){
   const r=calcular(u.profile);
-  if(r.plan.normal)return r.plan.normal;
-  return isTrainDay(u,date)?r.plan.entreno:r.plan.descanso;
+  const b=r.plan.normal?r.plan.normal:isTrainDay(u,date)?r.plan.entreno:r.plan.descanso;
+  const c=u.profile&&u.profile.ciclo;
+  if(c&&c.activo&&c.ajusta&&!c.anti&&u.profile.sexo==='Mujer'&&typeof cicloDia==='function'){const cd=cicloDia(u,date);if(cd&&cd.f==='lutea'&&!cd.tarde)return {...b,kcal:b.kcal+100,c:b.c+25,ciclo:true}}
+  return b;
 }
 function totals(foods){return (foods||[]).reduce((a,f)=>({k:a.k+f.k,p:a.p+f.p,c:a.c+f.c,g:a.g+f.g}),{k:0,p:0,c:0,g:0})}
 const MET={Suave:3.5,Media:5.5,Alta:8};
@@ -1592,12 +1801,12 @@ function renderApp(){
   </div></header>
   <main class="wrap v-${UI.view}" id="view"></main>
   <nav class="tabs"><div class="in2">
-    ${[['diario',ico('nav-diario',''),'Diario'],['movimiento',ico('nav-movimiento',''),'Movimiento'],['plan',ico('nav-plan',''),'Mi plan'],['progreso',ico('nav-progreso',''),'Mi progreso|Progreso'],['menu',ico('nav-menu',''),'Menú']].map(([k,i,t])=>{const [l,s]=t.split('|');return `<button data-v="${k}" class="${UI.view===k?'on':''}">${i}${s?`<span class="nav-l">${l}</span><span class="nav-s">${s}</span>`:l}</button>`}).join('')}
+    ${[['diario',ico('nav-diario',''),'Diario'],['movimiento',ico('nav-movimiento',''),'Movimiento|Mover'],['juntas',ico('compartido',''),'Juntas'],['plan',ico('nav-plan',''),'Mi plan|Plan'],['progreso',ico('nav-progreso',''),'Mi progreso|Progreso'],['menu',ico('nav-menu',''),'Menú']].map(([k,i,t])=>{const [l,s]=t.split('|');return `<button data-v="${k}" class="${UI.view===k?'on':''}">${i}${s?`<span class="nav-l">${l}</span><span class="nav-s">${s}</span>`:l}</button>`}).join('')}
   </div></nav>`;
   $$('nav.tabs button').forEach(b=>b.onclick=()=>{UI.view=b.dataset.v;if(b.dataset.v==='menu'&&MP.screen!=='gen')MP.screen='home';renderApp();scrollTo(0,0)});
   $('#av').onclick=e=>{e.stopPropagation();toggleDD()};
   $('#home').onclick=e=>{e.preventDefault();$$('.modal').forEach(m=>m.remove());UI.view='diario';UI.date=today();UI.range='dia';MP.screen=MP.screen==='gen'?'gen':'home';renderApp();scrollTo({top:0,behavior:'smooth'})};
-  ({diario:vDiario,movimiento:vMov,progreso:vProgreso,plan:vPlan,espacio:vEspacio,menu:vMenu,retos:vRetos,biblio:vBiblio,lista:vLista,descargas:vDescargas,productos:vProductos})[UI.view]();
+  ({juntas:vJuntas,diario:vDiario,movimiento:vMov,progreso:vProgreso,plan:vPlan,espacio:vEspacio,menu:vMenu,retos:vRetos,biblio:vBiblio,lista:vLista,descargas:vDescargas,productos:vProductos})[UI.view]();
   if(SERVER&&!LIB.adminChecked)libCheckAdmin().catch(()=>{});
 }
 
@@ -1643,8 +1852,8 @@ const RETO_TIPOS={
   mov:{t:'Días de movimiento',s:'Suma un punto cada día que registres actividad',ic:ico('act-ligera','mi')},
   ambos:{t:'Combinado',s:'Un punto por comer en objetivo y otro por moverte',ic:ico('menu-retos','mi')}
 };
-function retosOf(u){return Object.values(load().retos||{}).filter(r=>r.miembros.includes(u.email))}
-function pendingInvites(u){return Object.values(load().retos||{}).filter(r=>r.invitados.includes(u.email)&&!r.miembros.includes(u.email)&&!(r.rechazados||[]).includes(u.email))}
+function retosOf(u){return Object.values(load().retos||{}).filter(r=>r.tipo!=='juntas'&&r.miembros.includes(u.email))}
+function pendingInvites(u){return Object.values(load().retos||{}).filter(r=>r.tipo!=='juntas'&&r.invitados.includes(u.email)&&!r.miembros.includes(u.email)&&!(r.rechazados||[]).includes(u.email))}
 function retoFin(r){return addDays(r.inicio,r.dias-1)}
 const diasEntre=(a,b)=>Math.round((parse(b)-parse(a))/864e5)+1;
 function retoScore(r,email){
@@ -1903,6 +2112,7 @@ function vDiario(){
   const mb=(v,t,col)=>`<div class="mb"><i style="width:${Math.min(v/t*100||0,100)}%;background:${col}"></i></div>`;
   $('#view').innerHTML=head+`
   <div class="datenav"><button class="ar" id="dp">←</button><div class="t"><b>${dateTitle(UI.date)}</b><small>${UI.date===today()?'Tu resumen de hoy':'Tu resumen del día'}</small></div><button class="ar" id="dn">→</button></div>
+  ${UI.range==='dia'&&UI.date===today()?juntasCardHTML(u):''}
   <div class="card daycard"><div class="dcols"><div class="dcol dl">
     <div class="who"><span class="av">${esc((u.nombre[0]||'?').toUpperCase())}</span>${esc(u.nombre)}</div>
     <div class="sum">
@@ -1948,7 +2158,7 @@ function vDiario(){
   ${cd}
   <p class="foot">Vuelve por encima de perfección. Cada registro cuenta.</p>`;
   {const md=$('.mdet');if(md)md.ontoggle=()=>{UI.microOpen=md.open}}
-  bindCiclo(u);
+  bindCiclo(u);bindJuntas(u);if(SERVER&&!JT.loaded&&!JT.loading)jLoad().then(()=>{if(UI.view==='diario')vDiario()});
   bindRange();
   bindArrows(()=>UI.date=addDays(UI.date,-1),()=>UI.date=addDays(UI.date,1),vDiario);
   $('#add').onclick=()=>openAdd(null);
@@ -3674,7 +3884,7 @@ let LAST_TODAY=today();
 function checkNewDay(){const t=today();if(t===LAST_TODAY)return;const was=LAST_TODAY;LAST_TODAY=t;
   if(typeof UI!=='undefined'&&UI.date===was&&me()?.profile&&!SCREEN.busy){UI.date=t;if(!document.querySelector('.modal'))renderApp()}}
 setInterval(checkNewDay,60000);
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushNow();else{checkNewDay();refreshFromServer()}});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushNow();else{checkNewDay();refreshFromServer();if(SERVER&&JT.loaded&&Date.now()-(JT.t||0)>60e3){JT.t=Date.now();jLoad(true).then(()=>{if(UI.view==='juntas')vJuntas();else if(UI.view==='diario'&&!$('.modal'))vDiario()})}}});
 // Al volver a la app, recarga lo guardado en el servidor (otro móvil, el ordenador…)
 let LAST_REFRESH=0;
 async function refreshFromServer(){
