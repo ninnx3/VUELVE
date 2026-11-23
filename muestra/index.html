@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Vuelve · Muestra de estilo</title>
+<meta name="description" content="Dos amigas poniéndose en forma juntas. Vuelve: tu día, el de tu compañera y una meta semanal en común. Apúntate y te avisamos cuando abramos.">
+<meta property="og:title" content="Vuelve · Muy pronto">
+<meta property="og:description" content="Volver a cuidarte, un día a la vez. Apúntate a la lista de espera.">
+<meta property="og:image" content="https://ninnx3.github.io/VUELVE/img/og-unete.jpg">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#744a69">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32.png?v=2"><link rel="icon" type="image/png" sizes="192x192" href="../icon-192.png?v=2"><link rel="shortcut icon" href="../favicon.ico?v=2">
+<link rel="apple-touch-icon" href="../icon-180.png?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--plum:#412229;--plum-d:#2c161c;--ink:#2a1a1e;--muted:#6b5458;--line:#e6d6b9;--bg:#f7efe1;--lilac:#efe0c3;--tile:#f3e7d1;--em:#2d4a3a;--ochre:#edd4a9;--wine:#5c2a3a}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg)}
+body{font-family:Montserrat,Arial,sans-serif;color:var(--ink);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100vh}
+button,input{font:inherit;color:inherit}
+a{color:var(--plum)}
+.wrap{display:grid;min-height:100vh}
+.hero{position:relative;min-height:56vh;background:#412229 url(../img/motivacion/pausa-costera.webp) center 35%/cover no-repeat;display:flex;flex-direction:column;justify-content:space-between;padding:22px 22px 30px;color:#fff}
+.hero::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(40,18,24,.55) 0%,rgba(65,34,41,.25) 35%,rgba(65,34,41,.45) 60%,rgba(35,15,20,.92) 100%),linear-gradient(0deg,rgba(65,34,41,.35),rgba(65,34,41,.35));mix-blend-mode:normal}
+.hero>*{position:relative;z-index:1}
+.top{display:flex;justify-content:space-between;align-items:center}
+.top img{height:34px;width:auto}
+.lang{display:inline-flex;background:rgba(255,255,255,.18);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:3px;gap:2px}
+.lang button{border:0;background:none;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:800;letter-spacing:.5px;color:#fff;cursor:pointer}
+.lang button.on{background:var(--ochre);color:var(--plum)}
+.eyebrow{color:var(--ochre);display:inline-block;font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;background:rgba(255,255,255,.2);border:1px solid rgba(237,212,169,.55);padding:6px 12px;border-radius:999px;margin-bottom:14px}
+h1{font-size:38px;line-height:1.02;font-weight:800;letter-spacing:-1px;max-width:14ch;color:#f7efe1;text-shadow:0 2px 18px rgba(40,15,35,.35)}
+.panel{padding:28px 22px 40px;max-width:560px;width:100%;margin:0 auto}
+.lead{font-size:15.5px;color:var(--muted);margin-bottom:22px}
+.lead b{color:var(--ink)}
+h2{font-size:12px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:var(--plum);margin:0 0 10px}
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px}
+.chip{display:flex;align-items:center;gap:10px;padding:13px 12px;border-radius:14px;background:#fff;border:1.5px solid var(--line);font-weight:700;font-size:13.5px;cursor:pointer;text-align:left;transition:border-color .15s,background .15s}
+.chip .e{font-size:20px;line-height:1}
+.chip .ck{margin-left:auto;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:12px;color:#fff;flex-shrink:0}
+.chip.on{border-color:var(--plum);background:var(--lilac)}
+.chip{background:#fffaf1}.in{background:#fffaf1}.cta{background:#fffaf1}
+.chip.on .ck{background:var(--plum);border-color:var(--plum)}
+label.f{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin:0 0 6px}
+.in{width:100%;padding:14px 14px;border-radius:12px;border:1.5px solid var(--line);background:#fff;font-size:16px;outline:none;margin-bottom:14px}
+.in:focus{border-color:var(--plum)}
+.consent{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--muted);margin:4px 0 18px;cursor:pointer}
+.consent input{width:20px;height:20px;accent-color:var(--plum);flex-shrink:0;margin-top:1px}
+.btn{width:100%;border:0;border-radius:12px;background:var(--plum);color:#fff;font-weight:800;font-size:16px;padding:16px;cursor:pointer;transition:background .15s,transform .1s}
+.btn:hover{background:var(--plum-d)}.btn:active{transform:scale(.99)}
+.btn[disabled]{opacity:.6;cursor:default}
+.err{color:#a3324a;font-size:13px;font-weight:600;min-height:20px;margin-top:10px}
+.priv{margin-top:18px;font-size:12.5px;color:var(--muted)}
+.priv summary{cursor:pointer;font-weight:700;color:var(--plum)}
+.priv p{margin-top:8px}
+.ok{text-align:center;padding:20px 0}
+.ok .big{font-size:46px;line-height:1;margin-bottom:12px}
+.ok h3{font-size:24px;font-weight:800;color:var(--ink);margin-bottom:8px}
+.ok p{color:var(--muted)}
+.ok .pill{display:inline-block;margin-top:20px;background:#dfe6dc;color:var(--em);font-weight:700;font-size:13px;padding:8px 14px;border-radius:999px}
+.ctas{display:grid;gap:10px;margin:22px auto 0;max-width:380px}
+.cta{display:flex;align-items:center;gap:12px;padding:13px 16px;border-radius:14px;background:#fff;border:1.5px solid var(--line);font-weight:700;font-size:14px;text-decoration:none;color:var(--ink);transition:border-color .15s,transform .1s}
+.cta:hover{border-color:var(--plum)}.cta:active{transform:scale(.99)}
+.cta .e{font-size:20px;width:26px;text-align:center}.cta .t{flex:1;text-align:left}.cta .a{color:var(--plum);font-weight:800}
+.cta.main{background:var(--plum);border-color:var(--plum);color:#fff}.cta.main .a{color:#fff}
+.foot{text-align:center;font-size:12px;color:var(--muted);padding:0 22px 28px}
+.btn{letter-spacing:.3px}
+.panel{position:relative}
+.lead{font-size:16px}
+h2{color:var(--wine)}
+.mbadge{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);white-space:nowrap;z-index:50;background:#edd4a9;color:#412229;font:800 11px Montserrat,sans-serif;letter-spacing:1.5px;text-transform:uppercase;padding:7px 14px;border-radius:99px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+@media(min-width:900px){h1{font-size:60px}}
+.strip{display:none}
+@media(min-width:900px){
+  .wrap{grid-template-columns:1.1fr 1fr}
+  .hero{min-height:100vh;padding:34px 40px 48px;position:sticky;top:0;height:100vh}
+  h1{font-size:52px}
+  .panel{padding:64px 48px 40px;align-self:center}
+  .strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:26px}
+  .strip div{aspect-ratio:1;border-radius:14px;background:center/cover no-repeat}
+  .foot{grid-column:2}
+}
+</style>
+<meta name="robots" content="noindex"></head>
+<body>
+<div class="mbadge">Muestra · estilo terciopelo</div>
+<div class="wrap">
+  <header class="hero">
+    <div class="top"><img src="../img/logo/vuelve-logo-crema.svg" alt="Vuelve"><div class="lang" role="group" aria-label="Idioma"><button data-l="es">ES</button><button data-l="en">EN</button></div></div>
+    <div><span class="eyebrow" data-t="eyebrow"></span><h1 data-t="h1"></h1></div>
+  </header>
+  <main class="panel" id="panel">
+    <div class="strip" aria-hidden="true"><div style="background-image:url(../img/motivacion/almuerzo-mediterraneo.webp)"></div><div style="background-image:url(../img/motivacion/curl-mancuerna.webp)"></div><div style="background-image:url(../img/motivacion/trote-pinos.webp)"></div></div>
+    <p class="lead" data-t="lead"></p>
+    <form id="f" novalidate>
+      <h2 data-t="qInt"></h2>
+      <div class="chips">
+        <button type="button" class="chip" data-i="recetas"><span class="e">🥗</span><span data-t="iRec"></span><span class="ck">✓</span></button>
+        <button type="button" class="chip" data-i="rutinas"><span class="e">🏋️</span><span data-t="iRut"></span><span class="ck">✓</span></button>
+        <button type="button" class="chip" data-i="merch"><span class="e">👕</span><span data-t="iMer"></span><span class="ck">✓</span></button>
+        <button type="button" class="chip" data-i="app"><span class="e">📱</span><span data-t="iApp"></span><span class="ck">✓</span></button>
+      </div>
+      <label class="f" for="nombre" data-t="lNom"></label>
+      <input class="in" id="nombre" name="nombre" autocomplete="given-name" maxlength="60">
+      <label class="f" for="email" data-t="lEm"></label>
+      <input class="in" id="email" name="email" type="email" inputmode="email" autocomplete="email" maxlength="254" required>
+      <label class="consent"><input type="checkbox" id="acepto"><span data-t="consent"></span></label>
+      <button class="btn" id="go" type="submit" data-t="btn"></button>
+      <div class="err" id="err" role="alert"></div>
+    </form>
+    <details class="priv"><summary data-t="privT"></summary><p data-t="priv"></p></details>
+  </main>
+  <p class="foot" data-t="foot"></p>
+</div>
+<script>
+/* Configuración: rellenad estos datos cuando existan las cuentas */
+const CONTACTO = 'vuelve.contact@gmail.com';          // email de contacto para privacidad, p. ej. 'hola@vuelve.app'
+const REDES = { instagram:'https://www.instagram.com/vuelve.contact/', tiktok:'https://www.tiktok.com/@vuelvehaciati', youtube:'https://www.youtube.com/@vuelvehaciati' }; // enlaces completos a vuestros perfiles
+
+const SB_URL='https://vzzkzajzzehhxzwonpgv.supabase.co', SB_KEY='sb_publishable_9-Tb4XFSfV_EXN6cG1Nxtw_KZotYkWS';
+const T={
+ es:{eyebrow:'Muy pronto',h1:'Juntas es más fácil.',
+  lead:'Somos dos amigas poniéndonos en forma juntas, y lo estamos contando todo: lo que funciona, lo que cuesta y cómo darnos caprichos <b>sin pasarnos de calorías</b>. Vuelve es la app que usamos: tu día, el de tu compañera y una meta semanal en común. Apúntate y te avisamos en cuanto abramos.',
+  qInt:'¿Qué te interesa?',iRec:'Packs de recetas',iRut:'Rutinas',iMer:'Merch',iApp:'La app Vuelve',
+  lNom:'Tu nombre (opcional)',lEm:'Tu email',
+  consent:'Quiero recibir emails de Vuelve sobre el lanzamiento y novedades. Puedo darme de baja cuando quiera.',
+  btn:'Apuntarme',eEm:'Ese email no parece válido.',eCon:'Marca la casilla para poder escribirte.',eNet:'No se ha podido guardar. Inténtalo de nuevo en un momento.',
+  okT:'¡Ya estás dentro!',okP:'Te escribiremos cuando abramos. Mientras, acompáñanos en el proceso.',okPill:'Sin spam. Solo lo importante.',cApp:'Conoce la app Vuelve',cMail:'Escríbenos',
+  privT:'Privacidad',
+  priv:c=>`Responsables: el equipo de Vuelve. Usamos tu email, tu nombre (si lo das) y tus intereses solo para avisarte del lanzamiento y de novedades de Vuelve, con tu consentimiento como base. Se guardan en servidores de la UE (Irlanda) hasta que te des de baja. Puedes pedir acceso, corrección o borrado ${c?`escribiendo a <a href="mailto:${c}">${c}</a>`:'escribiéndonos por mensaje directo en nuestras redes'}, y reclamar ante la AEPD.`,
+  foot:'Vuelve · Siempre se puede volver.'},
+ en:{eyebrow:'Coming soon',h1:'Together is easier.',
+  lead:'We\'re two friends getting in shape together, and we\'re sharing all of it: what works, what\'s hard and how to enjoy treats <b>without going over your calories</b>. Vuelve is the app we use: your day, your partner\'s day and a weekly goal you share. Join the list and we\'ll let you know as soon as we open.',
+  qInt:'What are you interested in?',iRec:'Recipe bundles',iRut:'Workout routines',iMer:'Merch',iApp:'The Vuelve app',
+  lNom:'Your name (optional)',lEm:'Your email',
+  consent:'I want to receive emails from Vuelve about the launch and news. I can unsubscribe anytime.',
+  btn:'Join the list',eEm:'That email doesn\'t look valid.',eCon:'Tick the box so we can email you.',eNet:'Couldn\'t save it. Please try again in a moment.',
+  okT:'You\'re in!',okP:'We\'ll email you when we open. Meanwhile, follow along with our journey.',okPill:'No spam. Only what matters.',cApp:'Discover the Vuelve app',cMail:'Email us',
+  privT:'Privacy',
+  priv:c=>`Controller: the Vuelve team. We use your email, your name (if given) and your interests only to tell you about Vuelve's launch and news, based on your consent. They're stored on EU servers (Ireland) until you unsubscribe. You can ask for access, correction or deletion ${c?`by writing to <a href="mailto:${c}">${c}</a>`:'by sending us a direct message on our socials'}, and complain to the Spanish data protection authority (AEPD).`,
+  foot:'Vuelve · You can always come back.'}};
+let L=(()=>{try{const s=localStorage.getItem('vuelve_lang');if(s==='es'||s==='en')return s}catch(e){}return /^es\b/i.test(navigator.language||'es')?'es':'en'})();
+const sel=new Set();const qs=new URLSearchParams(location.search);
+const origen=(qs.get('src')||qs.get('utm_source')||(document.referrer?(()=>{try{return new URL(document.referrer).hostname.replace(/^www\./,'').split('.')[0]}catch(e){return ''}})():'')).slice(0,40);
+let done=false;
+function render(){
+  const D=T[L];document.documentElement.lang=L;document.title='Vuelve · '+D.eyebrow;
+  document.querySelectorAll('[data-t]').forEach(n=>{const v=D[n.dataset.t];if(v==null)return;n.innerHTML=typeof v==='function'?v(CONTACTO):v});
+  document.querySelectorAll('.lang button').forEach(b=>b.classList.toggle('on',b.dataset.l===L));
+  if(done)showOk();
+}
+document.querySelectorAll('.lang button').forEach(b=>b.onclick=()=>{L=b.dataset.l;try{localStorage.setItem('vuelve_lang',L)}catch(e){}render()});
+document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{const i=c.dataset.i;sel.has(i)?sel.delete(i):sel.add(i);c.classList.toggle('on',sel.has(i));c.setAttribute('aria-pressed',sel.has(i))});
+function ctasHTML(){
+  const D=T[L],R=REDES,c=[[ '../','🌿',D.cApp,'main']];
+  if(/^https:\/\//.test(R.instagram))c.push([R.instagram,'📸','Instagram']);
+  if(/^https:\/\//.test(R.youtube))c.push([R.youtube,'▶️','YouTube']);
+  if(/^https:\/\//.test(R.tiktok))c.push([R.tiktok,'🎵','TikTok']);
+  if(/^[^@\s]+@[^@\s]+$/.test(CONTACTO))c.push(['mailto:'+CONTACTO,'✉️',D.cMail]);
+  return `<div class="ctas">${c.map(([u,e,t,k])=>`<a class="cta ${k||''}" href="${u}" ${u.startsWith('http')?'target="_blank" rel="noopener"':''}><span class="e">${e}</span><span class="t">${t}</span><span class="a">→</span></a>`).join('')}</div>`;
+}
+function showOk(){
+  const D=T[L];
+  document.getElementById('f').outerHTML=`<div class="ok" id="f"><div class="big">💜</div><h3>${D.okT}</h3><p>${D.okP}</p>${ctasHTML()}<span class="pill">${D.okPill}</span></div>`;
+}
+document.getElementById('f').addEventListener('submit',async e=>{
+  e.preventDefault();const D=T[L],err=document.getElementById('err'),go=document.getElementById('go');err.textContent='';
+  const email=document.getElementById('email').value.trim(),nombre=document.getElementById('nombre').value.trim();
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){err.textContent=D.eEm;return}
+  if(!document.getElementById('acepto').checked){err.textContent=D.eCon;return}
+  go.disabled=true;
+  try{
+    const r=await fetch(SB_URL+'/rest/v1/rpc/unirse_lista',{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY},
+      body:JSON.stringify({p_email:email,p_nombre:nombre||null,p_intereses:[...sel],p_idioma:L,p_origen:origen||null,p_acepto:true})});
+    if(!r.ok){const j=await r.json().catch(()=>({}));throw new Error(/Email/.test(j.message||'')?D.eEm:D.eNet)}
+    done=true;showOk();
+  }catch(x){err.textContent=x.message||D.eNet;go.disabled=false}
+});
+render();
+</script>
+</body>
+</html>
