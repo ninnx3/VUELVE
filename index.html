@@ -693,7 +693,9 @@ html .jhero .cj.jbut,html[data-tema=ciruela] .jhero .cj.jbut{color:#f3e2a9!impor
 .cmt{font-weight:800;font-size:16px;line-height:1.25;color:var(--ink)}.cmof{display:inline-block;font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;background:#f3e2a9;color:#6c2146;padding:3px 8px;border-radius:20px;margin-bottom:3px}
 .cmst{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:10px;font-size:12px;color:var(--muted)}.cmst b{color:var(--ink)}
 .cmact{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:14px;align-items:center}.cmact .btn{flex:1;min-width:120px}
-.cmhoy{display:inline-flex;align-items:center;gap:6px;border:1.5px solid #e6d3e1;background:#fff;border-radius:999px;padding:9px 14px;font:inherit;font-size:12.5px;font-weight:700;color:#6c2146;cursor:pointer;flex:1;justify-content:center}.cmhoy .mi{width:16px;height:16px}.cmhoy.ok{background:#e4ece8;border-color:#c8dbd3;color:#325958}
+.cmhoy{display:inline-flex;align-items:center;gap:8px;border:1.5px solid #e6d3e1;background:#fff;border-radius:10px;padding:10px 16px;font:inherit;font-size:14px;font-weight:700;color:#6c2146;cursor:pointer;flex:1;min-width:120px;justify-content:center}.cmhoy .mi{width:22px;height:22px;flex-shrink:0}.cmpriv{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;background:#ede1ee;color:#6c2146;padding:3px 8px;border-radius:20px;margin-bottom:3px}.cmpriv .mi{width:12px;height:12px}
+.cmvis{display:grid;grid-template-columns:1fr 1fr;gap:10px}.cminv{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.cminv span{display:inline-flex;align-items:center;gap:6px;background:#ede1ee;color:#6c2146;font-weight:700;font-size:13px;padding:6px 10px;border-radius:20px}.cminv button{border:0;background:none;color:#6c2146;cursor:pointer;font-size:13px;padding:0}
+.cmc.inv{border:1.5px solid #e3c6d7;background:#fffafc}.cmhoy.ok{background:#e4ece8;border-color:#c8dbd3;color:#325958}
 .cmnew{font-size:10.5px;font-weight:700;background:#6c2146;color:#fff;padding:4px 9px;border-radius:20px;white-space:nowrap}
 .cmintro{display:flex;gap:16px;align-items:flex-start}
 .cmat{display:flex;align-items:center;gap:6px}.cmat b{font-size:18px;color:#6c2146}.cmat .in{flex:1}
@@ -1726,9 +1728,7 @@ function vRetosPage(){
   const hero2=V.querySelector('.hero');const ca=cuentaAtrasHTML(u.profile);
   if(ca&&hero2)hero2.insertAdjacentHTML('afterend',ca);
   V.insertAdjacentHTML('beforeend','<div id="cmsec"></div>');cmSeccion(V.querySelector('#cmsec'));
-  V.insertAdjacentHTML('beforeend',`<div class="rsec"><div><p class="cj">Retos con amigos</p><h2 class="ct">Compite y suma puntos</h2></div></div>`);
-  if(nr){nr.classList.add('sm');[...V.querySelectorAll('.rsec')].pop().appendChild(nr)}
-  V.appendChild(frag);
+  if(retosOf(u).length||pendingInvites(u).length){V.insertAdjacentHTML('beforeend',`<div class="rsec"><div><p class="cj">Retos con puntos</p><h2 class="ct">Tus retos por email</h2></div></div>`);V.appendChild(frag)}
   tick();
 }
 /* ---------- Fotos de progreso (privadas) ---------- */
@@ -1860,6 +1860,7 @@ async function cmLoad(force){
     COM.perfil=pf.data?pf.data.usuario:null;if(COM.perfil)COM.nombres[SBUID]=COM.perfil;
     COM.vetada=!!(vt.data&&vt.data.length);COM.retos=rt.data||[];COM.bloq=new Set((bl.data||[]).map(b=>b.bloqueada));
     COM.mios={};(mm.data||[]).forEach(m=>COM.mios[m.reto_id]=m);
+    {const {data:iv}=await SB.from('comunidad_invitaciones').select('reto_id,invitada_por').eq('user_id',SBUID);COM.inv={};(iv||[]).forEach(x=>{if(!COM.mios[x.reto_id])COM.inv[x.reto_id]=x.invitada_por});await cmNombres(Object.values(COM.inv))}
     const ids=Object.keys(COM.mios);COM.miembros={};COM.checks={};COM.ult={};
     if(ids.length){
       const desde=addDays(today(),-95);
@@ -1880,6 +1881,12 @@ async function cmLoad(force){
 }
 async function cmSyncPasos(){
   const u=me(),p=+(dayLog(u,today()).pasos)||0;
+  for(const r of COM.retos){if(!COM.mios[r.id]||!['calorias','movimiento'].includes(r.tipo))continue;const pr=cmProg(r,SBUID);if(!pr)continue;
+    for(const d of [addDays(today(),-1),today()]){if(d<pr.unido)continue;const L=u.logs[d];
+      const h=r.tipo==='calorias'?!!(L&&(L.foods||[]).length&&dayStatus(u,d)==='ok'):!!(L&&(L.mov||[]).length);
+      const C=COM.checks[r.id]=COM.checks[r.id]||[],cur=C.find(c=>c.user_id===SBUID&&c.fecha===d);if(cur?cur.hecho===h:!h)continue;
+      const row={reto_id:r.id,user_id:SBUID,fecha:d,hecho:h};const {error}=await SB.from('comunidad_checkins').upsert(row);if(error){console.warn(error);continue}
+      const i=C.findIndex(c=>c.user_id===SBUID&&c.fecha===d);if(i>=0)C[i]={...C[i],...row};else C.push(row)}}
   for(const r of COM.retos){if(r.tipo!=='pasos'||!COM.mios[r.id])continue;const pr=cmProg(r,SBUID);if(!pr||pr.fin)continue;
     const cur=(COM.checks[r.id]||[]).find(c=>c.user_id===SBUID&&c.fecha===today());if(cur&&cur.valor===p)continue;if(!p&&!cur)continue;
     const row={reto_id:r.id,user_id:SBUID,fecha:today(),valor:p,hecho:p>=(r.meta||6000)};
@@ -1889,35 +1896,38 @@ async function cmSyncPasos(){
 }
 function cmRetoCard(r,mio){
   const pr=mio?cmProg(r,SBUID):null,nuevo=mio&&COM.ult[r.id]&&COM.ult[r.id]>(cmLeido()[r.id]||'');
-  const meta=r.tipo==='pasos'?`${fmt(r.meta)} pasos al día`:'Hábito diario';
+  const meta=CM_TIPOS[r.tipo]?.(r)||'Hábito diario',priv=r.privado?`<span class="cmpriv">${ico('privado','mi')} Privado</span> `:'';
   if(mio){
-    const hoyTxt=r.tipo==='pasos'?`<span class="cmhoy ${pr.hoy?'ok':''}">${ico('act-pasos','mi')} Hoy ${fmt(pr.valor)} / ${fmt(r.meta)}</span>`
-      :`<button class="cmhoy ${pr.hoy?'ok':''}" data-cmhoy="${r.id}">${ico('dia-cerrado','mi')} ${pr.hoy?'Hoy cumplido':'Marcar hoy cumplido'}</button>`;
-    return `<div class="card cmc mio"><div class="cmh"><span class="cmi">${ico(r.icono,'mi')}</span><div style="flex:1;min-width:0"><p class="cj">${pr.fin?'Reto terminado':`Día ${pr.dia} de ${r.dias}`}</p><div class="cmt">${esc(r.titulo)}</div></div>${nuevo?'<span class="cmnew">Nuevos mensajes</span>':''}</div>
+    const hoyTxt=r.tipo==='calorias'||r.tipo==='movimiento'?`<span class="cmhoy ${pr.hoy?'ok':''}">${ico(r.tipo==='calorias'?'dia-cerrado':'act-alta','mi')} ${pr.hoy?'Hoy cumplido':'Se marca con tu diario'}</span>`:r.tipo==='pasos'?`<span class="cmhoy ${pr.hoy?'ok':''}">${ico('act-pasos','mi')} Hoy ${fmt(pr.valor)} / ${fmt(r.meta)}</span>`
+      :`<button class="cmhoy ${pr.hoy?'ok':''}" data-cmhoy="${r.id}">${ico('dia-cerrado','mi')} ${pr.hoy?'Hoy cumplido':'Marcar hoy'}</button>`;
+    return `<div class="card cmc mio"><div class="cmh"><span class="cmi">${ico(r.icono,'mi')}</span><div style="flex:1;min-width:0">${priv}<p class="cj">${pr.fin?'Reto terminado':`Día ${pr.dia} de ${r.dias}`}</p><div class="cmt">${esc(r.titulo)}</div></div>${nuevo?'<span class="cmnew">Nuevos mensajes</span>':''}</div>
       <div class="bar" style="margin-top:12px"><i style="width:${Math.min(pr.hechos/r.dias*100,100)}%"></i></div>
       <div class="cmst"><span><b>${pr.hechos}</b>/${r.dias} días cumplidos</span><span><b>${pr.racha}</b> de racha</span><span><b>${r.n_miembros}</b> en la piña</span></div>
       <div class="cmact">${pr.fin?`<button class="btn soft" data-cmrei="${r.id}">Empezar de nuevo</button>`:hoyTxt}<button class="btn" data-cmchat="${r.id}">${ico('chat','mi')} Abrir chat</button></div></div>`;
   }
-  return `<div class="card cmc"><div class="cmh"><span class="cmi">${ico(r.icono,'mi')}</span><div style="flex:1;min-width:0">${r.oficial?'<span class="cmof">Reto Vuelve</span>':`<p class="cj">Creado por ${cmNom(r.creada_por)}</p>`}<div class="cmt">${esc(r.titulo)}</div></div></div>
+  const inv=COM.inv&&COM.inv[r.id];
+  return `<div class="card cmc ${inv?'inv':''}"><div class="cmh"><span class="cmi">${ico(r.icono,'mi')}</span><div style="flex:1;min-width:0">${inv?`<p class="cj">${cmNom(inv)} te invita</p>`:''}${priv}${r.oficial?'<span class="cmof">Reto Vuelve</span>':inv?'':`<p class="cj">Creado por ${cmNom(r.creada_por)}</p>`}<div class="cmt">${esc(r.titulo)}</div></div></div>
     ${r.descripcion?`<p class="small muted" style="margin-top:8px">${esc(r.descripcion)}</p>`:''}
     <div class="cmst"><span>${r.dias} días</span><span>${meta}</span><span><b>${r.n_miembros}</b> ${r.n_miembros===1?'participante':'participantes'}</span></div>
-    <div class="cmact"><button class="btn" data-cmjoin="${r.id}">Unirme</button>${LIB.admin||r.creada_por===SBUID?`<button class="btn ghost" data-cmhide="${r.id}">${LIB.admin?'Ocultar':'Borrar'}</button>`:''}</div></div>`;
+    <div class="cmact"><button class="btn" data-cmjoin="${r.id}">Unirme</button>${inv?`<button class="btn soft" data-cmno="${r.id}">Ahora no</button>`:''}${LIB.admin||r.creada_por===SBUID?`<button class="btn ghost" data-cmhide="${r.id}">${LIB.admin?'Ocultar':'Borrar'}</button>`:''}</div></div>`;
 }
 function cmSeccion(el){
   if(!el)return;
   if(!SERVER){el.innerHTML=`<div class="card cmintro"><p class="small muted">La comunidad funciona con tu cuenta online de Vuelve.</p></div>`;return}
   if(!COM.loaded){el.innerHTML=`<div class="card cmintro"><p class="small muted">Cargando la comunidad…</p></div>`;cmLoad().then(()=>{if(document.body.contains(el))cmSeccion(el)});return}
-  const mios=COM.retos.filter(r=>COM.mios[r.id]),otros=COM.retos.filter(r=>!COM.mios[r.id]&&!r.oculto);
+  const mios=COM.retos.filter(r=>COM.mios[r.id]),invs=COM.retos.filter(r=>!COM.mios[r.id]&&COM.inv&&COM.inv[r.id]),otros=COM.retos.filter(r=>!COM.mios[r.id]&&!r.oculto&&!r.privado&&!(COM.inv&&COM.inv[r.id]));
   const quien=COM.perfil?`<p class="small" style="margin-top:4px">Eres <b>@${esc(COM.perfil)}</b> · <a href="#" id="cmuser">Cambiar</a></p>`:'';
-  el.innerHTML=`<div class="rsec"><div><p class="cj">Comunidad</p><h2 class="ct">Retos abiertos</h2>${quien}</div>${COM.perfil&&!COM.vetada?`<button class="btn sm" id="cmnew">+ Crear reto</button>`:''}</div>
+  el.innerHTML=`<div class="rsec"><div><p class="cj">Retos</p><h2 class="ct">Únete o crea el tuyo</h2>${quien}</div>${!COM.vetada?`<button class="btn sm" id="cmnew">+ Crear reto</button>`:''}</div>
     ${COM.vetada?`<div class="card cwarn"><span class="cic">${ico('aviso','mi')}</span><div style="flex:1"><b>Tu cuenta no puede participar en la comunidad</b><p class="small muted">Si crees que es un error, escríbenos.</p></div></div>`:''}
     ${!COM.perfil&&!COM.vetada?`<div class="card cmintro"><span class="cmi big">${ico('compartido','mi')}</span><div style="flex:1"><h3 class="h3">Únete a otras mujeres en un reto</h3><p class="small muted" style="margin-top:6px">Elige un nombre de usuario, apúntate a un reto y animaos en el chat del grupo. Nadie verá tu email ni tu diario: solo tu @usuario y cómo vas en el reto.</p><button class="btn" id="cmuser" style="margin-top:14px">Elegir mi nombre de usuario</button></div></div>`:''}
     ${LIB.admin?`<button class="btn soft block" id="cmmod" style="margin-top:12px">${ico('aviso','mi')} Moderación${COM.reportes?` · ${COM.reportes} reporte${COM.reportes>1?'s':''} pendiente${COM.reportes>1?'s':''}`:''}</button>`:''}
+    ${invs.length?`<p class="eyebrow" style="margin:18px 0 10px">Te han invitado</p><div class="cmg">${invs.map(r=>cmRetoCard(r,false)).join('')}</div>`:''}
     ${mios.length?`<p class="eyebrow" style="margin:18px 0 10px">Tus retos</p><div class="cmg">${mios.map(r=>cmRetoCard(r,true)).join('')}</div>`:''}
-    ${otros.length?`<p class="eyebrow" style="margin:18px 0 10px">Explora</p><div class="cmg">${otros.map(r=>cmRetoCard(r,false)).join('')}</div>`:''}`;
+    ${otros.length?`<p class="eyebrow" style="margin:18px 0 10px">Retos públicos de la comunidad</p><div class="cmg">${otros.map(r=>cmRetoCard(r,false)).join('')}</div>`:''}`;
   const re=()=>cmSeccion(el);
   el.querySelectorAll('#cmuser').forEach(a=>a.onclick=e=>{e.preventDefault();cmElegirUsuario(re)});
-  if(el.querySelector('#cmnew'))el.querySelector('#cmnew').onclick=()=>cmCrear(re);
+  if(el.querySelector('#cmnew'))el.querySelector('#cmnew').onclick=()=>COM.perfil?cmCrear(re):cmElegirUsuario(()=>cmCrear(re));
+  el.querySelectorAll('[data-cmno]').forEach(b=>b.onclick=async()=>{await SB.from('comunidad_invitaciones').delete().eq('reto_id',b.dataset.cmno).eq('user_id',SBUID);delete COM.inv[b.dataset.cmno];re()});
   if(el.querySelector('#cmmod'))el.querySelector('#cmmod').onclick=()=>cmModeracion(re);
   el.querySelectorAll('[data-cmjoin]').forEach(b=>b.onclick=()=>cmUnirme(b.dataset.cmjoin,re));
   el.querySelectorAll('[data-cmchat]').forEach(b=>b.onclick=()=>cmChat(b.dataset.cmchat,re));
@@ -1967,29 +1977,58 @@ async function cmReiniciar(id,done){
   const {error}=await SB.from('comunidad_miembros').update({unido:today()}).eq('reto_id',id).eq('user_id',SBUID);if(error)return toast(sbErr(error));
   await cmLoad(true);toast('¡Nueva vuelta! Día 1 💪');done&&done();
 }
+const CM_TIPOS={habito:()=>'Hábito diario',pasos:r=>`${fmt(r.meta||6000)} pasos al día`,calorias:()=>'Días dentro de tus calorías',movimiento:()=>'Días con movimiento'};
+async function cmBuscarUsuario(v){v=(v||'').trim().toLowerCase().replace(/^@/,'');if(!/^[a-z0-9][a-z0-9._]{2,19}$/.test(v))return null;
+  const {data}=await SB.from('perfiles_publicos').select('user_id,usuario').eq('usuario',v).maybeSingle();if(data)COM.nombres[data.user_id]=data.usuario;return data||null}
+function cmInvitarUI(m,st){
+  const pinta=()=>{m.querySelector('#cmil').innerHTML=st.inv.map((x,i)=>`<span>@${esc(x.usuario)}<button data-qi="${i}" aria-label="Quitar">✕</button></span>`).join('');
+    m.querySelectorAll('[data-qi]').forEach(b=>b.onclick=()=>{st.inv.splice(+b.dataset.qi,1);pinta()})};
+  const add=async()=>{const inp=m.querySelector('#cmiu'),e=m.querySelector('#cmie');e.textContent='';const v=inp.value;if(!v.trim())return;
+    const r=await cmBuscarUsuario(v);if(!r)return e.textContent='No encontramos a ninguna usuaria con ese nombre.';
+    if(r.user_id===SBUID)return e.textContent='Ese eres tú 🙂';if(st.inv.some(x=>x.user_id===r.user_id))return;st.inv.push(r);inp.value='';pinta()};
+  m.querySelector('#cmia').onclick=add;m.querySelector('#cmiu').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();add()}};pinta();
+}
+const cmInvHTML=`<div class="searchrow" style="margin-top:0"><input class="in" id="cmiu" placeholder="@usuario de tu amiga" autocomplete="off" autocapitalize="none"><button class="btn" id="cmia" style="padding:10px 14px;font-size:12px">Añadir</button></div><div class="err" id="cmie"></div><div class="cminv" id="cmil"></div>
+  <p class="tiny muted" style="margin-top:8px">¿Aún no tiene cuenta? <a href="#" id="cmshare">Mándale el enlace de Vuelve</a> y, cuando tenga su @usuario, la invitas.</p>`;
+function cmShareApp(){const url=location.origin+location.pathname,t='Únete a Vuelve y hacemos un reto juntas 💜';
+  if(navigator.share)navigator.share({title:'Vuelve',text:t,url}).catch(()=>{});else{try{navigator.clipboard.writeText(t+' '+url);toast('Enlace copiado ✓')}catch(e){toast(url)}}}
+async function cmEnviarInv(id,lista){let ok=0;for(const x of lista){const {error}=await SB.from('comunidad_invitaciones').insert({reto_id:id,user_id:x.user_id,invitada_por:SBUID});if(!error||/duplicate/.test(error.message))ok++;else toast(sbErr(error))}return ok}
 function cmCrear(done){
-  const st={tipo:'habito',dias:21,icono:'compartido'};
+  const st={tipo:'habito',dias:21,icono:'compartido',privado:false,inv:[]};
+  const TIP=[['habito','Hábito diario','Cada una marca el día como cumplido'],['pasos','Pasos','Se cuentan solos con tus pasos'],['calorias','Calorías','Días dentro de tu objetivo, desde el diario'],['movimiento','Movimiento','Días con algún entreno o actividad']];
   const ICS=[['compartido','Juntas'],['act-alta','Movimiento'],['act-pasos','Pasos'],['consejo','Hábito'],['comida-almuerzo','Comida'],['corazon','Bienestar']];
-  const m=modal(`<div class="top"><b>Crear un reto abierto</b><button class="close">✕</button></div>
-    <p class="small muted" style="margin-top:8px">Cualquier usuaria podrá verlo y unirse. Cada una empieza el día que se une.</p>
+  const m=modal(`<div class="top"><b>Crear un reto</b><button class="close">✕</button></div>
+    <label class="f"><span>¿Quién puede unirse?</span></label>
+    <div class="cmvis"><button class="opt on" data-vis="0"><div><b>Público</b><small>Cualquier usuaria de Vuelve puede verlo y unirse</small></div></button><button class="opt" data-vis="1"><div><b>Privado</b><small>Solo por invitación, con su @usuario</small></div></button></div>
+    <div id="cminvw" style="display:none"><label class="f"><span>Invita a tus amigas</span></label>${cmInvHTML}</div>
     <label class="f"><span>Nombre del reto</span><input class="in" id="ct" maxlength="60" placeholder="21 días sin picar entre horas"></label>
     <label class="f"><span>Descripción (opcional)</span><textarea class="in" id="cd" maxlength="220" style="min-height:70px;font-family:inherit"></textarea></label>
-    <label class="f"><span>Tipo</span></label><div class="grid2"><button class="opt on" data-t="habito"><div><b>Hábito diario</b><small>Cada una marca el día como cumplido</small></div></button><button class="opt" data-t="pasos"><div><b>Pasos</b><small>Se cuentan solos con tus pasos</small></div></button></div>
+    <label class="f"><span>Qué cuenta como día cumplido</span></label><div class="grid2">${TIP.map(([k,t,d])=>`<button class="opt ${k==='habito'?'on':''}" data-t="${k}"><div><b>${t}</b><small>${d}</small></div></button>`).join('')}</div>
     <label class="f" id="cmw" style="display:none"><span>Pasos al día</span><input class="in" id="cp" type="number" min="1000" max="40000" step="500" value="8000"></label>
     <label class="f"><span>Duración</span></label><div class="cmdias">${[7,14,21,30,60].map(d=>`<button class="cmchip ${d===21?'on':''}" data-d="${d}">${d} días</button>`).join('')}</div>
     <label class="f"><span>Icono</span></label><div class="cmdias">${ICS.map(([k,t])=>`<button class="cmchip ic ${k===st.icono?'on':''}" data-i="${k}" title="${t}">${ico(k,'mi')}</button>`).join('')}</div>
+    <p class="tiny muted" style="margin-top:12px">Cada una empieza su día 1 cuando se une. Solo se comparte tu @usuario y si has cumplido cada día, nunca tus comidas, peso ni fotos.</p>
     <div class="err" id="ce"></div><button class="btn block" id="cs" style="margin-top:10px">Crear y unirme</button>`);
+  cmInvitarUI(m,st);m.querySelector('#cmshare').onclick=e=>{e.preventDefault();cmShareApp()};
+  m.querySelectorAll('[data-vis]').forEach(b=>b.onclick=()=>{st.privado=b.dataset.vis==='1';m.querySelectorAll('[data-vis]').forEach(x=>x.classList.toggle('on',x===b));m.querySelector('#cminvw').style.display=st.privado?'':'none'});
   m.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{st.tipo=b.dataset.t;m.querySelectorAll('[data-t]').forEach(x=>x.classList.toggle('on',x===b));m.querySelector('#cmw').style.display=st.tipo==='pasos'?'':'none'});
   m.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{st.dias=+b.dataset.d;m.querySelectorAll('[data-d]').forEach(x=>x.classList.toggle('on',x===b))});
   m.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>{st.icono=b.dataset.i;m.querySelectorAll('[data-i]').forEach(x=>x.classList.toggle('on',x===b))});
   m.querySelector('#cs').onclick=async()=>{const t=m.querySelector('#ct').value.trim(),d=m.querySelector('#cd').value.trim(),p=Math.round(+m.querySelector('#cp').value||0),err=x=>m.querySelector('#ce').textContent=x;
     if(t.length<3)return err('Ponle un nombre de al menos 3 letras.');
-    if(/(https?:\/\/|www\.|@)/i.test(t+' '+d))return err('Sin enlaces ni emails, por seguridad.');
+    if(/(https?:\/\/|www\.|@\S+\.)/i.test(t+' '+d))return err('Sin enlaces ni emails, por seguridad.');
     if(st.tipo==='pasos'&&!(p>=1000&&p<=40000))return err('Los pasos deben estar entre 1.000 y 40.000.');
     const b=m.querySelector('#cs');b.disabled=true;
-    const {data,error}=await SB.from('comunidad_retos').insert({titulo:t,descripcion:d||null,tipo:st.tipo,meta:st.tipo==='pasos'?p:null,dias:st.dias,icono:st.icono,creada_por:SBUID}).select().single();
+    const {data,error}=await SB.from('comunidad_retos').insert({titulo:t,descripcion:d||null,tipo:st.tipo,meta:st.tipo==='pasos'?p:null,dias:st.dias,icono:st.icono,privado:st.privado,creada_por:SBUID}).select().single();
     if(error){b.disabled=false;return err(sbErr(error))}
-    m.remove();COM.retos.push(data);cmUnirme(data.id,done)};
+    const {error:e2}=await SB.from('comunidad_miembros').insert({reto_id:data.id,user_id:SBUID,unido:today()});if(e2){b.disabled=false;return err(sbErr(e2))}
+    const n=st.inv.length?await cmEnviarInv(data.id,st.inv):0;
+    m.remove();await cmLoad(true);toast(n?`Reto creado · ${n} invitación${n>1?'es':''} enviada${n>1?'s':''} 💜`:'¡Reto creado! 💜');done&&done();cmChat(data.id,done)};
+}
+function cmInvitarModal(id){
+  const st={inv:[]};const m=modal(`<div class="top"><b>Invitar al reto</b><button class="close">✕</button></div><p class="small muted" style="margin:8px 0 12px">Escribe el @usuario de tu amiga. Le aparecerá la invitación en su página de Retos.</p>${cmInvHTML}<button class="btn block" id="cmis" style="margin-top:14px">Enviar invitaciones</button>`);
+  cmInvitarUI(m,st);m.querySelector('#cmshare').onclick=e=>{e.preventDefault();cmShareApp()};
+  m.querySelector('#cmis').onclick=async()=>{if(!st.inv.length)return m.querySelector('#cmie').textContent='Añade al menos una usuaria.';const n=await cmEnviarInv(id,st.inv);m.remove();if(n)toast(`${n} invitación${n>1?'es':''} enviada${n>1?'s':''} ✓`)};
 }
 function cmMenu(items){
   const m=modal(`<div class="cmmenu">${items.map((it,i)=>`<button class="btn ${it[2]||'soft'} block" data-k="${i}">${it[0]}</button>`).join('')}<button class="btn ghost block close">Cancelar</button></div>`);
@@ -2046,7 +2085,7 @@ function cmChat(id,done){
     if(error)return;const L=(data||[]).slice().reverse();await cmNombres(L.map(x=>x.user_id));
     const cambio=L.length!==S.msgs.length||L.some((x,i)=>!S.msgs[i]||S.msgs[i].id!==x.id||S.msgs[i].borrado!==x.borrado);S.msgs=L;if(cambio&&S.tab==='chat')pinta()};
   m.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{S.tab=b.dataset.tab;m.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('on',x===b));m.querySelector('#cmin').style.display=S.tab==='chat'?'':'none';pinta()});
-  m.querySelector('#cmmas').onclick=()=>cmMenu([['Salir del reto',async()=>{if(!confirmar(`¿Salir de «${r.titulo}»? Se borrará tu progreso en este reto.`))return;
+  m.querySelector('#cmmas').onclick=()=>cmMenu([['Invitar a una amiga',()=>cmInvitarModal(id)],['Salir del reto',async()=>{if(!confirmar(`¿Salir de «${r.titulo}»? Se borrará tu progreso en este reto.`))return;
     const {error}=await SB.from('comunidad_miembros').delete().eq('reto_id',id).eq('user_id',SBUID);if(error)return toast(sbErr(error));m.remove();await cmLoad(true);toast('Has salido del reto');done&&done()},'danger']]);
   const enviar=async t=>{t=(t||'').trim();if(!t)return;
     if(COM.vetada)return toast('Tu cuenta no puede escribir en la comunidad');
