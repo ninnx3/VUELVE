@@ -714,6 +714,21 @@ html .jhero .cj.jbut,html[data-tema=ciruela] .jhero .cj.jbut{color:#f3e2a9!impor
 .cmquick{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px}.cmquick button{flex-shrink:0;border:1px solid #e6d3e1;background:#fbf6f9;border-radius:999px;padding:6px 11px;font:inherit;font-size:12px;font-weight:600;color:#6c2146;cursor:pointer}
 .cmrow{display:flex;gap:8px;align-items:flex-end}.cmrow textarea{flex:1;resize:none;border:1px solid var(--line);border-radius:14px;padding:10px 12px;font:inherit;font-size:14px;max-height:120px;background:#fbf9f4}.cmrow .btn{padding:10px 16px}
 @media(max-width:640px){.cmg{grid-template-columns:1fr}.modal .sheet.cmsheet{height:calc(100dvh - 24px);max-height:none}.cmintro{flex-direction:column}}
+.ndot{position:absolute;top:7px;left:calc(50% + 9px);width:8px;height:8px;border-radius:50%;background:#c9a35c;box-shadow:0 0 0 2px #fff}[data-v=progreso]{position:relative}
+.fplock{display:flex;align-items:center;gap:6px;font-size:12.5px;color:#325958;font-weight:600;margin-top:6px}.fplock .mi{width:15px;height:15px}
+.fpnext{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:14px;padding:14px 16px;border-radius:16px;background:#f6eef4}.fpnext.due{background:linear-gradient(135deg,#f6e4ea,#efdbe8);border:1.5px solid #e3c6d7}.fpnext b{display:block;font-size:15px;color:var(--ink)}.fpnext small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}.fpnext .btn .mi{width:16px;height:16px;vertical-align:-3px}
+.fplab{font-size:13px;font-weight:700;margin:16px 0 8px;color:var(--ink)}.cmchip em{font-style:normal;font-size:10px;font-weight:700;background:#f3e2a9;color:#6c2146;border-radius:20px;padding:2px 6px;margin-left:4px}.cmchip.on em{background:#f3e2a9}
+.fpcmp{margin-top:16px}
+.fpses{display:flex;flex-direction:column;gap:14px;margin-top:16px}.fpsd{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px}.fpsd span{color:var(--muted);font-weight:600}
+.fpths{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.fpth{position:relative;border:0;padding:0;border-radius:12px;overflow:hidden;aspect-ratio:3/4;background:#efe6ec;cursor:pointer}.fpth img{width:100%;height:100%;object-fit:cover;display:block}.fpth span{position:absolute;left:6px;bottom:6px;background:rgba(60,56,58,.7);color:#fff;font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:20px}
+.fptips{margin-top:12px;background:#f6eef4;border-radius:16px;padding:14px 16px}.fptip{display:flex;gap:10px;margin-top:10px}.fptip>span{width:22px;height:22px;border-radius:50%;background:#6c2146;color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;flex-shrink:0}.fptip b{display:block;font-size:13.5px}.fptip small{display:block;font-size:12.5px;color:var(--muted);line-height:1.4}
+.fpslots{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.fpslot{position:relative;aspect-ratio:3/4;border:1.5px dashed #d9bfd0;border-radius:14px;overflow:hidden;cursor:pointer;background:#fbf6f9;display:block}.fpslot.ok{border-style:solid;border-color:#6c2146}
+.fpslot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.fpghost{opacity:.22}.fpsl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#6c2146;text-align:center;padding:6px}.fpsl .mi{width:24px;height:24px}.fpsl b{font-size:13px}.fpsl small{font-size:10px;color:var(--muted);line-height:1.2}.fpslot.ok .fpsl{justify-content:flex-end;background:linear-gradient(transparent 60%,rgba(60,56,58,.55));color:#fff}.fpslot.ok .fpsl .mi,.fpslot.ok .fpsl small{display:none}
+.fpbig{width:100%;max-height:70vh;object-fit:contain;border-radius:14px;margin-top:12px;background:#f3eef0}
+.fpdiff{text-align:center;font-size:13.5px;margin:12px 0 10px;color:var(--ink)}
+.fpsl2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.fpsl2i{position:relative;border-radius:14px;overflow:hidden;background:#f3eef0;aspect-ratio:3/4}.fpsl2i img{width:100%;height:100%;object-fit:cover;display:block}.fptag{position:absolute;top:8px;font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;padding:4px 10px;border-radius:20px}.fptag.l{left:8px;background:#fff;color:#6c2146}.fptag.r{right:8px;background:#6c2146;color:#fff}
+.modal .sheet.fpcmpm{max-width:720px}.fpcmpm select.in{font-size:14px;padding-right:28px}
+@media(max-width:640px){.fpnext{flex-direction:column;align-items:stretch}.fpnext .btn{width:100%}}
 </style>
 </head>
 <body>
@@ -1716,6 +1731,102 @@ function vRetosPage(){
   V.appendChild(frag);
   tick();
 }
+/* ---------- Fotos de progreso (privadas) ---------- */
+const FP={loaded:false,loading:null,list:[],urls:{}};
+const FP_DIR=()=>'privadas/'+SBUID+'/progreso';
+const FP_POSES=[['frente','Frente'],['perfil','Perfil'],['espalda','Espalda']];
+const FP_FREC=[[7,'Cada semana'],[14,'Cada 2 semanas'],[28,'Cada mes'],[56,'Cada 2 meses']];
+const FP_TIPS=[['Misma ropa','Ropa deportiva ajustada o ropa interior: siempre la misma.'],['Mismo lugar y misma luz','Frente a una pared lisa, con luz natural de frente y sin contraluz.'],['Misma hora','Por la mañana, en ayunas y después de ir al baño.'],['Mismo encuadre','Móvil a la altura del pecho y a la misma distancia, con el cuerpo entero. Usa el temporizador o apóyalo en algo.'],['Postura natural','Brazos sueltos, sin meter tripa ni posar: queremos ver tu cuerpo real.']];
+const fpFrec=u=>+(u.profile.fotoFrec)||14;
+function fpProx(u){const l=u.profile.fotoUlt;return l?addDays(l,fpFrec(u)):today()}
+function fpDue(u){return SERVER&&!!u&&!!u.profile&&!!u.profile.fotoUlt&&today()>=fpProx(u)}
+async function fpLoad(force){
+  if(!SERVER||!SB||!SBUID)return [];if(FP.loaded&&!force)return FP.list;if(FP.loading&&!force)return FP.loading;
+  FP.loading=(async()=>{try{
+    const {data}=await SB.storage.from('fotos').list(FP_DIR(),{limit:500,sortBy:{column:'name',order:'desc'}});
+    const out=(data||[]).filter(f=>f.id&&/^\d{4}-\d{2}-\d{2}_(frente|perfil|espalda)_/.test(f.name)).map(f=>{const [fecha,pose]=f.name.split('_');return {path:FP_DIR()+'/'+f.name,fecha,pose}});
+    const falta=out.filter(f=>!FP.urls[f.path]);
+    if(falta.length){const {data:su}=await SB.storage.from('fotos').createSignedUrls(falta.map(f=>f.path),60*60*6);(su||[]).forEach(x=>{if(x.signedUrl)FP.urls[x.path]=x.signedUrl})}
+    FP.list=out.filter(f=>FP.urls[f.path]).sort((a,b)=>b.fecha.localeCompare(a.fecha));
+    const u=me(),ult=FP.list[0]&&FP.list[0].fecha||null;if(u&&u.profile.fotoUlt!==ult){u.profile.fotoUlt=ult;save()}
+    FP.loaded=true}catch(e){console.warn(e)}finally{FP.loading=null}return FP.list})();
+  return FP.loading;
+}
+const fpSesiones=()=>{const m={};FP.list.forEach(f=>(m[f.fecha]=m[f.fecha]||{})[f.pose]=f);return Object.keys(m).sort().reverse().map(fecha=>({fecha,poses:m[fecha]}))};
+const fpFecha=d=>`${parse(d).getDate()} ${MONL[parse(d).getMonth()]} ${parse(d).getFullYear()}`;
+function fpPesoEn(u,d){const W=(u.weights||[]).slice().sort((a,b)=>Math.abs(parse(a.date)-parse(d))-Math.abs(parse(b.date)-parse(d)));const w=W[0];return w&&Math.abs(parse(w.date)-parse(d))<=7*864e5?w.kg:null}
+function fpCard(el){
+  if(!el)return;const u=me();
+  if(!SERVER){el.innerHTML=`<div class="card"><p class="eyebrow">Fotos de progreso</p><p class="small muted" style="margin-top:6px">Las fotos de progreso se guardan en tu cuenta online de Vuelve.</p></div>`;return}
+  if(!FP.loaded){el.innerHTML=`<div class="card"><p class="eyebrow">Fotos de progreso</p><p class="small muted" style="margin-top:6px">Cargando tus fotos…</p></div>`;fpLoad().then(()=>{if(document.body.contains(el))fpCard(el)});return}
+  const S=fpSesiones(),prox=fpProx(u),due=today()>=prox,falta=Math.round((parse(prox)-parse(today()))/864e5);
+  el.innerHTML=`<div class="card fpc"><p class="eyebrow">Fotos de progreso</p>
+    <p class="fplock">${ico('privado','mi')} Solo las ves tú. Ni tu compañera ni la comunidad pueden verlas.</p>
+    <div class="fpnext ${due?'due':''}"><div style="flex:1;min-width:0"><b>${!S.length?'Haz tus primeras fotos':due?'Hoy te toca tu foto de progreso':`Próxima foto el ${DOWL[parse(prox).getDay()]} ${parse(prox).getDate()} de ${MONL[parse(prox).getMonth()]}`}</b>
+      <small>${!S.length?'Serán tu punto de partida. Dentro de unas semanas te alegrarás de tenerlas.':due?'Frente, perfil y espalda. Tardas 2 minutos.':`Dentro de ${falta} día${falta>1?'s':''} · ${FP_FREC.find(f=>f[0]===fpFrec(u))?.[1].toLowerCase()||'cada '+fpFrec(u)+' días'}`}</small></div>
+      <button class="btn ${due?'':'soft'}" id="fpadd">${ico('fotos','mi')} ${due?'Hacer mis fotos':'Añadir fotos'}</button></div>
+    <p class="fplab">¿Cada cuánto quieres hacerte fotos?</p>
+    <div class="cmdias">${FP_FREC.map(([d,t])=>`<button class="cmchip ${fpFrec(u)===d?'on':''}" data-fq="${d}">${t}${d===14?' <em>recomendado</em>':''}</button>`).join('')}</div>
+    <p class="tiny muted" style="margin-top:8px">Te recomendamos cada 2 semanas: da tiempo a que se note el cambio sin estar pendiente cada día.</p>
+    ${S.length>=2?`<button class="btn block fpcmp" id="fpcmp">Comparar antes y ahora</button>`:''}
+    ${S.length?`<div class="fpses">${S.map(s=>`<div class="fps"><div class="fpsd"><b>${fpFecha(s.fecha)}</b>${fpPesoEn(u,s.fecha)?`<span>${fmt1(fpPesoEn(u,s.fecha))} kg</span>`:''}</div><div class="fpths">${FP_POSES.map(([p,l])=>s.poses[p]?`<button class="fpth" data-fv="${esc(s.poses[p].path)}"><img src="${esc(FP.urls[s.poses[p].path])}" alt="${l}" loading="lazy"><span>${l}</span></button>`:'').join('')}</div></div>`).join('')}</div>`:''}
+  </div>`;
+  el.querySelector('#fpadd').onclick=()=>fpSubirModal(()=>fpCard(el));
+  el.querySelectorAll('[data-fq]').forEach(b=>b.onclick=()=>{u.profile.fotoFrec=+b.dataset.fq;save();fpCard(el);renderNavDot()});
+  if(el.querySelector('#fpcmp'))el.querySelector('#fpcmp').onclick=()=>fpComparar();
+  el.querySelectorAll('[data-fv]').forEach(b=>b.onclick=()=>fpVer(b.dataset.fv,()=>fpCard(el)));
+}
+function renderNavDot(){const b=document.querySelector('nav [data-v=progreso], [data-v=progreso]');if(!b)return;const on=fpDue(me());let d=b.querySelector('.ndot');if(on&&!d)b.insertAdjacentHTML('beforeend','<i class="ndot"></i>');if(!on&&d)d.remove()}
+function fpSubirModal(done){
+  const u=me(),S=fpSesiones(),ult={};FP_POSES.forEach(([p])=>{const s=S.find(x=>x.poses[p]);if(s)ult[p]=FP.urls[s.poses[p].path]});
+  const st={fecha:today(),files:{}};
+  const m=modal(`<div class="top"><b>Tus fotos de progreso</b><button class="close">✕</button></div>
+    <div class="fptips"><p class="eyebrow">Para que se vea el cambio de verdad</p>${FP_TIPS.map(([t,d],i)=>`<div class="fptip"><span>${i+1}</span><div><b>${t}</b><small>${d}</small></div></div>`).join('')}</div>
+    <p class="fplab" style="margin-top:16px">Sube una, dos o las tres</p>
+    <div class="fpslots">${FP_POSES.map(([p,l])=>`<label class="fpslot" data-sl="${p}">${ult[p]?`<img class="fpghost" src="${esc(ult[p])}" alt="">`:''}<img class="fppre" alt="" hidden><span class="fpsl">${ico('fotos','mi')}<b>${l}</b>${ult[p]?'<small>Encuádrala como la anterior</small>':''}</span><input type="file" accept="image/*" hidden data-fi="${p}"></label>`).join('')}</div>
+    <label class="f"><span>Fecha de las fotos</span><input class="in" type="date" id="fpf" value="${st.fecha}" max="${today()}"></label>
+    <p class="fplock" style="margin-top:10px">${ico('privado','mi')} Se guardan en tu espacio privado. Solo tú puedes verlas.</p>
+    <div class="err" id="fpe"></div><button class="btn block" id="fps">Guardar mis fotos</button>`);
+  m.querySelectorAll('[data-fi]').forEach(inp=>inp.onchange=()=>{const f=inp.files[0];if(!f)return;const p=inp.dataset.fi;st.files[p]=f;
+    const sl=m.querySelector(`[data-sl=${p}]`),pre=sl.querySelector('.fppre');pre.src=URL.createObjectURL(f);pre.hidden=false;sl.classList.add('ok')});
+  m.querySelector('#fps').onclick=async()=>{const ps=Object.keys(st.files);if(!ps.length){m.querySelector('#fpe').textContent='Elige al menos una foto.';return}
+    const fecha=m.querySelector('#fpf').value||today();if(fecha>today()){m.querySelector('#fpe').textContent='La fecha no puede ser futura.';return}
+    const b=m.querySelector('#fps');b.disabled=true;let ok=0;
+    for(const [i,p] of ps.entries()){b.textContent=`Subiendo ${i+1} de ${ps.length}…`;
+      try{const blob=await fotoComprimir(st.files[p],1600);const name=`${fecha}_${p}_${Date.now().toString(36)}${Math.random().toString(36).slice(2,5)}.jpg`;
+        const old=FP.list.filter(f=>f.fecha===fecha&&f.pose===p).map(f=>f.path);
+        const {error}=await SB.storage.from('fotos').upload(FP_DIR()+'/'+name,blob,{contentType:'image/jpeg',upsert:false});if(error)throw error;
+        if(old.length)await SB.storage.from('fotos').remove(old);ok++}catch(e){console.warn(e);toast(sbErr(e))}}
+    await fpLoad(true);m.remove();renderNavDot();
+    if(ok)celebrate('fotos','¡Fotos guardadas!',`Tu próxima foto: ${fpFecha(fpProx(u))}`,{n:60,ms:2200});done&&done()};
+}
+function fpVer(path,done){
+  const f=FP.list.find(x=>x.path===path);if(!f)return;const l=FP_POSES.find(p=>p[0]===f.pose)[1];
+  const m=modal(`<div class="top"><b>${l} · ${fpFecha(f.fecha)}</b><button class="close">✕</button></div><img class="fpbig" src="${esc(FP.urls[path])}" alt="${l}"><button class="btn ghost block" id="fpdel" style="margin-top:12px;color:var(--warn)">Borrar esta foto</button>`);
+  m.querySelector('#fpdel').onclick=async()=>{if(!confirmar('¿Borrar esta foto? No se puede deshacer.'))return;const {error}=await SB.storage.from('fotos').remove([path]);if(error)return toast(sbErr(error));
+    await fpLoad(true);m.remove();toast('Foto borrada');renderNavDot();done&&done()};
+}
+function fpComparar(){
+  const u=me(),S=fpSesiones();
+  const poses=FP_POSES.filter(([p])=>S.filter(s=>s.poses[p]).length>=2);
+  const st={pose:(poses[0]||FP_POSES[0])[0]};
+  const m=modal(`<div class="top"><b>Antes y ahora</b><button class="close">✕</button></div><div id="fpcb"></div>`,'wide fpcmpm');
+  const pinta=()=>{
+    const ses=S.filter(s=>s.poses[st.pose]);if(!st.a||!ses.find(s=>s.fecha===st.a))st.a=ses[ses.length-1]?.fecha;if(!st.b||!ses.find(s=>s.fecha===st.b))st.b=ses[0]?.fecha;
+    const A=ses.find(s=>s.fecha===st.a),B=ses.find(s=>s.fecha===st.b);
+    const dias=A&&B?Math.round((parse(st.b)-parse(st.a))/864e5):0,pa=A&&fpPesoEn(u,st.a),pb=B&&fpPesoEn(u,st.b);
+    const opt=sel=>ses.map(s=>`<option value="${s.fecha}" ${s.fecha===sel?'selected':''}>${fpFecha(s.fecha)}</option>`).join('');
+    m.querySelector('#fpcb').innerHTML=`<div class="cmdias" style="margin-top:12px">${FP_POSES.map(([p,l])=>`<button class="cmchip ${st.pose===p?'on':''}" data-po="${p}" ${poses.some(x=>x[0]===p)?'':'disabled'}>${l}</button>`).join('')}</div>
+      ${ses.length<2?'<p class="small muted" style="margin-top:14px">Necesitas al menos dos fotos de esta postura.</p>':`
+      <div class="grid2" style="margin-top:12px"><label class="f" style="margin-top:0"><span>Antes</span><select class="in" id="fpa">${opt(st.a)}</select></label><label class="f" style="margin-top:0"><span>Ahora</span><select class="in" id="fpb">${opt(st.b)}</select></label></div>
+      <p class="fpdiff">${dias>0?`<b>${dias} días</b> de diferencia`:''}${pa&&pb?` · <b>${pb-pa>0?'+':''}${fmt1(pb-pa)} kg</b>`:''}</p>
+      <div class="fpsl2"><div class="fpsl2i"><img src="${esc(FP.urls[A.poses[st.pose].path])}" alt="Antes"><span class="fptag l">Antes</span></div><div class="fpsl2i"><img src="${esc(FP.urls[B.poses[st.pose].path])}" alt="Ahora"><span class="fptag r">Ahora</span></div></div>
+      <p class="tiny muted" style="margin-top:10px;text-align:center">Fíjate en la postura, la ropa y cómo te queda, no solo en la báscula. 💜</p>`}`;
+    m.querySelectorAll('[data-po]').forEach(b=>b.onclick=()=>{st.pose=b.dataset.po;pinta()});
+    const a=m.querySelector('#fpa'),b=m.querySelector('#fpb');if(a)a.onchange=()=>{st.a=a.value;pinta()};if(b)b.onchange=()=>{st.b=b.value;pinta()};
+  };pinta();
+}
+
 /* ---------- Comunidad: usuarios, retos abiertos y chat por reto ---------- */
 const COM={loaded:false,loading:null,perfil:null,vetada:false,retos:[],mios:{},miembros:{},checks:{},nombres:{},bloq:new Set(),ult:{},reportes:0};
 const CM_NORMAS=['Respeto siempre: aquí venimos a animarnos.','Nada de dietas extremas ni consejos médicos: cada cuerpo es distinto.','No compartas datos personales, teléfonos ni enlaces.','Si algo no está bien, repórtalo y lo revisamos.'];
@@ -2352,7 +2463,7 @@ function renderApp(){
   </div></header>
   <main class="wrap v-${UI.view}" id="view"></main>
   <nav class="tabs"><div class="in2">
-    ${[['diario',ico('nav-diario',''),'Comidas'],['movimiento',ico('nav-movimiento',''),'Movimiento'],...(me()?.profile?.sexo==='Mujer'?[['ciclo',ico('corazon',''),'Ciclo']]:[]),['retos',ico('compartido',''),'Retos'],['progreso',ico('nav-progreso',''),'Progreso'],['menu',ico('nav-menu',''),'Menú']].map(([k,i,t])=>{const [l,s]=t.split('|');return `<button data-v="${k}" class="${UI.view===k?'on':''}">${i}${s?`<span class="nav-l">${l}</span><span class="nav-s">${s}</span>`:l}</button>`}).join('')}
+    ${[['diario',ico('nav-diario',''),'Comidas'],['movimiento',ico('nav-movimiento',''),'Movimiento'],...(me()?.profile?.sexo==='Mujer'?[['ciclo',ico('corazon',''),'Ciclo']]:[]),['retos',ico('compartido',''),'Retos'],['progreso',ico('nav-progreso',''),'Progreso'],['menu',ico('nav-menu',''),'Menú']].map(([k,i,t])=>{const [l,s]=t.split('|');return `<button data-v="${k}" class="${UI.view===k?'on':''}">${k==='progreso'&&fpDue(me())?'<i class="ndot"></i>':''}${i}${s?`<span class="nav-l">${l}</span><span class="nav-s">${s}</span>`:l}</button>`}).join('')}
   </div></nav>`;
   $$('nav.tabs button').forEach(b=>b.onclick=()=>{UI.view=b.dataset.v;if(b.dataset.v==='menu'&&MP.screen!=='gen')MP.screen='home';renderApp();scrollTo(0,0)});
   $('#av').onclick=e=>{e.stopPropagation();toggleDD()};
@@ -3560,9 +3671,10 @@ function vProgreso(){
     ${W.slice().reverse().map(w=>`<div class="wk"><span>${cap(DOWL[parse(w.date).getDay()])} ${parse(w.date).getDate()} ${MON[parse(w.date).getMonth()]} ${parse(w.date).getFullYear()}</span><span class="row" style="gap:4px"><b>${fmt1(w.kg)} kg</b><button class="x" data-dw="${w.date}">✕</button></span></div>`).join('')||'<p class="muted small">Sin registros.</p>'}
   </div>
   ${medidasCard(u)}
+  <div id="fpcard"></div>
   <div class="card" id="balcard"><p class="eyebrow">${ico('notas','mi')} Tu semana en notas</p><div id="balb"></div></div>`;
   if(!BAL_WS)BAL_WS=weekStart(today());
-  const drawBal=()=>{$('#balb').innerHTML=balanceHTML(u,BAL_WS,false);bindBalance($('#balcard'),u,drawBal)};drawBal();
+  const drawBal=()=>{$('#balb').innerHTML=balanceHTML(u,BAL_WS,false);bindBalance($('#balcard'),u,drawBal)};drawBal();fpCard($('#fpcard'));
   $('#ci').onclick=()=>checkin(false);$('#ci2').onclick=()=>checkin(false);$('#ci3').onclick=()=>checkin(false);
   if(SERVER&&!PFOTO.loaded)pesoFotoLoad().then(url=>{if(url&&UI.view==='progreso'&&$('#wfoto'))vProgreso()});
   const wfu=$('#wfup');if(wfu)wfu.onchange=async e=>{const f=e.target.files[0];if(!f)return;toast('Subiendo foto…');try{await pesoFotoSubir(f);toast('Foto guardada ✓ · solo la ves tú');vProgreso()}catch(er){toast(sbErr(er))}};
@@ -3734,7 +3846,7 @@ function vEspacio(){
   $$('[data-sw]').forEach(b=>b.onclick=()=>{d.session=null;save();renderAuth('login',b.dataset.sw)});
   $('#dl').onclick=()=>{const m=modal(`<div class="top"><b>Borrar cuenta</b><button class="close">✕</button></div><h3 class="h2" style="font-size:24px;margin-top:12px">¿Borrar <span>esta cuenta?</span></h3><p class="muted" style="margin-top:8px">Se eliminarán todos los registros de ${esc(u.email)}. No se puede deshacer.</p>
     <button class="btn danger block" style="margin-top:18px" id="yes">Sí, borrar</button><button class="btn soft block" style="margin-top:8px" id="no">Cancelar</button>`);
-    m.querySelector('#no').onclick=()=>m.remove();m.querySelector('#yes').onclick=async()=>{if(SERVER){try{for(const dir of ['privadas/'+SBUID,'privadas/'+SBUID+'/portada','compartidas/'+SBUID]){const {data}=await SB.storage.from('fotos').list(dir,{limit:1000});if(data&&data.length)await SB.storage.from('fotos').remove(data.map(f=>dir+'/'+f.name))}}catch(e){}
+    m.querySelector('#no').onclick=()=>m.remove();m.querySelector('#yes').onclick=async()=>{if(SERVER){try{for(const dir of ['privadas/'+SBUID,'privadas/'+SBUID+'/portada','privadas/'+SBUID+'/progreso','compartidas/'+SBUID]){const {data}=await SB.storage.from('fotos').list(dir,{limit:1000});if(data&&data.length)await SB.storage.from('fotos').remove(data.map(f=>dir+'/'+f.name))}}catch(e){}
       const {error}=await SB.rpc('borrar_mi_cuenta');if(error){toast(sbErr(error));return}m.remove();return logout()}delete d.users[u.email];d.session=null;save();m.remove();route()}};
   $('#ex').onclick=()=>{const {pass,...rest}=u;const txt=JSON.stringify(rest);
     const m=modal(`<div class="top"><b>Tu copia</b><button class="close">✕</button></div><p class="small muted" style="margin-top:8px">Guárdala en una nota o un archivo de texto.</p><textarea class="in" readonly style="margin-top:12px">${esc(txt)}</textarea><button class="btn block" style="margin-top:12px" id="cp">Copiar al portapapeles</button>`);
