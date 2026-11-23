@@ -1512,24 +1512,40 @@ function upsertWeight(u,date,kg){
   u.weights.sort((a,b)=>a.date.localeCompare(b.date));
 }
 
+const MA_ICO={
+  P:'<path d="M-8 8V0c0-3 2-5 4-5h1l1-4c.5-1.5 2.5-1.5 3 0l.5 3M-8 8h9c4 0 7-2.5 7-6s-3-5.5-6-4.5c-1.5.5-2.5 1.5-3 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>',
+  C:'<path d="M-6 9L5-6M-1.5 3.5c-3-.5-4.5-3-4-6 3 .2 4.8 2.5 4 6zM1.5-.5c-3-.5-4.5-3-4-6 3 .2 4.8 2.5 4 6zM-1.5 3.5c.5-3 3-4.5 6-4-.2 3-2.5 4.8-6 4zM1.5-.5c.5-3 3-4.5 6-4-.2 3-2.5 4.8-6 4zM4.5-4.5c-1-2.5 0-5 2.5-6 1 2.5 0 5-2.5 6z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>',
+  G:'<path d="M0-9C-3-4-6-.5-6 3a6 6 0 0012 0C6-.5 3-4 0-9z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M-2.5 3.5a2.5 2.5 0 002.5 2.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>'};
 function macroArt(m,etq){
-  const tot=m.p*4+m.c*4+m.g*9||1,parts=[['P','Proteína',m.p*4,'#c45c72'],['C','Carbos',m.c*4,'#7b5ea7'],['G','Grasas',m.g*9,'#d4a72c']];
-  const donut=(cx,cy,r,w,big)=>{const C=2*Math.PI*r,gap=3;let off=0,segs='',badges='';
-    parts.forEach(([k,lab,v,col])=>{const fr=v/tot,len=Math.max(0,fr*C-gap);
-      segs+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${col}" stroke-width="${w}" stroke-dasharray="${len.toFixed(1)} ${C.toFixed(1)}" stroke-dashoffset="${(-off).toFixed(1)}" transform="rotate(-90 ${cx} ${cy})"/>`;
-      const a=-Math.PI/2+(off+fr*C/2)/r,bx=cx+r*Math.cos(a),by=cy+r*Math.sin(a),br=big?30:26;
-      badges+=`<g><circle cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="${br}" fill="#fff" stroke="${col}" stroke-width="3"/><text x="${bx.toFixed(1)}" y="${(by-2).toFixed(1)}" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="${big?17:15}" font-weight="800" fill="${col}">${k}</text><text x="${bx.toFixed(1)}" y="${(by+(big?15:13)).toFixed(1)}" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="${big?11:10}" font-weight="700" fill="#7d6c7a">${Math.round(fr*100)}%</text></g>`;
-      off+=fr*C});
-    return `<circle cx="${cx}" cy="${cy}" r="${r+w/2+6}" fill="#fff" opacity=".55"/>${segs}<circle cx="${cx}" cy="${cy}" r="${r-w/2-4}" fill="#fdf9fc"/>
-      <text x="${cx}" y="${cy-(big?26:22)}" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="${big?15:14}" font-weight="600" fill="#7d6c7a">${etq?esc(etq.replace('KCAL · ','').toLowerCase()).replace(/^./,x=>x.toUpperCase()):'Calorías'}</text>
-      <text x="${cx}" y="${cy+(big?20:16)}" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="${big?50:44}" font-weight="800" letter-spacing="-1.5" fill="#6b4462">${fmt(m.kcal)}</text>
-      <text x="${cx}" y="${cy+(big?44:38)}" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="12" font-weight="700" letter-spacing="2" fill="#9a7c93">KCAL / DÍA</text>${badges}`};
-  return `<svg class="macroart" viewBox="0 0 640 380" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-    <circle cx="560" cy="60" r="120" fill="#ecdcf0" opacity=".5"/><circle cx="250" cy="350" r="80" fill="#f6e7d4" opacity=".6"/>
-    ${donut(380,190,122,34,true)}</svg>
-  <svg class="macroart mob" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-    <circle cx="350" cy="40" r="90" fill="#ecdcf0" opacity=".5"/>
-    ${donut(200,150,108,30,false)}</svg>`;
+  const tot=m.p*4+m.c*4+m.g*9||1,parts=[['P','Proteína',m.p,m.p*4,'#6c2146','#a33a6b','#5a1a3a'],['C','Carbos',m.c,m.c*4,'#915a92','#c995c6','#8c5a92'],['G','Grasas',m.g,m.g*9,'#c9a35c','#f1d184','#d0a043']];
+  const donut=(W,H,cx,cy,r,w,big)=>{const uid='ma'+Math.random().toString(36).slice(2,7);const gapA=.035;let ang=-Math.PI/2,segs='',defs='',badges='';
+    const pt=(a,rr)=>[cx+rr*Math.cos(a),cy+rr*Math.sin(a)];
+    parts.forEach(([k,lab,g,v,col,c1,c2],i)=>{const fr=v/tot,a0=ang+gapA/2,a1=ang+fr*2*Math.PI-gapA/2;
+      if(a1>a0){const ro=r+w/2,ri=r-w/2,lg=a1-a0>Math.PI?1:0,[x0,y0]=pt(a0,ro),[x1,y1]=pt(a1,ro),[x2,y2]=pt(a1,ri),[x3,y3]=pt(a0,ri),[gx0,gy0]=pt(a0,r),[gx1,gy1]=pt(a1,r);
+        defs+=`<linearGradient id="${uid}${k}" gradientUnits="userSpaceOnUse" x1="${gx0.toFixed(1)}" y1="${gy0.toFixed(1)}" x2="${gx1.toFixed(1)}" y2="${gy1.toFixed(1)}"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient>`;
+        segs+=`<path d="M${x0.toFixed(1)} ${y0.toFixed(1)}A${ro} ${ro} 0 ${lg} 1 ${x1.toFixed(1)} ${y1.toFixed(1)}L${x2.toFixed(1)} ${y2.toFixed(1)}A${ri} ${ri} 0 ${lg} 0 ${x3.toFixed(1)} ${y3.toFixed(1)}Z" fill="url(#${uid}${k})" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/>`}
+      const am=ang+fr*Math.PI,bw=big?172:134,bh=big?62:50,[mx,my]=pt(am,r+(big?18:14));
+      let bx=Math.cos(am)>=0?mx-bw*.28:mx-bw*.72,by=my-bh/2;bx=Math.max(4,Math.min(W-bw-4,bx));by=Math.max(4,Math.min(H-bh-4,by));
+      const pct=Math.round(fr*100),ir=big?17:14,ix=bx+(big?30:24),iy=by+bh/2,tx=ix+ir+(big?12:9);
+      badges+=`<g filter="url(#${uid}sh)"><rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${bw}" height="${bh}" rx="${bh/2}" fill="#fffdfd" stroke="${col}" stroke-width="2"/></g>
+        <circle cx="${ix.toFixed(1)}" cy="${iy.toFixed(1)}" r="${ir}" fill="${c1}" opacity=".18"/><g transform="translate(${ix.toFixed(1)} ${iy.toFixed(1)}) scale(${big?1.15:.95})" style="color:${col}">${MA_ICO[k]}</g>
+        <text x="${tx.toFixed(1)}" y="${(iy-(big?4:3)).toFixed(1)}" font-family="Montserrat,sans-serif" font-size="${big?16:13}" font-weight="800" fill="#3c383a">${lab}</text>
+        <text x="${tx.toFixed(1)}" y="${(iy+(big?16:13)).toFixed(1)}" font-family="Montserrat,sans-serif" font-size="${big?13.5:11.5}" font-weight="500" fill="#5e5458">${fmt(g)} g · ${pct}%</text>`;
+      ang+=fr*2*Math.PI});
+    const ir=r-w/2-6,fz=big?52:42;
+    return `<defs>${defs}<filter id="${uid}sh" x="-20%" y="-30%" width="140%" height="170%"><feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#6c2146" flood-opacity=".12"/></filter>
+      <radialGradient id="${uid}in" cx=".5" cy=".4" r=".7"><stop offset="0" stop-color="#fffdfd"/><stop offset="1" stop-color="#f8eef2"/></radialGradient></defs>
+      <circle cx="${cx}" cy="${cy}" r="${r+w/2+7}" fill="#fff" opacity=".7"/>${segs}
+      <circle cx="${cx}" cy="${cy}" r="${ir}" fill="url(#${uid}in)" stroke="#fff" stroke-width="3" filter="url(#${uid}sh)"/>
+      <circle cx="${cx}" cy="${cy-ir*.56}" r="${big?17:14}" fill="#f6dde4"/>
+      <path transform="translate(${cx} ${cy-ir*.56}) scale(${big?1:.85})" d="M0-9c1 3.5 6 5.5 6 10.5a6 6 0 01-12 0c0-2.5 1.5-4 2.5-5 .3 1.6 1.2 2.6 2.4 3C-2 4.5 -1-3 0-9z" fill="none" stroke="#a33a6b" stroke-width="1.6" stroke-linejoin="round"/>
+      <text x="${cx}" y="${cy-(big?6:5)}" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="${big?16:13}" font-weight="600" fill="#7a6e73">${etq?esc(etq.replace('KCAL · ','').toLowerCase()).replace(/^./,x=>x.toUpperCase()):'Calorías'}</text>
+      <text x="${cx}" y="${cy+fz*.72}" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="${fz}" font-weight="800" letter-spacing="-1.5" fill="#5a1a3a">${fmt(m.kcal)}</text>
+      <text x="${cx}" y="${cy+fz*.72+(big?24:20)}" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="${big?12:10.5}" font-weight="700" letter-spacing="2.4" fill="#7a6e73">KCAL / DÍA</text>
+      <g transform="translate(${cx} ${cy+fz*.72+(big?44:36)})" stroke="#c9a7b6" stroke-width="1.2" fill="none" stroke-linecap="round"><path d="M-36 0H-12M12 0H36"/><path d="M-1 4c-5-1-6-6-4-9 4 1 5 5 4 9zM1 4c5-1 6-6 4-9-4 1-5 5-4 9z"/></g>
+      ${badges}`};
+  return `<svg class="macroart" viewBox="0 0 640 400" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${donut(640,400,320,200,132,48,true)}</svg>
+  <svg class="macroart mob" viewBox="0 0 400 330" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${donut(400,330,200,165,104,38,false)}</svg>`;
 }
 
 /* ---------- Micronutrientes ---------- */
