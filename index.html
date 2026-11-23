@@ -2270,7 +2270,7 @@ function vDiario(){
   const r=calcular(pf),ex=exKcal(u,log.mov)+pasosKcal(u,log),gasto=r.get+ex,disp=tg.kcal-tt.k,def=gasto-tt.k;
   const W=Math.max(gasto,tt.k,tg.kcal);
   let cd='';
-  if(UI.range==='dia')cd+=cicloCardHTML(u,UI.date);
+  if(UI.range==='dia')cd+='<div id="dplan"></div>';
   const mb=(v,t,col)=>`<div class="mb"><i style="width:${Math.min(v/t*100||0,100)}%;background:${col}"></i></div>`;
   $('#view').innerHTML=head+`
   <div class="datenav"><button class="ar" id="dp">←</button><div class="t"><b>${dateTitle(UI.date)}</b><small>${UI.date===today()?'Tu resumen de hoy':'Tu resumen del día'}</small></div><button class="ar" id="dn">→</button></div>
@@ -2320,6 +2320,7 @@ function vDiario(){
   ${cd}
   <p class="foot">Vuelve por encima de perfección. Cada registro cuenta.</p>`;
   {const mv=$('#microvm');if(mv)mv.onclick=()=>openMicros(u,peekLog(u,UI.date))}
+  {const dp=$('#dplan');if(dp){const tmp=document.createElement('div');vPlan(tmp);const ph=tmp.querySelector('.phero.fhero');if(ph){dp.replaceWith(ph);ph.querySelector('#ajb').onclick=openAjuste;const eg=ph.querySelector('#enfgo');eg.textContent='Ver mi plan completo';eg.onclick=openPlan}else dp.remove()}}
   bindCiclo(u);bindJuntas(u);if(SERVER&&!JT.loaded&&!JT.loading)jLoad().then(()=>{if(UI.view==='diario')vDiario()});
   bindRange();
   bindArrows(()=>UI.date=addDays(UI.date,-1),()=>UI.date=addDays(UI.date,1),vDiario);
@@ -3290,8 +3291,8 @@ function vPlan(el){
   <button class="btn soft block" style="margin-top:14px" id="redo">Repetir el walkthrough completo</button>`;
   V.querySelectorAll('[data-en]').forEach(b=>b.onclick=()=>{pf.enfoque=+b.dataset.en;save();toast('Enfoque actualizado ✓');vPlan(el);if(el&&UI.view==='progreso'){const sc=el.closest('.sheet');const st=sc&&sc.scrollTop;vProgreso();if(sc)sc.scrollTop=st}});
   V.querySelector('#redo').onclick=()=>{$$('.modal').forEach(m=>m.remove());startOnboarding(true)};
-  $('#ajb').onclick=openAjuste;
-  $('#enfgo').onclick=()=>V.querySelector('.enfcard').scrollIntoView({behavior:'smooth',block:'start'});
+  V.querySelector('#ajb').onclick=openAjuste;
+  V.querySelector('#enfgo').onclick=()=>V.querySelector('.enfcard').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function openPlan(){
   const m=modal(`<div class="top"><b>${ico('nav-plan','mi')} Tu plan</b><button class="close">✕</button></div><div id="planm" class="planm"></div>`,'wide');
