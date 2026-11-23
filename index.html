@@ -757,6 +757,9 @@ html .jhero .cj.jbut,html[data-tema=ciruela] .jhero .cj.jbut{color:#f3e2a9!impor
 .pguia{margin:10px 0 0 18px;font-size:13.5px;line-height:1.6}.pguia li{margin-top:4px}
 .pban{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:#fff;border:1.5px solid #e3c6d7}.pban b{display:block;font-size:14px}.pban small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}@media(max-width:640px){.pban{flex-direction:column;align-items:stretch}.pban .row .btn{flex:1}}
 .pios{margin-top:14px;background:#f6eef4;border-radius:14px;padding:14px}.pstep{display:flex;gap:10px;align-items:flex-start;margin-top:10px}.pstep>span{width:22px;height:22px;border-radius:50%;background:#6c2146;color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;flex-shrink:0}.pstep p{margin:0;font-size:13.5px;line-height:1.45}
+.usst{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:14px}.usst div{background:#f6eef4;border-radius:12px;padding:10px;text-align:center}.usst b{display:block;font-size:22px;color:#6c2146}.usst small{font-size:11.5px;color:var(--muted)}
+.usl{margin-top:10px}.usr{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}.usr .av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:800;flex-shrink:0}.usr b{display:block;font-size:14px}.usem{display:block;font-size:13px;color:#6c2146;word-break:break-all}.usr small{display:block;font-size:11.5px;color:var(--muted);margin-top:2px}.ustags{display:flex;flex-direction:column;gap:4px;align-items:flex-end}
+@media(max-width:640px){.usst{grid-template-columns:repeat(2,minmax(0,1fr))}.usr{align-items:flex-start}}
 </style>
 </head>
 <body>
@@ -2881,7 +2884,7 @@ function toggleDD(){
     <button class="it" data-go="invitar"><span class="ic" style="background:var(--pink)">${ico('menu-invitar')}</span><div>Añadir amigo a Vuelve<small>Invítale a un reto en conjunto</small></div></button>
     <button class="it" data-go="tienda"><span class="ic" style="background:var(--pink)">${ico('menu-tienda')}</span><div>Tienda<small>Recetas, rutinas y merch</small></div></button>
     <button class="it" data-go="descargas"><span class="ic" style="background:var(--mint,#e3f4ea)">${ico('menu-descargas')}</span><div>Mis descargas<small>Lo que has comprado</small></div></button>
-    ${LIB.admin?`<button class="it" data-go="biblio"><span class="ic" style="background:var(--mint,#e3f4ea)">${ico('menu-biblioteca')}</span><div>Biblioteca de recetas<small>Solo administradoras</small></div></button><button class="it" data-go="lista"><span class="ic" style="background:var(--lilac)">${ico('menu-lista-espera')}</span><div>Lista de espera<small>Solo administradoras</small></div></button><button class="it" data-go="productos"><span class="ic" style="background:var(--beige)">${ico('menu-productos')}</span><div>Productos de la tienda<small>Solo administradoras</small></div></button>`:''}
+    ${LIB.admin?`<button class="it" data-go="usuarias"><span class="ic" style="background:var(--lilac)">${ico('compartido')}</span><div>Usuarias<small>Solo administradoras</small></div></button><button class="it" data-go="biblio"><span class="ic" style="background:var(--mint,#e3f4ea)">${ico('menu-biblioteca')}</span><div>Biblioteca de recetas<small>Solo administradoras</small></div></button><button class="it" data-go="lista"><span class="ic" style="background:var(--lilac)">${ico('menu-lista-espera')}</span><div>Lista de espera<small>Solo administradoras</small></div></button><button class="it" data-go="productos"><span class="ic" style="background:var(--beige)">${ico('menu-productos')}</span><div>Productos de la tienda<small>Solo administradoras</small></div></button>`:''}
     <button class="it" data-lang="${LANG==='en'?'es':'en'}"><span class="ic" style="background:var(--tile)">${ico('menu-idioma')}</span><div><span data-notr>${LANG==='en'?'Español':'English'}</span><small data-notr>${LANG==='en'?'Cambiar a español':'Switch to English'}</small></div></button>
     <hr>
     ${Object.keys(d.users).length>1?`<button class="it" data-go="cambiar"><span class="ic" style="background:var(--tile)">${ico('menu-cambiar-cuenta')}</span><div>Cambiar de cuenta</div></button>`:''}
@@ -2895,11 +2898,33 @@ function toggleDD(){
     if(g==='tienda'){window.open(TIENDA_URL,'_blank','noopener')}
     else if(g==='espacio'||g==='retos'||g==='biblio'||g==='lista'||g==='descargas'||g==='productos'){UI.view=g;renderApp();scrollTo(0,0);if(g==='retos'&&SERVER)sbLoadRetos().then(()=>{if(UI.view==='retos')renderApp()})}
     else if(g==='ciclo'){UI.view='ciclo';renderApp();scrollTo(0,0)}
+    else if(g==='usuarias')openUsuarias();
     else if(g==='invitar')openInvite();
     else if(g==='cambiar'){d.session=null;save();renderAuth('login')}
     else if(g==='salir')logout()});
 }
 
+function openUsuarias(){
+  const st={q:'',L:null,err:''};
+  const m=modal(`<div class="top"><b>${ico('compartido','mi')} Usuarias de Vuelve</b><button class="close">✕</button></div><div id="usb"><p class="small muted" style="margin-top:12px">Cargando…</p></div>`,'wide');
+  const fd=t=>t?`${parse(t.slice(0,10)).getDate()} ${MON[parse(t.slice(0,10)).getMonth()]} ${t.slice(0,4)}`:'—';
+  const pinta=()=>{const B=m.querySelector('#usb');if(st.err){B.innerHTML=`<p class="err" style="margin-top:12px">${esc(st.err)}</p>`;return}
+    const L=st.L||[],q=st.q.toLowerCase(),F=L.filter(x=>!q||[x.email,x.usuario,x.nombre].some(v=>(v||'').toLowerCase().includes(q)));
+    const sem=L.filter(x=>x.ultimo_acceso&&Date.now()-new Date(x.ultimo_acceso)<7*864e5).length,sinU=L.filter(x=>!x.usuario).length;
+    B.innerHTML=`<div class="usst"><div><b>${L.length}</b><small>cuentas</small></div><div><b>${sem}</b><small>activas esta semana</small></div><div><b>${L.length-sinU}</b><small>con @usuario</small></div><div><b>${L.filter(x=>x.avisos).length}</b><small>con avisos</small></div></div>
+      <div class="searchrow" style="margin-top:14px"><input class="in" id="usq" placeholder="Buscar por email, @usuario o nombre" value="${esc(st.q)}" autocomplete="off"><button class="btn soft sm" id="uscsv">Descargar CSV</button></div>
+      <div class="usl">${F.map(x=>`<div class="usr"><span class="av" style="background:${cmCol(x.user_id)};color:#fff">${esc(((x.usuario||x.nombre||x.email||'?')[0]||'?').toUpperCase())}</span>
+        <div style="flex:1;min-width:0"><b>${x.usuario?'@'+esc(x.usuario):'<span class="muted">sin @usuario</span>'}${x.nombre?` <span class="tiny muted">· ${esc(x.nombre)}</span>`:''}</b><a class="usem" href="mailto:${esc(x.email)}">${esc(x.email)}</a>
+          <small>Alta ${fd(x.alta)} · último acceso ${fd(x.ultimo_acceso)}${x.retos?` · ${x.retos} reto${x.retos>1?'s':''}`:''}</small></div>
+        <div class="ustags">${x.vetada?'<span class="pill warn">vetada</span>':''}${!x.confirmada?'<span class="pill">sin confirmar</span>':''}${x.avisos?'<span class="pill ok">avisos</span>':''}</div></div>`).join('')||'<p class="small muted" style="margin-top:12px">Nadie coincide con la búsqueda.</p>'}</div>
+      <p class="tiny muted" style="margin-top:12px">Solo lo ven las administradoras. Usa estos datos solo para gestionar Vuelve y para lo que cada usuaria haya aceptado al registrarse.</p>`;
+    const qi=B.querySelector('#usq');qi.oninput=()=>{st.q=qi.value;const p=qi.selectionStart;pinta();const n=m.querySelector('#usq');n.focus();n.setSelectionRange(p,p)};
+    B.querySelector('#uscsv').onclick=()=>{const rows=[['email','usuario','nombre','alta','ultimo_acceso','retos','avisos','vetada','confirmada'],...F.map(x=>[x.email,x.usuario||'',x.nombre||'',(x.alta||'').slice(0,10),(x.ultimo_acceso||'').slice(0,10),x.retos,x.avisos?'si':'no',x.vetada?'si':'no',x.confirmada?'si':'no'])];
+      const csv='﻿'+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(';')).join('\r\n');
+      const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='vuelve-usuarias-'+today()+'.csv';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)};
+  };
+  SB.rpc('admin_usuarias').then(({data,error})=>{if(error)st.err=sbErr(error);else st.L=data||[];pinta()});
+}
 /* =========================================================
    RETOS CON AMIGOS
    ========================================================= */
