@@ -156,6 +156,7 @@ header.app .in2{max-width:1000px;margin:0 auto;padding:0 20px;height:72px;displa
 html[data-oscuro="1"]{color-scheme:dark}
 html[data-oscuro="1"]{--p:rgb(216,213,209);--c:rgb(143,201,174);--g:rgb(243,226,169)}
 html[data-oscuro="1"] body .eyebrow,html[data-oscuro="1"] body .cj,html[data-oscuro="1"] body .chigh .hbox small,html[data-oscuro="1"] body .hbox small,html[data-oscuro="1"] body .msub{color:rgb(206,203,199)!important}
+html[data-oscuro="1"] .cfases div{opacity:1!important}html[data-oscuro="1"] .cfases div:not(.on) b,html[data-oscuro="1"] .cfases div:not(.on) small{opacity:.8}html[data-oscuro="1"] .cfases i{opacity:1!important}
 html[data-oscuro="1"] .cener i.on,html[data-oscuro="1"] .cfuer i.on{background:rgb(226,223,219)!important}
 html[data-oscuro="1"] .cener i:not(.on),html[data-oscuro="1"] .cfuer i:not(.on){background:rgb(58,56,55)!important}
 html[data-oscuro="1"] .mbar i,html[data-oscuro="1"] .mrow.full .mbar i,html[data-oscuro="1"] .mrow.ok .mbar i,html[data-oscuro="1"] .mrow.near .mbar i{background:rgb(226,223,219)!important}
@@ -1855,14 +1856,15 @@ function cicloPatrones(u){
     f.n++;if((L.mov||[]).length)f.m++;if(L.animo){f.an++;if(L.animo==='mal'||L.animo==='muy_mal')f.mal++}
     if(wmap[d]!=null){(cd.pre?F.pre:f).w.push(wmap[d])}}
   const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null,out=[];
+const fN=k=>{const n=CICLO_FASES[k].n.toLowerCase();return LANG==='en'?({'menstrual':'menstrual','folicular':'follicular','ovulatoria':'ovulatory','lútea':'luteal'}[n]||n):n};
   const kF=F.folicular.k.length>=3?avg(F.folicular.k):null,kL=F.lutea.k.length>=3?avg(F.lutea.k):null;
-  if(kF&&kL&&Math.abs(kL-kF)>=60)out.push(['comida-capricho',kL>kF?`En tu fase lútea comes de media <b>${fmt(kL-kF)} kcal más al día</b> que en la folicular. Es muy habitual: tu cuerpo gasta un poco más y el hambre sube. Planifica un snack saciante para esos días.`:`En tu fase folicular comes de media <b>${fmt(kF-kL)} kcal más al día</b> que en la lútea.`]);
+  if(kF&&kL&&Math.abs(kL-kF)>=60)out.push(['comida-capricho',LANG==='en'?(kL>kF?`In your luteal phase you eat on average <b>${fmt(kL-kF)} more kcal a day</b> than in the follicular. This is very common: your body burns a bit more and hunger rises. Plan a filling snack for those days.`:`In your follicular phase you eat on average <b>${fmt(kF-kL)} more kcal a day</b> than in the luteal.`):(kL>kF?`En tu fase lútea comes de media <b>${fmt(kL-kF)} kcal más al día</b> que en la folicular. Es muy habitual: tu cuerpo gasta un poco más y el hambre sube. Planifica un snack saciante para esos días.`:`En tu fase folicular comes de media <b>${fmt(kF-kL)} kcal más al día</b> que en la lútea.`)]);
   const wPre=avg(F.pre.w),wFol=avg(F.folicular.w);
-  if(F.pre.w.length>=2&&F.folicular.w.length>=2&&wPre-wFol>=0.3)out.push(['peso',`Antes de la regla tu peso suele estar <b>${fmt1(wPre-wFol)} kg más alto</b> que en tu fase folicular. Es retención de líquidos, no grasa: no te agobies con la báscula esos días.`]);
+  if(F.pre.w.length>=2&&F.folicular.w.length>=2&&wPre-wFol>=0.3)out.push(['peso',LANG==='en'?`Before your period your weight is usually <b>${fmt1(wPre-wFol)} kg higher</b> than in your follicular phase. It's water retention, not fat: don't stress over the scale on those days.`:`Antes de la regla tu peso suele estar <b>${fmt1(wPre-wFol)} kg más alto</b> que en tu fase folicular. Es retención de líquidos, no grasa: no te agobies con la báscula esos días.`]);
   const pm=Object.entries(F).filter(([k,x])=>k!=='pre'&&x.n>=4).map(([k,x])=>[k,x.m/x.n]);
-  if(pm.length>=2){pm.sort((a,b)=>b[1]-a[1]);const [top,p1]=pm[0],[low,p2]=pm[pm.length-1];if(p1-p2>=0.2)out.push(['act-fuerza',`Te mueves más en tu fase <b>${CICLO_FASES[top].n.toLowerCase()}</b> (${Math.round(p1*100)}% de los días) que en la ${CICLO_FASES[low].n.toLowerCase()} (${Math.round(p2*100)}%). Aprovecha esa fase para tus entrenos más intensos.`])}
+  if(pm.length>=2){pm.sort((a,b)=>b[1]-a[1]);const [top,p1]=pm[0],[low,p2]=pm[pm.length-1];if(p1-p2>=0.2)out.push(['act-fuerza',LANG==='en'?`You move more in your <b>${fN(top)}</b> phase (${Math.round(p1*100)}% of days) than in the ${fN(low)} (${Math.round(p2*100)}%). Make the most of that phase for your hardest workouts.`:`Te mueves más en tu fase <b>${CICLO_FASES[top].n.toLowerCase()}</b> (${Math.round(p1*100)}% de los días) que en la ${CICLO_FASES[low].n.toLowerCase()} (${Math.round(p2*100)}%). Aprovecha esa fase para tus entrenos más intensos.`])}
   const pa=Object.entries(F).filter(([k,x])=>k!=='pre'&&x.an>=3).map(([k,x])=>[k,x.mal/x.an]);
-  if(pa.length>=2){pa.sort((a,b)=>b[1]-a[1]);if(pa[0][1]>=0.4&&pa[0][1]-pa[pa.length-1][1]>=0.25)out.push(['animo-mal',`Los días que te sientes peor se concentran en tu fase <b>${CICLO_FASES[pa[0][0]].n.toLowerCase()}</b>. Saberlo ayuda: esos días, más descanso y menos exigencia.`])}
+  if(pa.length>=2){pa.sort((a,b)=>b[1]-a[1]);if(pa[0][1]>=0.4&&pa[0][1]-pa[pa.length-1][1]>=0.25)out.push(['animo-mal',LANG==='en'?`The days you feel worst cluster in your <b>${fN(pa[0][0])}</b> phase. Knowing it helps: on those days, more rest and less pressure.`:`Los días que te sientes peor se concentran en tu fase <b>${CICLO_FASES[pa[0][0]].n.toLowerCase()}</b>. Saberlo ayuda: esos días, más descanso y menos exigencia.`])}
   return {pocos:!out.length,out,dias};
 }
 function openCicloAjustes(after){
@@ -1926,7 +1928,7 @@ function openCiclo(date){
     <div class="csec"><h3>${ico('comida-almuerzo','mi')} Alimentos que te pueden ayudar</h3><div class="cchips">${F.come.map(chip).join('')}</div><p style="margin-top:8px">${F.porque}</p></div>
     <div class="csec"><h3>${ico('act-fuerza','mi')} Movimiento</h3><p>${F.mueve}</p></div>
     ${(()=>{const pt=cicloPatrones(u);if(!pt)return '';return `<div class="csec cpat"><h3>${ico('consejo','mi')} Tus patrones</h3>${pt.pocos?`<p>Cuando lleves un ciclo completo registrando comidas, peso, movimiento y ánimo, aquí verás <b>tus propios patrones</b>: cuándo tienes más hambre, cómo cambia tu peso antes de la regla y en qué fase rindes mejor.</p>`:pt.out.map(([i,t])=>`<div class="cpi">${ico(i,'mi')}<p>${t}</p></div>`).join('')}</div>`})()}
-    <div class="cfases">${fases.map(k=>`<div class="${k===cd.f?'on':''}" style="--c:${CICLO_FASES[k].col}"><i></i><b>${CICLO_FASES[k].n}</b><small>${k==='menstrual'?'Días 1–'+cd.reg:k==='folicular'?'Días '+(cd.reg+1)+'–'+(cd.ov-2):k==='ovulatoria'?'Días '+(cd.ov-1)+'–'+(cd.ov+1):'Días '+(cd.ov+2)+'–'+cd.dur}</small></div>`).join('')}</div>
+    <div class="cfases">${fases.map(k=>`<div class="${k===cd.f?'on':''}" style="--c:${faseCol(k)}"><i></i><b>${CICLO_FASES[k].n}</b><small>${k==='menstrual'?'Días 1–'+cd.reg:k==='folicular'?'Días '+(cd.reg+1)+'–'+(cd.ov-2):k==='ovulatoria'?'Días '+(cd.ov-1)+'–'+(cd.ov+1):'Días '+(cd.ov+2)+'–'+cd.dur}</small></div>`).join('')}</div>
     <p class="tiny muted" style="margin-top:14px">Las fases son una estimación a partir de tus fechas: cada cuerpo y cada ciclo es distinto. Son consejos orientativos, no médicos; la evidencia sobre comer distinto en cada fase todavía es limitada. Si tienes dolor intenso, ciclos muy irregulares o síntomas que te preocupan, consulta con tu ginecóloga.</p>
     <button class="btn ghost block" id="cadj" style="margin-top:12px">Ajustar mi ciclo</button>`);
   m.querySelector('#cadj').onclick=()=>{m.remove();openCicloAjustes(()=>{if(UI.view==='diario')vDiario()})};
@@ -2950,6 +2952,8 @@ const CICLO_EXTRA={
   lutea:{caras:['regular','mal'],entreno:['Fuerza moderada','Pilates','Caminar'],mov:'Moderada',movT:'Sin culpa si bajas'}
 };
 const HORM=[['e','Estrógeno','#915a92','Da energía, mejora el ánimo y la piel y ayuda a construir músculo.'],['p','Progesterona','#6c2146','Calma y prepara el cuerpo; sube la temperatura, el hambre y la retención de líquidos.'],['lh','LH','#527f7e','Su pico dispara la ovulación.'],['fsh','FSH','#c9a35c','Hace madurar los folículos al inicio del ciclo.']];
+const FASE_D={menstrual:'rgb(214,92,146)',folicular:'rgb(236,194,92)',ovulatoria:'rgb(48,196,146)',lutea:'rgb(190,135,196)'};
+const faseCol=k=>themeDark()?FASE_D[k]:CICLO_FASES[k].col;
 const HORM_O=HORM.map(h=>h[2]),HORM_D={e:'rgb(236,194,92)',p:'rgb(190,135,196)',lh:'rgb(48,196,146)',fsh:'rgb(214,92,146)'};
 function hormSet(){const d=themeDark();HORM.forEach((h,i)=>{h[2]=d&&HORM_D[h[0]]?HORM_D[h[0]]:HORM_O[i]})}
 hormSet();
@@ -3026,7 +3030,7 @@ function vCiclo(){
       <div class="csec"><h3>${ico('act-fuerza','mi')} Movimiento</h3><p>${F.mueve}</p></div></div>
   </div>
   ${pt?`<div class="card cpat"><h3 class="cpt">${ico('consejo','mi')} Tus patrones</h3>${pt.pocos?`<p class="small" style="margin-top:8px">Cuando lleves un ciclo completo registrando comidas, peso, movimiento y ánimo, aquí verás <b>tus propios patrones</b>: cuándo tienes más hambre, cómo cambia tu peso antes de la regla y en qué fase rindes mejor.</p>`:pt.out.map(([i,t])=>`<div class="cpi">${ico(i,'mi')}<p>${t}</p></div>`).join('')}</div>`:''}
-  <div class="card"><p class="cj">Tus fases</p><div class="cfases">${fases.map(k=>`<div class="${k===cd.f?'on':''}" style="--c:${CICLO_FASES[k].col}"><i></i><b>${CICLO_FASES[k].n}</b><small>${k==='menstrual'?'Días 1–'+cd.reg:k==='folicular'?'Días '+(cd.reg+1)+'–'+(cd.ov-2):k==='ovulatoria'?'Días '+(cd.ov-1)+'–'+(cd.ov+1):'Días '+(cd.ov+2)+'–'+cd.dur}</small></div>`).join('')}</div></div>
+  <div class="card"><p class="cj">Tus fases</p><div class="cfases">${fases.map(k=>`<div class="${k===cd.f?'on':''}" style="--c:${faseCol(k)}"><i></i><b>${CICLO_FASES[k].n}</b><small>${k==='menstrual'?'Días 1–'+cd.reg:k==='folicular'?'Días '+(cd.reg+1)+'–'+(cd.ov-2):k==='ovulatoria'?'Días '+(cd.ov-1)+'–'+(cd.ov+1):'Días '+(cd.ov+2)+'–'+cd.dur}</small></div>`).join('')}</div></div>
   <div class="card"><p class="cj">Avisos</p><p class="small" style="margin-top:6px">Al abrir Vuelve te avisamos 3 días antes de tu regla y cuando empiezas una fase nueva. Para que te llegue aunque no abras la app, añade los avisos a tu calendario (próximos 6 ciclos, con alerta 3 días antes).</p><button class="btn soft" id="cics" style="margin-top:12px">${ico('plan-fecha','mi')} Añadir avisos a mi calendario</button></div>
   <p class="tiny muted" style="margin-top:14px">Las fases son una estimación a partir de tus fechas: cada cuerpo y cada ciclo es distinto. Son consejos orientativos, no médicos. Si tienes dolor intenso, ciclos muy irregulares o síntomas que te preocupan, consulta con tu ginecóloga. Vuelve no es un método anticonceptivo.</p>`;
   $('#cadj2b').onclick=()=>openCicloAjustes(vCiclo);
