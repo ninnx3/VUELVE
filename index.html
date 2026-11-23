@@ -1967,15 +1967,26 @@ function cmSeccion(el){
     const {error}=await q;if(error)return toast(sbErr(error));COM.retos=COM.retos.filter(x=>x.id!==r.id);re()});
 }
 function confirmar(t){try{return window.confirm(t)}catch(e){return true}}
-function cmElegirUsuario(done){
+async function pedirUsuarioInicio(next){
+  const u=me(),edad=+(u&&u.profile&&u.profile.edad)||0;
+  let ya=false;try{ya=!!sessionStorage.getItem('vuelve_user_luego')}catch(e){}
+  if(!SERVER||!SB||!SBUID||ya||(edad&&edad<18))return next();
+  try{await Promise.race([cmLoad(),new Promise(r=>setTimeout(r,3000))])}catch(e){}
+  if(!COM.loaded||COM.perfil||COM.vetada||!me())return next();
+  cmElegirUsuario(null,{inicio:true,onClose:next});
+}
+function cmElegirUsuario(done,opt={}){
   const u=me(),edad=+(u.profile&&u.profile.edad)||0;
   if(edad&&edad<18){toast('La comunidad es solo para mayores de 18 años');return}
-  const m=modal(`<div class="top"><b>${COM.perfil?'Cambiar nombre de usuario':'Tu nombre en la comunidad'}</b><button class="close">✕</button></div>
+  const m=modal(`<div class="top"><b>${COM.perfil?'Cambiar nombre de usuario':opt.inicio?'Elige tu nombre de usuario':'Tu nombre en la comunidad'}</b><button class="close">✕</button></div>
+    ${opt.inicio?'<p class="small" style="margin-top:8px">Con tu @usuario podrás unirte a retos e invitar a tus amigas sin tener que pasaros el email.</p>':''}
     <p class="small muted" style="margin-top:8px">Es lo único que verán las demás. Usa minúsculas, números, punto o guion bajo (de 3 a 20 caracteres). Mejor que no sea tu nombre completo.</p>
     <label class="f"><span>Nombre de usuario</span><div class="cmat"><b>@</b><input class="in" id="cmu" maxlength="20" autocomplete="off" autocapitalize="none" spellcheck="false" value="${esc(COM.perfil||'')}" placeholder="mica.fit"></div></label>
     ${COM.perfil?'':`<div class="cmnorm"><p class="eyebrow">Normas de la comunidad</p><ul>${CM_NORMAS.map(n=>`<li>${n}</li>`).join('')}</ul>
     <label class="cmchk"><input type="checkbox" id="cm18"> <span>Tengo 18 años o más y acepto las normas de la comunidad</span></label></div>`}
-    <div class="err" id="cme"></div><button class="btn block" id="cms" style="margin-top:8px">Guardar</button>`);
+    <div class="err" id="cme"></div><button class="btn block" id="cms" style="margin-top:8px">Guardar</button>${opt.inicio?'<button class="btn ghost block" id="cmlater" style="margin-top:8px">Más tarde</button>':''}`);
+  if(opt.onClose){const ob=new MutationObserver(()=>{if(!document.body.contains(m)){ob.disconnect();opt.onClose()}});ob.observe(document.body,{childList:true})}
+  if(m.querySelector('#cmlater'))m.querySelector('#cmlater').onclick=()=>{try{sessionStorage.setItem('vuelve_user_luego','1')}catch(e){}m.remove()};
   const inp=m.querySelector('#cmu'),err=t=>m.querySelector('#cme').textContent=t;
   inp.oninput=()=>{const v=inp.value.toLowerCase().replace(/[^a-z0-9._]/g,'');if(v!==inp.value)inp.value=v;err('')};
   setTimeout(()=>inp.focus(),50);
@@ -2496,7 +2507,7 @@ function renderResult(){
   </div>`;
   bindObInvites(renderResult);
   $('#goback').onclick=()=>{if(typeof OB==='undefined'||!OB||!OB.d)startOnboarding(true);OB.step=STEPS.length-1;renderOB();scrollTo(0,0)};
-  $('#go').onclick=()=>{SCREEN.busy=false;UI.view='diario';UI.date=today();UI.range='dia';renderApp()};
+  $('#go').onclick=()=>{SCREEN.busy=false;UI.view='diario';UI.date=today();UI.range='dia';renderApp();pedirUsuarioInicio(()=>{})};
 }
 
 /* =========================================================
@@ -4638,7 +4649,7 @@ function route(){
   if(!u)return renderAuth();
   if(!u.profile)return startOnboarding(false);
   renderApp();
-  if(!maybeCheckin()){if(SERVER&&!FOTOS.loaded)Promise.race([fotosLoad(),new Promise(r=>setTimeout(r,2500))]).catch(()=>{}).then(()=>{if(me()?.profile&&!document.querySelector('.modal'))maybeWelcome()});else maybeWelcome()}
+  if(!maybeCheckin())pedirUsuarioInicio(()=>{if(SERVER&&!FOTOS.loaded)Promise.race([fotosLoad(),new Promise(r=>setTimeout(r,2500))]).catch(()=>{}).then(()=>{if(me()?.profile&&!document.querySelector('.modal'))maybeWelcome()});else if(!document.querySelector('.modal'))maybeWelcome()});
   maybeCelebrarAyer();
   programarPromoFotos();
   maybeBalanceSemana();
