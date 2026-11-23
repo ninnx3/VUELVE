@@ -649,16 +649,22 @@ html[data-tema=ciruela] .btn.soft,html[data-tema=ciruela] .seg button.on:not(.x)
 html[data-tema=ciruela] .tile,html[data-tema=ciruela] .strip,html[data-tema=ciruela] .bday .bd{background:#efe6f0}
 html[data-tema=ciruela] .cchip,html[data-tema=ciruela] .mpill{background:#f1e9f2;border-color:#ddcde0}
 html[data-tema=ciruela] .hero .eyebrow,html[data-tema=ciruela] .cj,html[data-tema=ciruela] .card>.eyebrow,html[data-tema=ciruela] .msub{color:#24402f}
-html[data-tema=ciruela] nav.tabs button.on{background:#e3ebe4;color:#24402f}html[data-tema=ciruela] nav.tabs button.on svg path{fill:#24402f}
+html[data-tema=ciruela] nav.tabs button.on{background:#e9dcec;color:#412229}
 html[data-tema=ciruela] .btn.soft{background:#e6dbe8;color:#412229}
 html[data-tema=ciruela] .pill.ok,html[data-tema=ciruela] .bst.ok{background:#e3ebe4;color:#24402f}
 html[data-tema=ciruela] .bday.hoy .bd{background:#24402f}
-html[data-tema=ciruela] .chigh,html[data-tema=ciruela] .jhero{background:linear-gradient(135deg,#2c161c,#412229 55%,#5c2f3c)}
+html[data-tema=ciruela] .chigh,html[data-tema=ciruela] .jhero{background:linear-gradient(135deg,#412229,#5e3550 55%,#7d5a85)}
+html[data-tema=ciruela] .card{border-color:#ebe0ec}html[data-tema=ciruela] .datenav .ar,html[data-tema=ciruela] .btn.ghost{border-color:#e2d4e5}
+html[data-tema=ciruela] .phero.fhero{background:linear-gradient(135deg,#fbf3f7 0%,#f1e6f2 55%,#e9def0 100%)}
+html[data-tema=ciruela] .mtabs button.on{background:#412229;border-color:#412229}html[data-tema=ciruela] .mtabs button{border-color:#e2d4e5}
 html[data-tema=ciruela] .cfases i,html[data-tema=ciruela] .ctop{filter:none}
-html[data-tema=ciruela] .cd div:nth-child(1){background:#412229;color:#f7efe1}html[data-tema=ciruela] .cd div:nth-child(2){background:#f1e8e3;color:#412229}html[data-tema=ciruela] .cd div:nth-child(3){background:#f1e8e3;color:#5c2f3c}html[data-tema=ciruela] .cd div:nth-child(4){background:#24402f;color:#f3efe6}
+html[data-tema=ciruela] .cd div:nth-child(1){background:#412229;color:#f7efe1}html[data-tema=ciruela] .cd div:nth-child(2){background:#e9dcec;color:#412229}html[data-tema=ciruela] .cd div:nth-child(3){background:#f2e1ea;color:#8e2a5c}html[data-tema=ciruela] .cd div:nth-child(4){background:#24402f;color:#f3efe6}
 html[data-tema=ciruela] .cd div:nth-child(1) small,html[data-tema=ciruela] .cd div:nth-child(4) small{color:inherit;opacity:.8}
 .qhead{position:relative;padding-right:56px}.star.big{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:28px;width:44px;height:44px}
 @media(max-width:900px){.sheet.welcome{overflow-y:auto;padding:0}}
+html[data-tema=ciruela] .cerrar{background:#24402f;color:#f3efe6}html[data-tema=ciruela] .cerrar:hover{background:#1b3024}html[data-tema=ciruela] .cerrar svg path{fill:#f3efe6}html[data-tema=ciruela] .cerrar.done{background:#e3ebe4;color:#24402f}html[data-tema=ciruela] .cerrar.done svg path{fill:#24402f}
+html[data-tema=ciruela] .fc-btn{background:#412229}html[data-tema=ciruela] .fc-btn:hover{background:#2c161c}
+html[data-tema=ciruela] .fc-t{color:#2a1a1e}
 </style>
 </head>
 <body>
@@ -670,11 +676,12 @@ const THEME_MAP={
  '#744a69':'#412229','#6b4462':'#412229','#5e3a55':'#2c161c','#8a5a7c':'#5c2f3c','#a47a9a':'#7a4a57','#8a4f6e':'#5c2f3c','#b07fa3':'#8a5f68',
  '#372333':'#2a1a1e','#3a2436':'#2a1a1e','#3d383c':'#2a1a1e','#3a2f38':'#2a1a1e','#4e3048':'#2a1a1e',
  '#7d6c7a':'#6a5a5d','#5d4a59':'#5e4f52','#94738b':'#7a5d63','#a17998':'#7a5d63','#9a7c93':'#7a5d63','#9c8b98':'#8a7d7f',
- '#fbf8fb':'#fcfaf7','#f5eff4':'#fcfaf7','#f4f0f7':'#f6f2ee','#f1e8f1':'#f6f2ee','#f4eef2':'#f5f0ec','#faf4f8':'#f8f4f0','#faf6f9':'#f8f4f0','#fbf6f9':'#f8f4f0',
- '#ede7ee':'#efe9e4','#e9e1e8':'#ece4de','#e2d4de':'#ece4de','#ead9e5':'#e8ddd6','#e6d3e1':'#e6dad2','#e6d6e3':'#e6dad2','#f1e7ef':'#f0e9e4','#f0e4ec':'#efe7e1','#efe9ee':'#efe9e4',
- '#eae3f3':'#e9dfea','#ebe1f3':'#e9dfea','#ece3f4':'#ece4ec','#efe6f3':'#e9dfea','#ecdcf0':'#efe5df','#ece2f3':'#f1ebe6','#f4e6ef':'#f5ede8',
+ '#fbf8fb':'#fcf9fa','#f5eff4':'#fcf9fa','#f4f0f7':'#f4eef5','#f1e8f1':'#f4eef5','#f4eef2':'#f5f0ec','#faf4f8':'#f8f4f0','#faf6f9':'#f8f4f0','#fbf6f9':'#f8f4f0',
+ '#ede7ee':'#eee6f0','#e9e1e8':'#e9dfe9','#e2d4de':'#e9dfe9','#ead9e5':'#e8ddd6','#e6d3e1':'#e6dad2','#e6d6e3':'#e6dad2','#f1e7ef':'#f0e9e4','#f0e4ec':'#efe7e1','#efe9ee':'#efe9e4',
+ '#eae3f3':'#e9dfea','#ebe1f3':'#e9dfea','#ece3f4':'#ece4ec','#efe6f3':'#e9dfea','#ecdcf0':'#eadff0','#ece2f3':'#f1ebe6','#f4e6ef':'#f5ede8',
  '#dfd2e5':'#d3c1d6','#ddd0ea':'#d3c1d6','#d9cbe8':'#cdb9d1','#e4d4ea':'#d8c8db','#efe4ec':'#f2ebe6','#f3e9f0':'#f4eee9','#f6edf3':'#f6f0ec','#f3e2ea':'#f5ece8','#f4e9f1':'#f4eee9','#f6eef4':'#f5efea',
- '#f4e1e8':'#f5e9e8','#fdfafc':'#fffdfa','#fdf9fc':'#fffdfa','#fbf3ee':'#fbf6f1',
+ '#f4e1e8':'#f3e3ec','#fdfafc':'#fffdfa','#fdf9fc':'#fffdfa','#fbf3ee':'#fbf6f1',
+ '#c45c72':'#8e2a5c','#7b5ea7':'#6b4f8a','#d4a72c':'#c4922a','#d4ac52':'#c4922a','#e2a08c':'#b5739a','#a99bd0':'#9b84b4',
  '#2f6f5d':'#24402f','#547969':'#3d5a48','#7aa898':'#6b8a74','#3f7a62':'#24402f',
  '#e3efe9':'#e3ebe4','#e5f1ea':'#e3ebe4','#e3f4ea':'#e3ebe4','#d9e7de':'#d6e2d8','#e4f1ea':'#e3ebe4','#dcece6':'#dde7df'
 };
@@ -2294,10 +2301,10 @@ function bindArrows(prev,next,fn){$('#dp').onclick=()=>{prev();fn()};$('#dn').on
 /* ---------- Diario ---------- */
 // Color del anillo: verde pastel → amarillo al acercarte → naranja muy cerca → rojo si te pasas
 function ringColor(f){
-  const S=[[0,[110,207,151]],[0.7,[110,207,151]],[0.85,[242,207,92]],[0.97,[244,154,84]],[1,[244,140,76]]];
-  if(f>1.0001)return 'rgb(226,88,98)';
+  const S=themeOn()?[[0,[36,64,47]],[0.7,[36,64,47]],[0.85,[61,90,72]],[0.97,[196,146,42]],[1,[196,146,42]]]:[[0,[110,207,151]],[0.7,[110,207,151]],[0.85,[242,207,92]],[0.97,[244,154,84]],[1,[244,140,76]]];
+  if(f>1.0001)return themeOn()?'rgb(142,42,92)':'rgb(226,88,98)';
   for(let i=1;i<S.length;i++)if(f<=S[i][0]){const [a,ca]=S[i-1],[b,cb]=S[i],t=(f-a)/(b-a||1);return 'rgb('+ca.map((v,j)=>Math.round(v+(cb[j]-v)*t)).join(',')+')'}
-  return 'rgb(244,140,76)';
+  return themeOn()?'rgb(196,146,42)':'rgb(244,140,76)';
 }
 function ring(val,max){
   const r=58,C=2*Math.PI*r,p=Math.min(val/max,1),col=ringColor(max>0?val/max:0);
