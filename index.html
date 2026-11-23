@@ -1755,7 +1755,7 @@ function vRetosPage(){
   vJuntas();
   const hero2=V.querySelector('.hero');const ca=cuentaAtrasHTML(u.profile);
   if(ca&&hero2)hero2.insertAdjacentHTML('afterend',ca);bindCuentaAtras(()=>vRetosPage());
-  V.insertAdjacentHTML('beforeend','<div id="cmsec"></div>');cmSeccion(V.querySelector('#cmsec'));
+  V.insertAdjacentHTML('beforeend','<div id="cmsec"></div>');{const el=V.querySelector('#cmsec');cmSeccion(el);if(COM.loaded&&SERVER)cmSyncPasos().then(n=>{if(n&&document.body.contains(el))cmSeccion(el)}).catch(()=>{})}
   if(retosOf(u).length||pendingInvites(u).length){V.insertAdjacentHTML('beforeend',`<div class="rsec"><div><p class="cj">Retos con puntos</p><h2 class="ct">Tus retos por email</h2></div></div>`);V.appendChild(frag)}
   tick();
 }
@@ -1908,25 +1908,26 @@ async function cmLoad(force){
   return COM.loading;
 }
 async function cmSyncPasos(){
-  const u=me(),p=+(dayLog(u,today()).pasos)||0;
+  const u=me(),p=+(dayLog(u,today()).pasos)||0;let n=0;
   for(const r of COM.retos){if(!COM.mios[r.id]||!['calorias','movimiento'].includes(r.tipo))continue;const pr=cmProg(r,SBUID);if(!pr)continue;
     for(const d of [addDays(today(),-1),today()]){if(d<pr.unido)continue;const L=u.logs[d];
-      const h=r.tipo==='calorias'?!!(L&&(L.foods||[]).length&&dayStatus(u,d)==='ok'):!!(L&&(L.mov||[]).length);
-      const C=COM.checks[r.id]=COM.checks[r.id]||[],cur=C.find(c=>c.user_id===SBUID&&c.fecha===d);if(cur?cur.hecho===h:!h)continue;
-      const row={reto_id:r.id,user_id:SBUID,fecha:d,hecho:h};const {error}=await SB.from('comunidad_checkins').upsert(row);if(error){console.warn(error);continue}
-      const i=C.findIndex(c=>c.user_id===SBUID&&c.fecha===d);if(i>=0)C[i]={...C[i],...row};else C.push(row)}}
+      const mins=L?(L.mov||[]).reduce((a,m)=>a+(+m.min||0),0):0,h=r.tipo==='calorias'?!!(L&&(L.foods||[]).length&&dayStatus(u,d)==='ok'):r.meta?mins>=r.meta:!!(L&&(L.mov||[]).length);
+      const C=COM.checks[r.id]=COM.checks[r.id]||[],cur=C.find(c=>c.user_id===SBUID&&c.fecha===d);if(cur?(cur.hecho===h&&(r.tipo!=='movimiento'||cur.valor===mins)):!h&&!mins)continue;
+      const row={reto_id:r.id,user_id:SBUID,fecha:d,hecho:h,valor:r.tipo==='movimiento'?mins:null};const {error}=await SB.from('comunidad_checkins').upsert(row);if(error){console.warn(error);continue}
+      const i=C.findIndex(c=>c.user_id===SBUID&&c.fecha===d);if(i>=0)C[i]={...C[i],...row};else C.push(row);n++}}
   for(const r of COM.retos){if(r.tipo!=='pasos'||!COM.mios[r.id])continue;const pr=cmProg(r,SBUID);if(!pr||pr.fin)continue;
     const cur=(COM.checks[r.id]||[]).find(c=>c.user_id===SBUID&&c.fecha===today());if(cur&&cur.valor===p)continue;if(!p&&!cur)continue;
     const row={reto_id:r.id,user_id:SBUID,fecha:today(),valor:p,hecho:p>=(r.meta||6000)};
     const {error}=await SB.from('comunidad_checkins').upsert(row);if(error){console.warn(error);continue}
-    const L=COM.checks[r.id]=COM.checks[r.id]||[];const i=L.findIndex(c=>c.user_id===SBUID&&c.fecha===today());if(i>=0)L[i]=row;else L.push(row);
+    const L=COM.checks[r.id]=COM.checks[r.id]||[];const i=L.findIndex(c=>c.user_id===SBUID&&c.fecha===today());if(i>=0)L[i]=row;else L.push(row);n++;
     if(row.hecho&&!(cur&&cur.hecho))toast(`¡Pasos del reto «${r.titulo}» cumplidos hoy! 💜`)}
+  return n;
 }
 function cmRetoCard(r,mio){
   const pr=mio?cmProg(r,SBUID):null,nuevo=mio&&COM.ult[r.id]&&COM.ult[r.id]>(cmLeido()[r.id]||'');
   const meta=CM_TIPOS[r.tipo]?.(r)||'Hábito diario',priv=r.privado?`<span class="cmpriv">${ico('privado','mi')} Privado</span> `:'';
   if(mio){
-    const hoyTxt=r.tipo==='calorias'||r.tipo==='movimiento'?`<span class="cmhoy ${pr.hoy?'ok':''}">${ico(r.tipo==='calorias'?'dia-cerrado':'act-alta','mi')} ${pr.hoy?'Hoy cumplido':'Se marca con tu diario'}</span>`:r.tipo==='pasos'?`<span class="cmhoy ${pr.hoy?'ok':''}">${ico('act-pasos','mi')} Hoy ${fmt(pr.valor)} / ${fmt(r.meta)}</span>`
+    const hoyTxt=r.tipo==='calorias'||r.tipo==='movimiento'?`<span class="cmhoy ${pr.hoy?'ok':''}">${ico(r.tipo==='calorias'?'dia-cerrado':'act-alta','mi')} ${pr.hoy?'Hoy cumplido':r.tipo==='movimiento'&&r.meta?`Hoy ${pr.valor||0} / ${r.meta} min`:'Se marca con tu diario'}</span>`:r.tipo==='pasos'?`<span class="cmhoy ${pr.hoy?'ok':''}">${ico('act-pasos','mi')} Hoy ${fmt(pr.valor)} / ${fmt(r.meta)}</span>`
       :`<button class="cmhoy ${pr.hoy?'ok':''}" data-cmhoy="${r.id}">${ico('dia-cerrado','mi')} ${pr.hoy?'Hoy cumplido':'Marcar hoy'}</button>`;
     return `<div class="card cmc mio"><div class="cmh"><span class="cmi">${ico(r.icono,'mi')}</span><div style="flex:1;min-width:0">${priv}<p class="cj">${pr.fin?'Reto terminado':`Día ${pr.dia} de ${r.dias}`}</p><div class="cmt">${esc(r.titulo)}</div></div>${nuevo?'<span class="cmnew">Nuevos mensajes</span>':''}</div>
       <div class="bar" style="margin-top:12px"><i style="width:${Math.min(pr.hechos/r.dias*100,100)}%"></i></div>
@@ -2005,7 +2006,7 @@ async function cmReiniciar(id,done){
   const {error}=await SB.from('comunidad_miembros').update({unido:today()}).eq('reto_id',id).eq('user_id',SBUID);if(error)return toast(sbErr(error));
   await cmLoad(true);toast('¡Nueva vuelta! Día 1 💪');done&&done();
 }
-const CM_TIPOS={habito:()=>'Hábito diario',pasos:r=>`${fmt(r.meta||6000)} pasos al día`,calorias:()=>'Días dentro de tus calorías',movimiento:()=>'Días con movimiento'};
+const CM_TIPOS={habito:()=>'Hábito diario',pasos:r=>`${fmt(r.meta||6000)} pasos al día`,calorias:()=>'Días dentro de tus calorías',movimiento:r=>r.meta?`${r.meta} min de movimiento al día`:'Días con movimiento'};
 async function cmBuscarUsuario(v){v=(v||'').trim().toLowerCase().replace(/^@/,'');if(!/^[a-z0-9][a-z0-9._]{2,19}$/.test(v))return null;
   const {data}=await SB.from('perfiles_publicos').select('user_id,usuario').eq('usuario',v).maybeSingle();if(data)COM.nombres[data.user_id]=data.usuario;return data||null}
 function cmInvitarUI(m,st){
@@ -2023,7 +2024,7 @@ function cmShareApp(){const url=location.origin+location.pathname,t='Únete a Vu
 async function cmEnviarInv(id,lista){let ok=0;for(const x of lista){const {error}=await SB.from('comunidad_invitaciones').insert({reto_id:id,user_id:x.user_id,invitada_por:SBUID});if(!error||/duplicate/.test(error.message))ok++;else toast(sbErr(error))}return ok}
 function cmCrear(done){
   const st={tipo:'habito',dias:21,icono:'compartido',privado:false,inv:[]};
-  const TIP=[['habito','Hábito diario','Cada una marca el día como cumplido'],['pasos','Pasos','Se cuentan solos con tus pasos'],['calorias','Calorías','Días dentro de tu objetivo, desde el diario'],['movimiento','Movimiento','Días con algún entreno o actividad']];
+  const TIP=[['habito','Hábito diario','Cada una marca el día como cumplido'],['pasos','Pasos','Se cuentan solos con tus pasos'],['calorias','Calorías','Días dentro de tu objetivo, desde el diario'],['movimiento','Movimiento','Minutos de movimiento registrados']];
   const ICS=[['compartido','Juntas'],['act-alta','Movimiento'],['act-pasos','Pasos'],['consejo','Hábito'],['comida-almuerzo','Comida'],['corazon','Bienestar']];
   const m=modal(`<div class="top"><b>Crear un reto</b><button class="close">✕</button></div>
     <label class="f"><span>¿Quién puede unirse?</span></label>
@@ -2033,21 +2034,22 @@ function cmCrear(done){
     <label class="f"><span>Descripción (opcional)</span><textarea class="in" id="cd" maxlength="220" style="min-height:70px;font-family:inherit"></textarea></label>
     <label class="f"><span>Qué cuenta como día cumplido</span></label><div class="grid2">${TIP.map(([k,t,d])=>`<button class="opt ${k==='habito'?'on':''}" data-t="${k}"><div><b>${t}</b><small>${d}</small></div></button>`).join('')}</div>
     <label class="f" id="cmw" style="display:none"><span>Pasos al día</span><input class="in" id="cp" type="number" min="1000" max="40000" step="500" value="8000"></label>
+    <label class="f" id="cmmw" style="display:none"><span>Minutos mínimos al día</span><input class="in" id="cmm" type="number" min="5" max="300" step="5" value="20"><small class="tiny muted">Cuenta la suma de lo que registres en Movimiento ese día.</small></label>
     <label class="f"><span>Duración</span></label><div class="cmdias">${[7,14,21,30,60].map(d=>`<button class="cmchip ${d===21?'on':''}" data-d="${d}">${d} días</button>`).join('')}</div>
     <label class="f"><span>Icono</span></label><div class="cmdias">${ICS.map(([k,t])=>`<button class="cmchip ic ${k===st.icono?'on':''}" data-i="${k}" title="${t}">${ico(k,'mi')}</button>`).join('')}</div>
     <p class="tiny muted" style="margin-top:12px">Cada una empieza su día 1 cuando se une. Solo se comparte tu @usuario y si has cumplido cada día, nunca tus comidas, peso ni fotos.</p>
     <div class="err" id="ce"></div><button class="btn block" id="cs" style="margin-top:10px">Crear y unirme</button>`);
   cmInvitarUI(m,st);m.querySelector('#cmshare').onclick=e=>{e.preventDefault();cmShareApp()};
   m.querySelectorAll('[data-vis]').forEach(b=>b.onclick=()=>{st.privado=b.dataset.vis==='1';m.querySelectorAll('[data-vis]').forEach(x=>x.classList.toggle('on',x===b));m.querySelector('#cminvw').style.display=st.privado?'':'none'});
-  m.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{st.tipo=b.dataset.t;m.querySelectorAll('[data-t]').forEach(x=>x.classList.toggle('on',x===b));m.querySelector('#cmw').style.display=st.tipo==='pasos'?'':'none'});
+  m.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{st.tipo=b.dataset.t;m.querySelectorAll('[data-t]').forEach(x=>x.classList.toggle('on',x===b));m.querySelector('#cmw').style.display=st.tipo==='pasos'?'':'none';m.querySelector('#cmmw').style.display=st.tipo==='movimiento'?'':'none'});
   m.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{st.dias=+b.dataset.d;m.querySelectorAll('[data-d]').forEach(x=>x.classList.toggle('on',x===b))});
   m.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>{st.icono=b.dataset.i;m.querySelectorAll('[data-i]').forEach(x=>x.classList.toggle('on',x===b))});
   m.querySelector('#cs').onclick=async()=>{const t=m.querySelector('#ct').value.trim(),d=m.querySelector('#cd').value.trim(),p=Math.round(+m.querySelector('#cp').value||0),err=x=>m.querySelector('#ce').textContent=x;
     if(t.length<3)return err('Ponle un nombre de al menos 3 letras.');
     if(/(https?:\/\/|www\.|@\S+\.)/i.test(t+' '+d))return err('Sin enlaces ni emails, por seguridad.');
-    if(st.tipo==='pasos'&&!(p>=1000&&p<=40000))return err('Los pasos deben estar entre 1.000 y 40.000.');
+    if(st.tipo==='pasos'&&!(p>=1000&&p<=40000))return err('Los pasos deben estar entre 1.000 y 40.000.');const mm=Math.round(+m.querySelector('#cmm').value||0);if(st.tipo==='movimiento'&&!(mm>=5&&mm<=300))return err('Los minutos deben estar entre 5 y 300.');
     const b=m.querySelector('#cs');b.disabled=true;
-    const {data,error}=await SB.from('comunidad_retos').insert({titulo:t,descripcion:d||null,tipo:st.tipo,meta:st.tipo==='pasos'?p:null,dias:st.dias,icono:st.icono,privado:st.privado,creada_por:SBUID}).select().single();
+    const {data,error}=await SB.from('comunidad_retos').insert({titulo:t,descripcion:d||null,tipo:st.tipo,meta:st.tipo==='pasos'?p:st.tipo==='movimiento'?mm:null,dias:st.dias,icono:st.icono,privado:st.privado,creada_por:SBUID}).select().single();
     if(error){b.disabled=false;return err(sbErr(error))}
     const {error:e2}=await SB.from('comunidad_miembros').insert({reto_id:data.id,user_id:SBUID,unido:today()});if(e2){b.disabled=false;return err(sbErr(e2))}
     const n=st.inv.length?await cmEnviarInv(data.id,st.inv):0;
