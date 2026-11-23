@@ -2217,7 +2217,9 @@ function bindRange(){
   $$('[data-r]').forEach(b=>b.onclick=()=>{UI.range=b.dataset.r;vDiario()});
   $('#hoy').onclick=()=>{UI.date=today();vDiario()};
 }
-function weekStart(s){const d=parse(s),w=(d.getDay()+6)%7;d.setDate(d.getDate()-w);return iso(d)}
+const semIni=()=>{try{const v=me()?.profile?.semIni;return v==null||isNaN(+v)?1:+v}catch(e){return 1}};
+function weekStart(s){const d=parse(s),w=(d.getDay()-semIni()+7)%7;d.setDate(d.getDate()-w);return iso(d)}
+function weekStartLunes(s){const d=parse(s),w=(d.getDay()+6)%7;d.setDate(d.getDate()-w);return iso(d)}
 function dayStatus(u,d){
   const l=u.logs[d];if(!l||!(l.foods||[]).length)return 'none';
   const t=totals(l.foods).k,tg=targetFor(u,d).kcal;
@@ -3037,7 +3039,7 @@ function vProgreso(){
     <div class="stat"><b>${Object.values(u.logs).filter(l=>(l.mov||[]).length).length}</b><small>días de movimiento</small></div>
   </div>
   <div class="card"><div class="row between"><p class="eyebrow">Evolución del peso</p><button class="btn sm" id="ci">+ Check-in</button></div>${chart}</div>
-  <div class="card"><p class="eyebrow">Últimas 8 semanas · lunes a domingo</p>${bars}
+  <div class="card"><p class="eyebrow">Últimas 8 semanas · ${DOWL[semIni()]} a ${DOWL[(semIni()+6)%7]}</p>${bars}
     <div class="legend"><span><i style="background:var(--base)"></i>Días cumplidos (±10% kcal)</span><span><i style="background:var(--ex)"></i>Días de movimiento</span><span>- - meta ${goal} días</span></div></div>
   <div class="card"><p class="eyebrow">Registros de peso</p>
     ${W.slice().reverse().map(w=>`<div class="wk"><span>${cap(DOWL[parse(w.date).getDay()])} ${parse(w.date).getDate()} ${MON[parse(w.date).getMonth()]} ${parse(w.date).getFullYear()}</span><span class="row" style="gap:4px"><b>${fmt1(w.kg)} kg</b><button class="x" data-dw="${w.date}">✕</button></span></div>`).join('')||'<p class="muted small">Sin registros.</p>'}
@@ -3077,8 +3079,7 @@ function siluetaHTML(prev){
   </div>`;
 }
 function checkinDue(u){
-  const fri=addDays(weekStart(today()),4);
-  if(today()<fri)return false;
+  const fri=addDays(today(),-((parse(today()).getDay()-5+7)%7));
   if((u.weights||[]).some(w=>w.date>=fri))return false;
   return u.ciSkip!==today();
 }
@@ -3186,6 +3187,9 @@ function vEspacio(){
       <tr><td>Meta</td><td>${pf.meta?esc(pf.metaNombre||'Mi meta'):'—'}</td></tr>
     </table>
     <button class="btn block" style="margin-top:16px" id="ed">Editar mis datos</button></div>
+  <div class="card"><p class="eyebrow">Tu semana</p><p class="small muted" style="margin-top:6px">¿Qué día cierras tu semana? Por ejemplo, el día que te pesas y te mides. Las semanas de tu progreso, tus notas y Movimiento irán hasta ese día.</p>
+    <div class="seg semfin" style="margin-top:12px">${[1,2,3,4,5,6,0].map(d=>`<button data-semfin="${d}" class="${(semIni()+6)%7===d?'on':''}">${['D','L','M','X','J','V','S'][d]}</button>`).join('')}</div>
+    <p class="small" style="margin-top:8px">Tu semana va de <b>${DOWL[semIni()]}</b> a <b>${DOWL[(semIni()+6)%7]}</b>.</p></div>
   <div class="card"><div class="row between"><p class="eyebrow">Idioma</p>${LANGSW()}</div><p class="small muted" style="margin-top:6px">Elige en qué idioma quieres ver Vuelve.</p></div>
   ${fotosCardHTML()}
   <div class="card"><p class="eyebrow">Compartir y guardar</p>
@@ -3211,6 +3215,7 @@ function vEspacio(){
   $('#im').onclick=()=>{const m=modal(`<div class="top"><b>Importar copia</b><button class="close">✕</button></div><p class="small muted" style="margin-top:8px">Pega aquí una copia. Sustituirá los registros de esta cuenta.</p><textarea class="in" id="it" style="margin-top:12px"></textarea><button class="btn block" style="margin-top:12px" id="ia">Importar</button>`);
     m.querySelector('#ia').onclick=()=>{try{const x=JSON.parse(m.querySelector('#it').value);if(!x.profile)throw 0;
       Object.assign(u,{profile:x.profile,logs:x.logs||{},weights:x.weights||[],favs:x.favs||[],custom:x.custom||[],off:x.off||[]});save();m.remove();toast('Copia importada ✓');renderApp()}catch(e){toast('La copia no es válida')}}};
+  $$('[data-semfin]').forEach(b=>b.onclick=()=>{const fin=+b.dataset.semfin;u.profile.semIni=(fin+1)%7;BAL_WS=null;save();toast('Tu semana ahora termina el '+DOWL[fin]+' ✓');vEspacio()});
 }
 
 /* =========================================================
@@ -3224,7 +3229,7 @@ const EVITAR=['Lactosa','Gluten','Frutos secos','Marisco','Pescado','Cerdo','Car
 const CHEATS=['Chocolate','Pizza','Hamburguesa','Helado','Tarta de queso','Croissant','Patatas fritas','Tortitas con sirope','Galletas','Nachos','Sushi','Brownie'];
 function mpDefaults(u){return {gustos:[],gustosTxt:'',incluir:[],incluirTxt:'',evitar:[],evitarTxt:'',comidas:['Desayuno','Comida','Cena','Snack'],cheatDias:[5],cheatFav:[],cheatTxt:'',sesiones:2,tiempo:'normal'}}
 function mpTargets(u){
-  const ws=weekStart(today());
+  const ws=weekStartLunes(today());
   return DIAS7.map((n,i)=>{const date=addDays(ws,i),t=targetFor(u,date),r=calcular(u.profile);
     return {dia:n,date,tipo:r.plan.normal?null:(isTrainDay(u,date)?'entreno':'descanso'),kcal:t.kcal,p:t.p,c:t.c,g:t.g}});
 }
@@ -3400,7 +3405,7 @@ function vMenuSemana(){
   const mealIc=n=>n==='Capricho'?ico('comida-capricho','mi'):n==='Cheatmeal'?ico('comida-cheatmeal','mi'):MEALS.find(m=>m[0]===n)?.[1]||ico('comida-almuerzo','mi');
   const dish=(id,slot)=>{const r=R_(id);if(!r)return `<div class="dish empty">—</div>`;const k=plan.recetas.indexOf(r)%5;
     return `<button class="dish ${r.cheat||slot==='Capricho'?'cheat':''}" data-rec="${r.id}">${r.cheat||slot==='Capricho'?'<span class="badge">'+ico('comida-capricho','mi')+' capricho</span>':''}${recPh(r,'ph ph'+k)}<b>${esc(r.nombre)}</b><small>${r.kcal} kcal · ${r.p}g P</small></button>`};
-  const ws=weekStart(today());
+  const ws=weekStartLunes(today());
   const MOBV=innerWidth<=640;
   if(MP.day==null)MP.day=(new Date().getDay()+6)%7;
   const mobHTML=()=>{const s=plan.semana[MP.day],tg=T[MP.day],t=mpDayTotal(plan,s),ok=Math.abs(t.k-tg.kcal)<=tg.kcal*0.05;
