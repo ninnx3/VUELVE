@@ -735,6 +735,17 @@ html .jhero .cj.jbut,html[data-tema=ciruela] .jhero .cj.jbut{color:#f3e2a9!impor
 .cdadd{display:flex;align-items:center;gap:14px;width:100%;text-align:left;cursor:pointer;border:1.5px dashed #e3c6d7;background:#fffafc}.cdadd .mi{width:26px;height:26px;color:#6c2146;flex-shrink:0}.cdadd b{display:block;font-size:15px;color:var(--ink)}.cdadd small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
 .linkb{border:0;background:none;padding:0 0 0 8px;font:inherit;font-size:12.5px;font-weight:700;color:#6c2146;text-decoration:underline;cursor:pointer}
 .fpav{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#fff}.fpav b{display:block;font-size:13.5px}.fpav small{display:block;font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4}.fpav .btn .mi{width:15px;height:15px}.fpsw{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600}.fpsw input{accent-color:#6c2146;width:16px;height:16px}
+.etopts{display:flex;flex-direction:column;gap:8px}.etopts .opt{text-align:left}
+.etc .etsl{display:flex;flex-direction:column;gap:12px;margin-top:14px}.etsr{display:flex;flex-direction:column;gap:7px}.etst{display:flex;justify-content:space-between;align-items:center;gap:10px}.etsn{font-size:13.5px;font-weight:700;color:var(--ink)}
+.etsv{display:flex;gap:4px;flex-wrap:wrap}.etsv button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 10px;font:inherit;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer}
+.etsv button.on{color:#fff;border-color:transparent}.etsv button.on.i0{background:#325958}.etsv button.on.i1{background:#c29cc2}.etsv button.on.i2{background:#915a92}.etsv button.on.i3{background:#6c2146}
+.etsh{display:flex;gap:2px}.etsh i{width:9px;height:14px;border-radius:3px;background:#efe6ec}.etsh i.h0{background:#dfe9e5}.etsh i.h1{background:#e6cfe4}.etsh i.h2{background:#b78ab6}.etsh i.h3{background:#6c2146}
+@media(max-width:640px){.etsh i{width:7px;height:12px}.ettop .btn{width:100%}}
+.etpat{display:flex;gap:10px;align-items:flex-start;margin-top:10px;padding:10px 12px;border-radius:12px;background:#f6eef4}.etpat>span{font-weight:800;font-size:16px;color:#6c2146}.etpat.mejor{background:#e8f0ed}.etpat.mejor>span{color:#325958}.etpat p{margin:0;font-size:13.5px;line-height:1.45}.etpat small{color:var(--muted)}
+.etob{margin-top:14px}.etob .mtop{display:flex;justify-content:space-between;gap:8px;font-size:13.5px}.etob .mn{font-weight:700}.etob .mv small{color:var(--muted)}.etob .mbar{height:6px;border-radius:6px;background:var(--line);margin-top:6px;overflow:hidden}.etob .mbar i{display:block;height:100%;background:#6c2146;border-radius:6px}.etob>small{display:block;font-size:12px;color:var(--muted);margin-top:5px;line-height:1.4}
+.etsug{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:16px;padding:12px 14px;border-radius:14px;background:#fbf3e2}.etsug b{display:block;font-size:13.5px}.etsug small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.etaviso,.etperi{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:14px;background:#f3eef0;margin-top:14px}.etaviso .mi,.etperi .mi{width:18px;height:18px;color:#6c2146;flex-shrink:0;margin-top:2px}.etaviso p,.etperi p{margin:0;font-size:12.5px;line-height:1.5;color:#5e5458}
+.ettop{display:flex;flex-direction:column;gap:14px;align-items:flex-start;background:linear-gradient(135deg,#f6e4ea,#efdbe8 55%,#e3d2ea);border:0}
 </style>
 </head>
 <body>
@@ -1580,7 +1591,7 @@ function dayMicro(u,foods){
 function microFmt(v,un){return v>=100?fmt(v):v>=10?fmt1(v):dec(Math.round(v*100)/100)}
 function openMicros(u,log){
   const d=dayMicro(u,log.foods),cov=Math.round(d.cov*100);
-  const row=k=>{const [ref,un,name]=MICRO_REF[k],v=d.t[k]||0,pc=v/ref*100;return `<div class="mrow ${pc>=100?'full':''}"><div class="mtop"><span class="mn">${name}</span><span class="mv"><b>${microFmt(v)}</b> ${un} <small>/ ${dec(ref)} ${un} · ${Math.round(pc)}%</small></span></div><div class="mbar"><i style="width:${Math.min(pc,100)}%"></i></div></div>`};
+  const row=k=>{const [ref0,un,name]=MICRO_REF[k],ref=microRefU(k,ref0),v=d.t[k]||0,pc=v/ref*100;return `<div class="mrow ${pc>=100?'full':''}"><div class="mtop"><span class="mn">${name}</span><span class="mv"><b>${microFmt(v)}</b> ${un} <small>/ ${dec(ref)} ${un} · ${Math.round(pc)}%</small></span></div><div class="mbar"><i style="width:${Math.min(pc,100)}%"></i></div></div>`};
   modal(`<div class="top"><b>${ico('consejo','mi')} Vitaminas y minerales</b><button class="close">✕</button></div>
     <p class="small muted" style="margin-top:6px">${UI.date===today()?'Hoy':dateTitle(UI.date)} · % de la referencia diaria</p>
     <p class="msub" style="margin-top:16px">Minerales</p><div class="mgrid">${['ca','fe','mg','k','zn'].map(row).join('')}</div>
@@ -1589,7 +1600,7 @@ function openMicros(u,log){
 }
 function microCardHTML(u,log){
   const d=dayMicro(u,log.foods);if(!log.foods.length)return '';
-  const row=k=>{const [ref,un,name,tipo]=MICRO_REF[k],v=d.t[k]||0,pc=v/ref*100,w=Math.min(pc,100);
+  const row=k=>{const [ref0,un,name,tipo]=MICRO_REF[k],ref=microRefU(k,ref0),v=d.t[k]||0,pc=v/ref*100,w=Math.min(pc,100);
     const cls=tipo==='max'?(pc>100?'over':pc>80?'near':'ok'):(pc>=100?'full':'');
     return `<div class="mrow ${cls}"><div class="mtop"><span class="mn">${name}</span><span class="mv"><b>${microFmt(v)}</b> ${un} <small>/ ${tipo==='max'?'máx. ':''}${dec(ref)} ${un}</small></span></div><div class="mbar"><i style="width:${w}%"></i></div></div>`};
   const sup=[d.sup.cre?`<span class="pill">${ico('consejo','mi')} Creatina ${fmt1(d.sup.cre)} g</span>`:'',d.sup.col?`<span class="pill">${ico('consejo','mi')} Colágeno ${fmt1(d.sup.col)} g</span>`:''].join('');
@@ -1636,11 +1647,11 @@ const CICLO_FASES={
     porque:'Carbohidratos complejos (boniato, pan integral) para la saciedad y el ánimo, magnesio y vitamina B6 (plátano, garbanzos, chocolate negro), calcio (yogur) y menos sal y cafeína si notas hinchazón.',
     mueve:'Fuerza moderada, pilates, caminar o nadar. Si te notas más cansada, baja un poco la intensidad sin culpa.'},
 };
-function cicloDe(u){const c=u.profile&&u.profile.ciclo;return c&&c.activo&&(c.inicios||[]).length?c:null}
+function cicloDe(u){const c=u.profile&&u.profile.ciclo;return c&&c.activo&&c.etapa!=='post'&&(c.inicios||[]).length?c:null}
 function cicloDia(u,date){
   const c=cicloDe(u);if(!c)return null;
   const ini=[...c.inicios].sort().filter(d=>d<=date);if(!ini.length)return null;
-  const L=ini[ini.length-1],dur=Math.min(40,Math.max(21,+c.dur||28)),reg=Math.min(8,Math.max(2,+c.reg||5));
+  const L=ini[ini.length-1],dur=Math.min(c.etapa==='peri'?90:40,Math.max(21,+c.dur||28)),reg=Math.min(8,Math.max(2,+c.reg||5));
   const dia=Math.round((parse(date)-parse(L))/864e5)+1,ov=dur-14;
   let f='lutea';if(dia<=reg)f='menstrual';else if(dia<ov-1)f='folicular';else if(dia<=ov+1)f='ovulatoria';
   const tarde=dia>dur,prox=addDays(L,dur),faltan=Math.round((parse(prox)-parse(date))/864e5);
@@ -1698,22 +1709,31 @@ function cicloPatrones(u){
 }
 function openCicloAjustes(after){
   const u=me(),c=u.profile.ciclo||{},last=(c.inicios||[]).slice().sort().pop()||'';
+  const st={etapa:c.etapa||'regular'};
   const m=modal(`<div class="top"><b>${ico('corazon','mi')} Ajustar mi ciclo</b><button class="close">✕</button></div>
+    <label class="f" style="margin-top:14px"><span>¿En qué etapa estás?</span></label>
+    <div class="etopts">${Object.entries(ETAPAS).map(([k,[t,d]])=>`<button class="opt ${st.etapa===k?'on':''}" data-et="${k}"><div><b>${t}</b><small>${d}</small></div></button>`).join('')}</div>
+    <div id="cregw">
     <label class="f" style="margin-top:14px"><span>Primer día de tu última regla</span><input class="in" type="date" id="cl" max="${today()}" value="${last}"></label>
     <div class="grid2"><label class="f"><span>Duración de tu ciclo (días)</span><input class="in dec" id="cdur" inputmode="numeric" value="${c.dur||28}"></label><label class="f"><span>Días de regla</span><input class="in dec" id="creg" inputmode="numeric" value="${c.reg||5}"></label></div>
     <p class="tiny muted">Si no lo sabes, deja 28 y 5. Cada vez que marques «Me ha bajado la regla», calculamos tu media real.</p>
     <label class="chk" style="margin-top:12px;display:flex;gap:10px;align-items:center"><input type="checkbox" id="cadj2" ${c.ajusta?'checked':''}> <span class="small">Ajustar mis calorías a mi ciclo: <b>+100 kcal en la fase lútea</b> (sobre todo carbohidratos), cuando el cuerpo gasta un poco más y el hambre sube.</span></label>
-    <label class="chk" style="margin-top:12px;display:flex;gap:10px;align-items:center"><input type="checkbox" id="canti" ${c.anti?'checked':''}> <span class="small">Uso anticoncepción hormonal (píldora, anillo, DIU hormonal, implante…)</span></label>
+    <label class="chk" style="margin-top:12px;display:flex;gap:10px;align-items:center"><input type="checkbox" id="canti" ${c.anti?'checked':''}> <span class="small">Uso anticoncepción hormonal (píldora, anillo, DIU hormonal, implante…)</span></label></div>
+    <p class="tiny muted" id="cpostx" style="margin-top:12px;display:none">En esta etapa no hay fases. En Ciclo verás tu diario de síntomas, tus patrones y lo que más te cuida ahora. ${ET_AVISO}</p>
     <p class="tiny muted" style="margin-top:12px">Tus datos del ciclo se guardan en tu cuenta igual que tu diario y solo los ves tú. Vuelve no es un método anticonceptivo ni de diagnóstico.</p>
     <p class="err" id="cerr"></p>
     <button class="btn block" id="csv" style="margin-top:12px">Guardar</button>
     ${c.activo?'<button class="btn ghost block" id="coff" style="margin-top:8px">Desactivar el seguimiento del ciclo</button>':''}`);
-  m.querySelector('#csv').onclick=()=>{const L=m.querySelector('#cl').value,dur=Math.round(num(m.querySelector('#cdur').value)||28),reg=Math.round(num(m.querySelector('#creg').value)||5);
+  const vis=()=>{m.querySelector('#cregw').style.display=st.etapa==='post'?'none':'';m.querySelector('#cpostx').style.display=st.etapa==='post'?'':'none'};vis();
+  m.querySelectorAll('[data-et]').forEach(b=>b.onclick=()=>{st.etapa=b.dataset.et;m.querySelectorAll('[data-et]').forEach(x=>x.classList.toggle('on',x===b));vis()});
+  m.querySelector('#csv').onclick=()=>{
+    if(st.etapa==='post'){u.profile.ciclo={...c,activo:true,etapa:'post',inicios:c.inicios||[]};save();m.remove();toast('Etapa guardada ✓');after&&after();return}
+    const L=m.querySelector('#cl').value,dur=Math.round(num(m.querySelector('#cdur').value)||28),reg=Math.round(num(m.querySelector('#creg').value)||5);
     if(!L){m.querySelector('#cerr').textContent='Indica el primer día de tu última regla.';return}
     if(L>today()){m.querySelector('#cerr').textContent='La fecha no puede ser futura.';return}
-    if(dur<21||dur>40||reg<2||reg>8){m.querySelector('#cerr').textContent='Revisa los días: el ciclo suele durar entre 21 y 40 días y la regla entre 2 y 8.';return}
+    if(dur<21||dur>(st.etapa==='peri'?90:40)||reg<2||reg>10){m.querySelector('#cerr').textContent=st.etapa==='peri'?'Revisa los días: entre 21 y 90 días de ciclo y entre 2 y 10 de regla.':'Revisa los días: el ciclo suele durar entre 21 y 40 días y la regla entre 2 y 8.';return}
     const ini=[...new Set([...(c.inicios||[]).filter(d=>d!==last),L])].sort();
-    u.profile.ciclo={activo:true,inicios:ini.slice(-24),dur,reg,anti:m.querySelector('#canti').checked,ajusta:m.querySelector('#cadj2').checked};{const cd0=cicloDia(u,today());if(cd0)u.profile.ciclo.ultFase=cd0.L+'|'+cd0.f}save();m.remove();toast('Ciclo sincronizado ✓');after&&after()};
+    u.profile.ciclo={activo:true,etapa:st.etapa,inicios:ini.slice(-24),dur,reg,anti:m.querySelector('#canti').checked,ajusta:m.querySelector('#cadj2').checked};{const cd0=cicloDia(u,today());if(cd0)u.profile.ciclo.ultFase=cd0.L+'|'+cd0.f}save();m.remove();toast('Ciclo sincronizado ✓');after&&after()};
   const off=m.querySelector('#coff');if(off)off.onclick=()=>{u.profile.ciclo={...c,activo:false,oculto:true};save();m.remove();toast('Seguimiento del ciclo desactivado');after&&after()};
 }
 function openCiclo(date){
@@ -1736,7 +1756,7 @@ function openCiclo(date){
     <button class="btn ghost block" id="cadj" style="margin-top:12px">Ajustar mi ciclo</button>`);
   m.querySelector('#cadj').onclick=()=>{m.remove();openCicloAjustes(()=>{if(UI.view==='diario')vDiario()})};
   m.querySelector('#cbaja').onclick=()=>{const c=u.profile.ciclo,t=today();if(!(c.inicios||[]).includes(t))c.inicios=[...(c.inicios||[]),t].sort().slice(-24);
-    const med=cicloMedia(c.inicios);if(med)c.dur=Math.min(40,Math.max(21,med));save();m.remove();toast('Anotado ✓ · Día 1 de tu ciclo'+(med?' · media '+c.dur+' días':''));if(UI.view==='diario')vDiario()};
+    const med=cicloMedia(c.inicios);if(med)c.dur=Math.min(c.etapa==='peri'?90:40,Math.max(21,med));save();m.remove();toast('Anotado ✓ · Día 1 de tu ciclo'+(med?' · media '+c.dur+' días':''));if(UI.view==='diario')vDiario()};
 }
 
 function metasNorm(pf){
@@ -1903,6 +1923,73 @@ function fpComparar(){
     m.querySelectorAll('[data-po]').forEach(b=>b.onclick=()=>{st.pose=b.dataset.po;pinta()});
     const a=m.querySelector('#fpa'),b=m.querySelector('#fpb');if(a)a.onchange=()=>{st.a=a.value;pinta()};if(b)b.onchange=()=>{st.b=b.value;pinta()};
   };pinta();
+}
+
+/* ---------- Etapa: perimenopausia y posmenopausia ---------- */
+const etapaDe=u=>(u&&u.profile&&u.profile.ciclo&&u.profile.ciclo.activo&&u.profile.ciclo.etapa)||'regular';
+const ETAPAS={regular:['Ciclo regular','Tengo la regla con normalidad'],peri:['Perimenopausia','Reglas irregulares, sofocos, cambios de sueño o de ánimo'],post:['Menopausia y posmenopausia','Llevo 12 meses o más sin regla']};
+const SINT=[['sofocos','Sofocos'],['sudores','Sudores nocturnos'],['sueno','Dormir mal'],['niebla','Niebla mental'],['animo','Ánimo bajo o irritable'],['articular','Dolor articular'],['cabeza','Dolor de cabeza']];
+const SINT_N=['Nada','Leve','Media','Fuerte'];
+const ET_AVISO='Todo es orientativo y no sustituye a una consulta médica. Para cifras y recomendaciones ajustadas a ti, habla con tu ginecóloga.';
+const microRefU=(k,ref)=>k==='ca'&&etapaDe(me())!=='regular'?1000:ref;
+const ET_ALC=/\b(vino|cerveza|cava|champ[aá]n|sidra|vermut|ginebra|gin\b|ron\b|vodka|whisky|tequila|licor|sangr[ií]a|mojito|copa|c[oó]ctel)/i;
+const ET_CAF=/\b(caf[eé]|espresso|expreso|capuchino|cappuccino|cortado|latte|coca.?cola|cola\b|energ[eé]tica|red ?bull|monster|matcha|t[eé] negro)/i;
+function etFactores(u,d){const L=u.logs[d];if(!L)return null;const f=L.foods||[],mv=L.mov||[];
+  return {alcohol:f.some(x=>ET_ALC.test(x.n||'')),cafeina:f.some(x=>ET_CAF.test(x.n||'')),mov:mv.reduce((a,m)=>a+(+m.min||0),0)>=20,objetivo:f.length?dayStatus(u,d)==='ok':null}}
+const ET_FN={alcohol:['con alcohol','sin alcohol'],cafeina:['con cafeína','sin cafeína'],mov:['con 20 min o más de movimiento','sin moverte'],objetivo:['dentro de tus calorías','fuera de tus calorías']};
+function etPatrones(u){
+  const dias=[];for(let i=0;i<60;i++){const d=addDays(today(),-i),L=u.logs[d];if(L&&L.sint)dias.push(d)}
+  if(dias.length<6)return {pocos:true,n:dias.length};
+  const out=[];
+  SINT.forEach(([k,lab])=>{const noche=k==='sudores'||k==='sueno';
+    ['alcohol','cafeina','mov','objetivo'].forEach(fk=>{const con=[],sin=[];
+      dias.forEach(d=>{const v=u.logs[d].sint[k];if(v==null)return;const F=etFactores(u,noche?addDays(d,-1):d);if(!F||F[fk]==null)return;(F[fk]?con:sin).push(v)});
+      if(con.length<3||sin.length<3)return;const a=con.reduce((x,y)=>x+y,0)/con.length,b=sin.reduce((x,y)=>x+y,0)/sin.length;
+      if(Math.abs(a-b)>=.6)out.push({k,lab,fk,a,b,dif:Math.abs(a-b),noche})})});
+  return {lista:out.sort((x,y)=>y.dif-x.dif).slice(0,4),n:dias.length};
+}
+function etSintHTML(u){
+  const L=dayLog(u,UI.date||today()),S=L.sint||{},dias=[...Array(14)].map((_,i)=>addDays(today(),i-13));
+  return `<div class="card etc" id="etsint"><p class="eyebrow">Tus síntomas</p><p class="small muted" style="margin-top:6px">¿Cómo ha ido hoy? Un toque por síntoma. Así vemos qué te sienta mejor y qué peor.</p>
+    <div class="etsl">${SINT.map(([k,lab])=>`<div class="etsr"><div class="etst"><span class="etsn">${lab}</span><div class="etsh" aria-hidden="true">${dias.map(d=>{const v=u.logs[d]&&u.logs[d].sint?u.logs[d].sint[k]:null;return `<i class="h${v==null?'x':v}"></i>`}).join('')}</div></div><div class="etsv">${SINT_N.map((n,i)=>`<button class="${(S[k]??-1)===i?'on':''} i${i}" data-sk="${k}" data-sv="${i}">${n}</button>`).join('')}</div></div>`).join('')}</div>
+    <p class="tiny muted" style="margin-top:10px">Los cuadraditos son tus últimos 14 días: cuanto más oscuro, más fuerte.</p></div>`;
+}
+function etPatronesHTML(u){
+  const P=etPatrones(u);
+  const body=P.pocos?`<p class="small muted" style="margin-top:6px">Apunta tus síntomas al menos 6 días (llevas ${P.n}) y te enseñaremos qué cosas los mejoran o los empeoran.</p>`
+    :P.lista.length?P.lista.map(x=>{const peor=x.a>x.b;return `<div class="etpat ${peor?'peor':'mejor'}"><span>${peor?'↑':'↓'}</span><p><b>${x.lab}</b> ${peor?'más fuertes':'más suaves'} ${x.noche?'tras los días':'los días'} <b>${ET_FN[x.fk][0]}</b> <small>(${dec(Math.round(x.a*10)/10)} frente a ${dec(Math.round(x.b*10)/10)} de media)</small></p></div>`}).join('')
+    :`<p class="small muted" style="margin-top:6px">Con ${P.n} días apuntados aún no vemos diferencias claras. Sigue apuntando y te avisamos cuando aparezca algo.</p>`;
+  return `<div class="card etc"><p class="eyebrow">Tus patrones</p><p class="small muted" style="margin-top:6px">Cruzamos tus síntomas con lo que apuntas en Vuelve: alcohol, cafeína, movimiento y calorías.</p>${body}
+    <p class="tiny muted" style="margin-top:10px">Son coincidencias en tus propios datos, no una causa demostrada.</p></div>`;
+}
+function etObjetivosHTML(u){
+  const pf=u.profile,tg=targetFor(u,today()),L=dayLog(u,today()),tt=L.foods.reduce((a,f)=>({p:a.p+(+f.p||0)}),{p:0}),dm=dayMicro(u,L.foods),ws=weekStart(today());
+  let fz=0;for(let i=0;i<7;i++){const d=addDays(ws,i);if(d>today())break;const l=u.logs[d];if(l&&(l.mov||[]).some(m=>ACTS[m.tipo]&&ACTS[m.tipo].k==='fuerza'))fz++}
+  const bar=(lab,v,ref,un,txt)=>{const pc=Math.min(100,v/ref*100);return `<div class="etob"><div class="mtop"><span class="mn">${lab}</span><span class="mv"><b>${un==='g'||un==='días'?fmt(v):microFmt(v)}</b> ${un} <small>/ ${dec(ref)} ${un}</small></span></div><div class="mbar"><i style="width:${pc}%"></i></div><small>${txt}</small></div>`};
+  const porComida=Math.round(tg.p/4/5)*5;
+  return `<div class="card etc"><p class="eyebrow">Lo que más te cuida ahora</p><p class="small muted" style="margin-top:6px">Con menos estrógeno se pierde músculo y hueso más rápido. Estas son las prioridades, con lo que llevas hoy y esta semana:</p>
+    ${bar('Proteína',tt.p,tg.p,'g',`Repártela: unos ${porComida} g en cada comida principal ayudan a mantener el músculo.`)}
+    ${bar('Fuerza esta semana',fz,3,'días','Entre 2 y 3 días de fuerza a la semana: es lo que más protege el músculo y el hueso.')}
+    ${bar('Calcio',dm.t.ca||0,1000,'mg','Lácteos, bebidas vegetales enriquecidas, sardinas, almendras, tofu con calcio.')}
+    ${bar('Vitamina D',dm.t.vd||0,15,'µg','Pescado azul, huevos y un rato de sol. A veces hace falta suplemento: pregúntale a tu médica.')}
+    ${bar('Fibra',dm.t.fib||0,25,'g','Verdura, legumbres, fruta y cereales integrales: ayudan a la saciedad y al corazón.')}
+    ${pf.enfoque!==5?`<div class="etsug"><div style="flex:1;min-width:0"><b>¿Probamos el enfoque «Densidad ósea y longevidad»?</b><small>Más proteína y grasas de calidad, calorías de mantenimiento. Pensado para esta etapa.</small></div><button class="btn sm" id="etenf">Cambiar</button></div>`:''}
+    ${dm.cov<.9&&L.foods.length?`<p class="tiny muted" style="margin-top:8px">Calcio, vitamina D y fibra calculados con el ${Math.round(dm.cov*100)}% de lo que has comido hoy.</p>`:''}</div>`;
+}
+function etAvisoHTML(){return `<div class="etaviso">${ico('aviso','mi')}<p>${ET_AVISO}</p></div>`}
+function etBind(V,u,redraw){
+  V.querySelectorAll('[data-sk]').forEach(b=>b.onclick=()=>{const L=dayLog(u,UI.date||today());L.sint=L.sint||{};const k=b.dataset.sk,v=+b.dataset.sv;if(L.sint[k]===v)delete L.sint[k];else L.sint[k]=v;if(!Object.keys(L.sint).length)delete L.sint;save();redraw()});
+  const e=V.querySelector('#etenf');if(e)e.onclick=()=>{u.profile.enfoque=5;save();toast('Enfoque cambiado a Densidad ósea y longevidad ✓');redraw()};
+  const a=V.querySelector('#etadj');if(a)a.onclick=()=>openCicloAjustes(()=>{UI.view='ciclo';renderApp()});
+}
+function vEtapa(){
+  const u=me(),y=$('#view').scrollTop;
+  $('#view').innerHTML=heroHTML('Tu etapa','Tu cuerpo,','tu fuerza.')+`
+  <div class="card ettop"><div style="flex:1;min-width:0"><p class="cj">Menopausia y posmenopausia</p><h2 class="ct">Ahora lo importante es cuidar músculo, hueso y descanso</h2>
+    <p class="small muted" style="margin-top:6px">Sin las subidas y bajadas del ciclo, tu energía depende sobre todo de cómo duermes, comes y te mueves. Apunta tus síntomas y te ayudamos a encontrar qué te sienta mejor.</p><p class="tiny" style="margin-top:8px;color:#6c2146;font-weight:600">Orientativo: para cifras ajustadas a ti, habla con tu ginecóloga.</p></div>
+    <button class="btn ghost sm" id="etadj">Cambiar mi etapa</button></div>
+  ${etSintHTML(u)}${etPatronesHTML(u)}${etObjetivosHTML(u)}${etAvisoHTML()}`;
+  etBind($('#view'),u,vEtapa);
 }
 
 /* ---------- Comunidad: usuarios, retos abiertos y chat por reto ---------- */
@@ -2437,6 +2524,7 @@ function cicloICS(u){
   toast('Ábrelo para añadir los avisos a tu calendario ✓');
 }
 function vCiclo(){
+  if(etapaDe(me())==='post')return vEtapa();
   const u=me(),c=u.profile.ciclo,cd=cicloDia(u,today());
   const H=heroHTML('Ciclo','Tu ritmo,','tu cuerpo.');
   if(!c||!c.activo||!cd){
@@ -2454,6 +2542,7 @@ function vCiclo(){
       <div class="row" style="gap:8px;margin-top:14px;flex-wrap:wrap"><button class="btn" id="cbaja2">${ico('corazon','mi')} Me ha bajado hoy</button><button class="btn ghost" id="cadj2b">Ajustar mi ciclo</button></div></div>
   </div>
   ${cicloHighlights(cd)}
+  ${c.etapa==='peri'?`<div class="card etperi">${ico('aviso','mi')}<p><b>Perimenopausia.</b> Tus ciclos pueden alargarse, acortarse o saltarse, así que las fases y la fecha de tu próxima regla son orientativas. Cada vez que marques «Me ha bajado hoy» afinamos.</p></div>${etSintHTML(u)}${etPatronesHTML(u)}${etObjetivosHTML(u)}${etAvisoHTML()}`:''}
   ${cd.faltan>=0&&cd.faltan<=3&&!cd.tarde?`<div class="card cwarn"><span class="cic">${ico('aviso','mi')}</span><div style="flex:1"><b>${cd.faltan===0?'Tu regla podría llegar hoy':`Tu regla podría llegar en ${cd.faltan} día${cd.faltan>1?'s':''}`}</b><p class="small muted">Lleva lo que necesites en el bolso, bebe agua y prioriza alimentos ricos en hierro y magnesio.</p></div></div>`:''}
   <div class="cgrid2">
     <div class="card"><div class="csec0"><h3>${ico('consejo','mi')} Tus hormonas</h3><p>${F.hor}</p><div class="hlist">${HORM.map(([k,n,col,t])=>`<div><i style="background:${col}"></i><p><b>${n}.</b> ${t}</p></div>`).join('')}</div></div><div class="csec"><h3>${ico('act-alta','mi')} Tu energía</h3><p>${F.energia}</p></div><div class="csec"><h3>${ico('animo-muy-bien','mi')} Tu ánimo</h3><p>${F.animo}</p></div><div class="csec"><h3>${ico('corazon','mi')} Tu cuerpo</h3><p>${F.cuerpo}</p></div></div>
@@ -2470,6 +2559,7 @@ function vCiclo(){
   $('#cics').onclick=()=>cicloICS(u);
   $('#cmp').onclick=()=>{MP.tab='semana';MP.prefs=mpDefaults(u);MP.prefs.fase=cd.f;MP.step=0;MP.screen='wizard';UI.view='menu';renderApp();scrollTo(0,0)};
   $('#ccm').onclick=()=>{MP.tab='comida';CM.fase=cd.f;UI.view='menu';renderApp();scrollTo(0,0)};
+  if(c.etapa==='peri')etBind($('#view'),u,()=>{const y=scrollY;vCiclo();scrollTo(0,y)});
 }
 function maybeCicloAvisos(){
   const u=me();if(!u||!u.profile||u.profile.sexo!=='Mujer')return;const c=u.profile.ciclo;if(!c||!c.activo||c.anti)return;
@@ -2594,7 +2684,7 @@ function renderApp(){
   </div></header>
   <main class="wrap v-${UI.view}" id="view"></main>
   <nav class="tabs"><div class="in2">
-    ${[['diario',ico('nav-diario',''),'Comidas'],['movimiento',ico('nav-movimiento',''),'Movimiento'],...(me()?.profile?.sexo==='Mujer'?[['ciclo',ico('corazon',''),'Ciclo']]:[]),['retos',ico('compartido',''),'Retos'],['progreso',ico('nav-progreso',''),'Progreso'],['menu',ico('nav-menu',''),'Menú']].map(([k,i,t])=>{const [l,s]=t.split('|');return `<button data-v="${k}" class="${UI.view===k?'on':''}"><span class="nic">${i}${navDot(k)?'<i class="ndot"></i>':''}</span>${s?`<span class="nav-l">${l}</span><span class="nav-s">${s}</span>`:l}</button>`}).join('')}
+    ${[['diario',ico('nav-diario',''),'Comidas'],['movimiento',ico('nav-movimiento',''),'Movimiento'],...(me()?.profile?.sexo==='Mujer'?[['ciclo',ico('corazon',''),etapaDe(me())==='post'?'Etapa':'Ciclo']]:[]),['retos',ico('compartido',''),'Retos'],['progreso',ico('nav-progreso',''),'Progreso'],['menu',ico('nav-menu',''),'Menú']].map(([k,i,t])=>{const [l,s]=t.split('|');return `<button data-v="${k}" class="${UI.view===k?'on':''}"><span class="nic">${i}${navDot(k)?'<i class="ndot"></i>':''}</span>${s?`<span class="nav-l">${l}</span><span class="nav-s">${s}</span>`:l}</button>`}).join('')}
   </div></nav>`;
   $$('nav.tabs button').forEach(b=>b.onclick=()=>{UI.view=b.dataset.v;if(b.dataset.v==='menu'&&MP.screen!=='gen')MP.screen='home';renderApp();scrollTo(0,0)});
   $('#av').onclick=e=>{e.stopPropagation();toggleDD()};
