@@ -681,11 +681,39 @@ html .eyebrow,html .cj,html .msub,html .welcome .eyebrow{text-transform:uppercas
 html .card>p.eyebrow:first-child,html .card>.row.between>p.eyebrow:first-child,html #balcard>p.eyebrow:first-child{font-size:22px!important;letter-spacing:-.5px!important;text-transform:none!important;color:var(--ink)!important;font-weight:800!important;line-height:1.2}
 html .ct,html .csec h3,html .csec0 h3,html .cpt,html .mtit,html .h3{color:var(--ink)!important}
 .chigh{grid-template-columns:repeat(5,minmax(0,1fr))}.hhorm{grid-column:span 2;align-items:stretch}.hhorm small{text-align:center}
-.hgraph{width:100%;height:auto;display:block;overflow:visible}.hleg{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 10px;font-size:11px;font-weight:600}.hleg span{display:inline-flex;align-items:center;gap:4px}.hleg i{width:8px;height:8px;border-radius:50%}.hleg em{font-style:normal;opacity:.7;font-weight:500}
+.hgraph{width:100%;height:auto;display:block;overflow:visible}.hleg{display:grid;grid-template-columns:repeat(2,max-content);justify-content:center;gap:5px 18px;font-size:11px;font-weight:600}.hleg span{display:inline-flex;align-items:center;gap:4px}.hleg i{width:8px;height:8px;border-radius:50%}.hleg em{font-style:normal;opacity:.7;font-weight:500}
 .hent2 b{font-size:13.5px}.cfuer{display:inline-flex;align-items:flex-end;gap:5px;height:34px;margin:6px 0 4px}.cfuer i{width:12px;border-radius:4px;background:#ede1ee}.cfuer i.on{background:#6c2146}
 .hlist{margin-top:10px;display:flex;flex-direction:column;gap:6px}.hlist div{display:flex;gap:8px;align-items:flex-start}.hlist i{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:7px}.hlist p{margin:0!important;font-size:13.5px}
 @media(max-width:640px){.chigh{grid-template-columns:repeat(2,minmax(0,1fr))}.hhorm,.hent2{grid-column:span 2}}
 html[data-tema=ciruela] .chigh .hleg{color:#3c383a}html[data-tema=ciruela] .chigh .hent2 b{color:#6c2146}
+html .jhero .cj.jbut,html[data-tema=ciruela] .jhero .cj.jbut{color:#f3e2a9!important;opacity:1}
+.cmg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.cmg .card{margin:0}
+.cmc{display:flex;flex-direction:column}.cmh{display:flex;gap:12px;align-items:center}
+.cmi{width:44px;height:44px;border-radius:14px;background:#ede1ee;color:#6c2146;display:grid;place-items:center;flex-shrink:0}.cmi .mi{width:24px;height:24px}.cmi.big{width:56px;height:56px;border-radius:18px}.cmi.big .mi{width:30px;height:30px}
+.cmt{font-weight:800;font-size:16px;line-height:1.25;color:var(--ink)}.cmof{display:inline-block;font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;background:#f3e2a9;color:#6c2146;padding:3px 8px;border-radius:20px;margin-bottom:3px}
+.cmst{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:10px;font-size:12px;color:var(--muted)}.cmst b{color:var(--ink)}
+.cmact{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:14px;align-items:center}.cmact .btn{flex:1;min-width:120px}
+.cmhoy{display:inline-flex;align-items:center;gap:6px;border:1.5px solid #e6d3e1;background:#fff;border-radius:999px;padding:9px 14px;font:inherit;font-size:12.5px;font-weight:700;color:#6c2146;cursor:pointer;flex:1;justify-content:center}.cmhoy .mi{width:16px;height:16px}.cmhoy.ok{background:#e4ece8;border-color:#c8dbd3;color:#325958}
+.cmnew{font-size:10.5px;font-weight:700;background:#6c2146;color:#fff;padding:4px 9px;border-radius:20px;white-space:nowrap}
+.cmintro{display:flex;gap:16px;align-items:flex-start}
+.cmat{display:flex;align-items:center;gap:6px}.cmat b{font-size:18px;color:#6c2146}.cmat .in{flex:1}
+.cmnorm{margin-top:16px;background:#f6eef4;border-radius:14px;padding:14px}.cmnorm ul{margin:8px 0 0 18px;font-size:13px;line-height:1.55}.cmchk{display:flex;gap:10px;align-items:flex-start;margin-top:12px;font-size:13px;font-weight:600}.cmchk input{margin-top:3px;width:18px;height:18px;accent-color:#6c2146}
+.cmdias{display:flex;flex-wrap:wrap;gap:8px}.cmchip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font:inherit;font-size:13px;font-weight:700;cursor:pointer;color:var(--ink)}.cmchip.on{background:#6c2146;border-color:#6c2146;color:#fff}.cmchip.ic{padding:8px 10px;display:grid;place-items:center}.cmchip.ic .mi{width:22px;height:22px}
+.cmmenu{display:flex;flex-direction:column;gap:8px}.cmmot{display:flex;flex-direction:column;gap:8px;margin-top:14px}.cmmot .opt{text-align:left}
+.modal .sheet.cmsheet{padding:0;display:flex;flex-direction:column;height:min(760px,92vh);overflow:hidden}
+.cmchat{display:flex;flex-direction:column;height:100%;min-height:0}
+.cmchh{display:flex;align-items:center;gap:12px;padding:16px 18px 10px}.cmchh .close{background:none;border:0;font-size:18px;cursor:pointer;color:var(--muted)}
+.cmdots{background:none;border:0;font-size:20px;line-height:1;cursor:pointer;color:var(--muted);padding:4px 6px;border-radius:8px}.cmdots.sm{font-size:15px;padding:0 4px;margin-left:auto}
+.cmtabs{display:flex;gap:6px;padding:0 18px 10px;border-bottom:1px solid var(--line)}.cmtabs button{border:0;background:none;font:inherit;font-weight:700;font-size:13px;padding:8px 14px;border-radius:999px;color:var(--muted);cursor:pointer}.cmtabs button.on{background:#ede1ee;color:#6c2146}
+.cmbody{flex:1;overflow-y:auto;padding:14px 18px;background:#fbf9f4;min-height:0}
+.cmm{display:flex;gap:8px;align-items:flex-end;margin-bottom:10px}.cmm .av{width:30px;height:30px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:12px}.cmm.mio{justify-content:flex-end}
+.cmbub{background:#fff;border:1px solid #efe6ec;border-radius:16px 16px 16px 4px;padding:8px 12px;max-width:78%}.cmm.mio .cmbub{background:#f3e6ef;border-color:#ead6e4;border-radius:16px 16px 4px 16px}
+.cmmh{display:flex;align-items:center;gap:8px;font-size:11.5px}.cmmh b{color:#6c2146}.cmmh span{color:var(--muted);font-size:10.5px}.cmbub p{margin:3px 0 0;font-size:14px;line-height:1.45;word-wrap:break-word}
+.cmvacio{text-align:center;padding:40px 20px;color:#6c2146}.cmvacio .celico{width:44px;height:44px}.cmvacio b{display:block;margin-top:8px;color:var(--ink)}
+.cmin{border-top:1px solid var(--line);padding:10px 14px calc(12px + env(safe-area-inset-bottom));background:#fff}
+.cmquick{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px}.cmquick button{flex-shrink:0;border:1px solid #e6d3e1;background:#fbf6f9;border-radius:999px;padding:6px 11px;font:inherit;font-size:12px;font-weight:600;color:#6c2146;cursor:pointer}
+.cmrow{display:flex;gap:8px;align-items:flex-end}.cmrow textarea{flex:1;resize:none;border:1px solid var(--line);border-radius:14px;padding:10px 12px;font:inherit;font-size:14px;max-height:120px;background:#fbf9f4}.cmrow .btn{padding:10px 16px}
+@media(max-width:640px){.cmg{grid-template-columns:1fr}.modal .sheet.cmsheet{height:calc(100dvh - 24px);max-height:none}.cmintro{flex-direction:column}}
 </style>
 </head>
 <body>
@@ -1682,11 +1710,270 @@ function vRetosPage(){
   vJuntas();
   const hero2=V.querySelector('.hero');const ca=cuentaAtrasHTML(u.profile);
   if(ca&&hero2)hero2.insertAdjacentHTML('afterend',ca);
+  V.insertAdjacentHTML('beforeend','<div id="cmsec"></div>');cmSeccion(V.querySelector('#cmsec'));
   V.insertAdjacentHTML('beforeend',`<div class="rsec"><div><p class="cj">Retos con amigos</p><h2 class="ct">Compite y suma puntos</h2></div></div>`);
-  if(nr){nr.classList.add('sm');V.querySelector('.rsec').appendChild(nr)}
+  if(nr){nr.classList.add('sm');[...V.querySelectorAll('.rsec')].pop().appendChild(nr)}
   V.appendChild(frag);
   tick();
 }
+/* ---------- Comunidad: usuarios, retos abiertos y chat por reto ---------- */
+const COM={loaded:false,loading:null,perfil:null,vetada:false,retos:[],mios:{},miembros:{},checks:{},nombres:{},bloq:new Set(),ult:{},reportes:0};
+const CM_NORMAS=['Respeto siempre: aquí venimos a animarnos.','Nada de dietas extremas ni consejos médicos: cada cuerpo es distinto.','No compartas datos personales, teléfonos ni enlaces.','Si algo no está bien, repórtalo y lo revisamos.'];
+const CM_COL=['#6c2146','#915a92','#325958','#c9a35c','#727c54','#a2577a'];
+const cmCol=id=>{let h=0;for(const c of String(id))h=(h*31+c.charCodeAt(0))|0;return CM_COL[Math.abs(h)%CM_COL.length]};
+const cmNom=id=>COM.nombres[id]?'@'+COM.nombres[id]:'@usuaria';
+const cmLeido=()=>{try{return JSON.parse(localStorage.getItem('vuelve_cm_leido')||'{}')}catch(e){return{}}};
+const cmMarcar=id=>{try{const l=cmLeido();l[id]=new Date().toISOString();localStorage.setItem('vuelve_cm_leido',JSON.stringify(l))}catch(e){}};
+function cmDia(r,m){return Math.floor((parse(today())-parse(m.unido))/864e5)+1}
+function cmProg(r,uid){
+  const m=(COM.miembros[r.id]||[]).find(x=>x.user_id===uid)||(uid===SBUID?COM.mios[r.id]:null);if(!m)return null;
+  const fin=addDays(m.unido,r.dias-1),cs=(COM.checks[r.id]||[]).filter(c=>c.user_id===uid&&c.hecho&&c.fecha>=m.unido&&c.fecha<=fin);
+  const set=new Set(cs.map(c=>c.fecha));let racha=0,d=set.has(today())?today():addDays(today(),-1);while(set.has(d)&&d>=m.unido){racha++;d=addDays(d,-1)}
+  const hoy=(COM.checks[r.id]||[]).find(c=>c.user_id===uid&&c.fecha===today());
+  return {dia:Math.min(cmDia(r,m),r.dias),hechos:set.size,racha,hoy:!!(hoy&&hoy.hecho),valor:hoy?.valor||0,fin:today()>fin,unido:m.unido};
+}
+async function cmNombres(ids){
+  const f=[...new Set(ids)].filter(i=>i&&!COM.nombres[i]);if(!f.length)return;
+  const {data}=await SB.from('perfiles_publicos').select('user_id,usuario').in('user_id',f);(data||[]).forEach(p=>COM.nombres[p.user_id]=p.usuario);
+}
+async function cmLoad(force){
+  if(!SERVER||!SB||!SBUID)return;if(COM.loading)return COM.loading;if(COM.loaded&&!force)return;
+  COM.loading=(async()=>{try{
+    const [pf,vt,rt,mm,bl]=await Promise.all([
+      SB.from('perfiles_publicos').select('usuario').eq('user_id',SBUID).maybeSingle(),
+      SB.from('comunidad_vetadas').select('user_id').eq('user_id',SBUID),
+      SB.from('comunidad_retos').select('*').order('n_miembros',{ascending:false}).limit(200),
+      SB.from('comunidad_miembros').select('reto_id,user_id,unido').eq('user_id',SBUID),
+      SB.from('comunidad_bloqueos').select('bloqueada')]);
+    if(rt.error)throw rt.error;
+    COM.perfil=pf.data?pf.data.usuario:null;if(COM.perfil)COM.nombres[SBUID]=COM.perfil;
+    COM.vetada=!!(vt.data&&vt.data.length);COM.retos=rt.data||[];COM.bloq=new Set((bl.data||[]).map(b=>b.bloqueada));
+    COM.mios={};(mm.data||[]).forEach(m=>COM.mios[m.reto_id]=m);
+    const ids=Object.keys(COM.mios);COM.miembros={};COM.checks={};COM.ult={};
+    if(ids.length){
+      const desde=addDays(today(),-95);
+      const [ms,cs,ul]=await Promise.all([SB.from('comunidad_miembros').select('reto_id,user_id,unido').in('reto_id',ids),
+        SB.from('comunidad_checkins').select('reto_id,user_id,fecha,valor,hecho').in('reto_id',ids).gte('fecha',desde),
+        SB.from('comunidad_mensajes').select('reto_id,user_id,creado').in('reto_id',ids).order('creado',{ascending:false}).limit(60)]);
+      (ms.data||[]).forEach(m=>(COM.miembros[m.reto_id]=COM.miembros[m.reto_id]||[]).push(m));
+      (cs.data||[]).forEach(c=>(COM.checks[c.reto_id]=COM.checks[c.reto_id]||[]).push(c));
+      (ul.data||[]).forEach(x=>{if(x.user_id!==SBUID&&(!COM.ult[x.reto_id]||x.creado>COM.ult[x.reto_id]))COM.ult[x.reto_id]=x.creado});
+      await cmNombres((ms.data||[]).map(m=>m.user_id));
+      await cmSyncPasos();
+    }
+    if(!LIB.adminChecked)await libCheckAdmin().catch(()=>{});
+    if(LIB.admin){const {data}=await SB.from('comunidad_reportes').select('id').eq('resuelto',false);COM.reportes=(data||[]).length}
+    COM.loaded=true;
+  }catch(e){console.warn('comunidad',e)}finally{COM.loading=null}})();
+  return COM.loading;
+}
+async function cmSyncPasos(){
+  const u=me(),p=+(dayLog(u,today()).pasos)||0;
+  for(const r of COM.retos){if(r.tipo!=='pasos'||!COM.mios[r.id])continue;const pr=cmProg(r,SBUID);if(!pr||pr.fin)continue;
+    const cur=(COM.checks[r.id]||[]).find(c=>c.user_id===SBUID&&c.fecha===today());if(cur&&cur.valor===p)continue;if(!p&&!cur)continue;
+    const row={reto_id:r.id,user_id:SBUID,fecha:today(),valor:p,hecho:p>=(r.meta||6000)};
+    const {error}=await SB.from('comunidad_checkins').upsert(row);if(error){console.warn(error);continue}
+    const L=COM.checks[r.id]=COM.checks[r.id]||[];const i=L.findIndex(c=>c.user_id===SBUID&&c.fecha===today());if(i>=0)L[i]=row;else L.push(row);
+    if(row.hecho&&!(cur&&cur.hecho))toast(`¡Pasos del reto «${r.titulo}» cumplidos hoy! 💜`)}
+}
+function cmRetoCard(r,mio){
+  const pr=mio?cmProg(r,SBUID):null,nuevo=mio&&COM.ult[r.id]&&COM.ult[r.id]>(cmLeido()[r.id]||'');
+  const meta=r.tipo==='pasos'?`${fmt(r.meta)} pasos al día`:'Hábito diario';
+  if(mio){
+    const hoyTxt=r.tipo==='pasos'?`<span class="cmhoy ${pr.hoy?'ok':''}">${ico('act-pasos','mi')} Hoy ${fmt(pr.valor)} / ${fmt(r.meta)}</span>`
+      :`<button class="cmhoy ${pr.hoy?'ok':''}" data-cmhoy="${r.id}">${ico('dia-cerrado','mi')} ${pr.hoy?'Hoy cumplido':'Marcar hoy cumplido'}</button>`;
+    return `<div class="card cmc mio"><div class="cmh"><span class="cmi">${ico(r.icono,'mi')}</span><div style="flex:1;min-width:0"><p class="cj">${pr.fin?'Reto terminado':`Día ${pr.dia} de ${r.dias}`}</p><div class="cmt">${esc(r.titulo)}</div></div>${nuevo?'<span class="cmnew">Nuevos mensajes</span>':''}</div>
+      <div class="bar" style="margin-top:12px"><i style="width:${Math.min(pr.hechos/r.dias*100,100)}%"></i></div>
+      <div class="cmst"><span><b>${pr.hechos}</b>/${r.dias} días cumplidos</span><span><b>${pr.racha}</b> de racha</span><span><b>${r.n_miembros}</b> en la piña</span></div>
+      <div class="cmact">${pr.fin?`<button class="btn soft" data-cmrei="${r.id}">Empezar de nuevo</button>`:hoyTxt}<button class="btn" data-cmchat="${r.id}">${ico('chat','mi')} Abrir chat</button></div></div>`;
+  }
+  return `<div class="card cmc"><div class="cmh"><span class="cmi">${ico(r.icono,'mi')}</span><div style="flex:1;min-width:0">${r.oficial?'<span class="cmof">Reto Vuelve</span>':`<p class="cj">Creado por ${cmNom(r.creada_por)}</p>`}<div class="cmt">${esc(r.titulo)}</div></div></div>
+    ${r.descripcion?`<p class="small muted" style="margin-top:8px">${esc(r.descripcion)}</p>`:''}
+    <div class="cmst"><span>${r.dias} días</span><span>${meta}</span><span><b>${r.n_miembros}</b> ${r.n_miembros===1?'participante':'participantes'}</span></div>
+    <div class="cmact"><button class="btn" data-cmjoin="${r.id}">Unirme</button>${LIB.admin||r.creada_por===SBUID?`<button class="btn ghost" data-cmhide="${r.id}">${LIB.admin?'Ocultar':'Borrar'}</button>`:''}</div></div>`;
+}
+function cmSeccion(el){
+  if(!el)return;
+  if(!SERVER){el.innerHTML=`<div class="card cmintro"><p class="small muted">La comunidad funciona con tu cuenta online de Vuelve.</p></div>`;return}
+  if(!COM.loaded){el.innerHTML=`<div class="card cmintro"><p class="small muted">Cargando la comunidad…</p></div>`;cmLoad().then(()=>{if(document.body.contains(el))cmSeccion(el)});return}
+  const mios=COM.retos.filter(r=>COM.mios[r.id]),otros=COM.retos.filter(r=>!COM.mios[r.id]&&!r.oculto);
+  const quien=COM.perfil?`<p class="small" style="margin-top:4px">Eres <b>@${esc(COM.perfil)}</b> · <a href="#" id="cmuser">Cambiar</a></p>`:'';
+  el.innerHTML=`<div class="rsec"><div><p class="cj">Comunidad</p><h2 class="ct">Retos abiertos</h2>${quien}</div>${COM.perfil&&!COM.vetada?`<button class="btn sm" id="cmnew">+ Crear reto</button>`:''}</div>
+    ${COM.vetada?`<div class="card cwarn"><span class="cic">${ico('aviso','mi')}</span><div style="flex:1"><b>Tu cuenta no puede participar en la comunidad</b><p class="small muted">Si crees que es un error, escríbenos.</p></div></div>`:''}
+    ${!COM.perfil&&!COM.vetada?`<div class="card cmintro"><span class="cmi big">${ico('compartido','mi')}</span><div style="flex:1"><h3 class="h3">Únete a otras mujeres en un reto</h3><p class="small muted" style="margin-top:6px">Elige un nombre de usuario, apúntate a un reto y animaos en el chat del grupo. Nadie verá tu email ni tu diario: solo tu @usuario y cómo vas en el reto.</p><button class="btn" id="cmuser" style="margin-top:14px">Elegir mi nombre de usuario</button></div></div>`:''}
+    ${LIB.admin?`<button class="btn soft block" id="cmmod" style="margin-top:12px">${ico('aviso','mi')} Moderación${COM.reportes?` · ${COM.reportes} reporte${COM.reportes>1?'s':''} pendiente${COM.reportes>1?'s':''}`:''}</button>`:''}
+    ${mios.length?`<p class="eyebrow" style="margin:18px 0 10px">Tus retos</p><div class="cmg">${mios.map(r=>cmRetoCard(r,true)).join('')}</div>`:''}
+    ${otros.length?`<p class="eyebrow" style="margin:18px 0 10px">Explora</p><div class="cmg">${otros.map(r=>cmRetoCard(r,false)).join('')}</div>`:''}`;
+  const re=()=>cmSeccion(el);
+  el.querySelectorAll('#cmuser').forEach(a=>a.onclick=e=>{e.preventDefault();cmElegirUsuario(re)});
+  if(el.querySelector('#cmnew'))el.querySelector('#cmnew').onclick=()=>cmCrear(re);
+  if(el.querySelector('#cmmod'))el.querySelector('#cmmod').onclick=()=>cmModeracion(re);
+  el.querySelectorAll('[data-cmjoin]').forEach(b=>b.onclick=()=>cmUnirme(b.dataset.cmjoin,re));
+  el.querySelectorAll('[data-cmchat]').forEach(b=>b.onclick=()=>cmChat(b.dataset.cmchat,re));
+  el.querySelectorAll('[data-cmhoy]').forEach(b=>b.onclick=()=>cmHoy(b.dataset.cmhoy,re));
+  el.querySelectorAll('[data-cmrei]').forEach(b=>b.onclick=()=>cmReiniciar(b.dataset.cmrei,re));
+  el.querySelectorAll('[data-cmhide]').forEach(b=>b.onclick=async()=>{const r=COM.retos.find(x=>x.id===b.dataset.cmhide);if(!confirmar(`¿${LIB.admin?'Ocultar':'Borrar'} «${r.titulo}»?`))return;
+    const q=LIB.admin&&r.creada_por!==SBUID?SB.from('comunidad_retos').update({oculto:true}).eq('id',r.id):SB.from('comunidad_retos').delete().eq('id',r.id);
+    const {error}=await q;if(error)return toast(sbErr(error));COM.retos=COM.retos.filter(x=>x.id!==r.id);re()});
+}
+function confirmar(t){try{return window.confirm(t)}catch(e){return true}}
+function cmElegirUsuario(done){
+  const u=me(),edad=+(u.profile&&u.profile.edad)||0;
+  if(edad&&edad<18){toast('La comunidad es solo para mayores de 18 años');return}
+  const m=modal(`<div class="top"><b>${COM.perfil?'Cambiar nombre de usuario':'Tu nombre en la comunidad'}</b><button class="close">✕</button></div>
+    <p class="small muted" style="margin-top:8px">Es lo único que verán las demás. Usa minúsculas, números, punto o guion bajo (de 3 a 20 caracteres). Mejor que no sea tu nombre completo.</p>
+    <label class="f"><span>Nombre de usuario</span><div class="cmat"><b>@</b><input class="in" id="cmu" maxlength="20" autocomplete="off" autocapitalize="none" spellcheck="false" value="${esc(COM.perfil||'')}" placeholder="mica.fit"></div></label>
+    ${COM.perfil?'':`<div class="cmnorm"><p class="eyebrow">Normas de la comunidad</p><ul>${CM_NORMAS.map(n=>`<li>${n}</li>`).join('')}</ul>
+    <label class="cmchk"><input type="checkbox" id="cm18"> <span>Tengo 18 años o más y acepto las normas de la comunidad</span></label></div>`}
+    <div class="err" id="cme"></div><button class="btn block" id="cms" style="margin-top:8px">Guardar</button>`);
+  const inp=m.querySelector('#cmu'),err=t=>m.querySelector('#cme').textContent=t;
+  inp.oninput=()=>{const v=inp.value.toLowerCase().replace(/[^a-z0-9._]/g,'');if(v!==inp.value)inp.value=v;err('')};
+  setTimeout(()=>inp.focus(),50);
+  m.querySelector('#cms').onclick=async()=>{const v=inp.value.trim().toLowerCase();
+    if(!/^[a-z0-9][a-z0-9._]{2,19}$/.test(v))return err('Entre 3 y 20 caracteres: minúsculas, números, punto o guion bajo. Empieza por letra o número.');
+    if(/^(vuelve|admin|moderador|soporte|oficial)/.test(v))return err('Ese nombre está reservado.');
+    if(!COM.perfil&&!m.querySelector('#cm18').checked)return err('Necesitamos que confirmes que tienes 18 años o más y aceptas las normas.');
+    const b=m.querySelector('#cms');b.disabled=true;
+    const {error}=COM.perfil?await SB.from('perfiles_publicos').update({usuario:v}).eq('user_id',SBUID):await SB.from('perfiles_publicos').insert({user_id:SBUID,usuario:v});
+    b.disabled=false;
+    if(error)return err(error.code==='23505'||/duplicate/.test(error.message)?'Ese nombre ya lo tiene otra usuaria. Prueba con otro.':sbErr(error));
+    COM.perfil=v;COM.nombres[SBUID]=v;m.remove();toast(`¡Hola, @${v}! 💜`);done&&done()};
+}
+async function cmUnirme(id,done){
+  if(!COM.perfil)return cmElegirUsuario(()=>cmUnirme(id,done));
+  const {error}=await SB.from('comunidad_miembros').insert({reto_id:id,user_id:SBUID,unido:today()});
+  if(error&&!/duplicate/.test(error.message))return toast(sbErr(error));
+  await cmLoad(true);const r=COM.retos.find(x=>x.id===id);toast(`¡Te has unido a «${r?r.titulo:'el reto'}»!`);done&&done();cmChat(id,done);
+}
+async function cmHoy(id,done){
+  const pr=cmProg(COM.retos.find(r=>r.id===id),SBUID),row={reto_id:id,user_id:SBUID,fecha:today(),hecho:!pr.hoy};
+  const {error}=await SB.from('comunidad_checkins').upsert(row);if(error)return toast(sbErr(error));
+  const L=COM.checks[id]=COM.checks[id]||[];const i=L.findIndex(c=>c.user_id===SBUID&&c.fecha===today());if(i>=0)L[i]={...L[i],...row};else L.push(row);
+  if(row.hecho)toast('¡Día cumplido! La piña lo verá 💜');done&&done();
+}
+async function cmReiniciar(id,done){
+  await SB.from('comunidad_checkins').delete().eq('reto_id',id).eq('user_id',SBUID);
+  const {error}=await SB.from('comunidad_miembros').update({unido:today()}).eq('reto_id',id).eq('user_id',SBUID);if(error)return toast(sbErr(error));
+  await cmLoad(true);toast('¡Nueva vuelta! Día 1 💪');done&&done();
+}
+function cmCrear(done){
+  const st={tipo:'habito',dias:21,icono:'compartido'};
+  const ICS=[['compartido','Juntas'],['act-alta','Movimiento'],['act-pasos','Pasos'],['consejo','Hábito'],['comida-almuerzo','Comida'],['corazon','Bienestar']];
+  const m=modal(`<div class="top"><b>Crear un reto abierto</b><button class="close">✕</button></div>
+    <p class="small muted" style="margin-top:8px">Cualquier usuaria podrá verlo y unirse. Cada una empieza el día que se une.</p>
+    <label class="f"><span>Nombre del reto</span><input class="in" id="ct" maxlength="60" placeholder="21 días sin picar entre horas"></label>
+    <label class="f"><span>Descripción (opcional)</span><textarea class="in" id="cd" maxlength="220" style="min-height:70px;font-family:inherit"></textarea></label>
+    <label class="f"><span>Tipo</span></label><div class="grid2"><button class="opt on" data-t="habito"><div><b>Hábito diario</b><small>Cada una marca el día como cumplido</small></div></button><button class="opt" data-t="pasos"><div><b>Pasos</b><small>Se cuentan solos con tus pasos</small></div></button></div>
+    <label class="f" id="cmw" style="display:none"><span>Pasos al día</span><input class="in" id="cp" type="number" min="1000" max="40000" step="500" value="8000"></label>
+    <label class="f"><span>Duración</span></label><div class="cmdias">${[7,14,21,30,60].map(d=>`<button class="cmchip ${d===21?'on':''}" data-d="${d}">${d} días</button>`).join('')}</div>
+    <label class="f"><span>Icono</span></label><div class="cmdias">${ICS.map(([k,t])=>`<button class="cmchip ic ${k===st.icono?'on':''}" data-i="${k}" title="${t}">${ico(k,'mi')}</button>`).join('')}</div>
+    <div class="err" id="ce"></div><button class="btn block" id="cs" style="margin-top:10px">Crear y unirme</button>`);
+  m.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{st.tipo=b.dataset.t;m.querySelectorAll('[data-t]').forEach(x=>x.classList.toggle('on',x===b));m.querySelector('#cmw').style.display=st.tipo==='pasos'?'':'none'});
+  m.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{st.dias=+b.dataset.d;m.querySelectorAll('[data-d]').forEach(x=>x.classList.toggle('on',x===b))});
+  m.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>{st.icono=b.dataset.i;m.querySelectorAll('[data-i]').forEach(x=>x.classList.toggle('on',x===b))});
+  m.querySelector('#cs').onclick=async()=>{const t=m.querySelector('#ct').value.trim(),d=m.querySelector('#cd').value.trim(),p=Math.round(+m.querySelector('#cp').value||0),err=x=>m.querySelector('#ce').textContent=x;
+    if(t.length<3)return err('Ponle un nombre de al menos 3 letras.');
+    if(/(https?:\/\/|www\.|@)/i.test(t+' '+d))return err('Sin enlaces ni emails, por seguridad.');
+    if(st.tipo==='pasos'&&!(p>=1000&&p<=40000))return err('Los pasos deben estar entre 1.000 y 40.000.');
+    const b=m.querySelector('#cs');b.disabled=true;
+    const {data,error}=await SB.from('comunidad_retos').insert({titulo:t,descripcion:d||null,tipo:st.tipo,meta:st.tipo==='pasos'?p:null,dias:st.dias,icono:st.icono,creada_por:SBUID}).select().single();
+    if(error){b.disabled=false;return err(sbErr(error))}
+    m.remove();COM.retos.push(data);cmUnirme(data.id,done)};
+}
+function cmMenu(items){
+  const m=modal(`<div class="cmmenu">${items.map((it,i)=>`<button class="btn ${it[2]||'soft'} block" data-k="${i}">${it[0]}</button>`).join('')}<button class="btn ghost block close">Cancelar</button></div>`);
+  m.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{m.remove();items[+b.dataset.k][1]()});
+}
+function cmReportar(msg,after){
+  const motivos=['Falta de respeto o acoso','Consejos peligrosos sobre comida o salud','Spam o publicidad','Contenido inapropiado','Parece menor de edad','Otro motivo'];
+  const m=modal(`<div class="top"><b>Reportar mensaje</b><button class="close">✕</button></div><p class="small muted" style="margin-top:8px">Lo revisaremos. ${cmNom(msg.user_id)} no sabrá quién lo ha reportado.</p>
+    <div class="cmmot">${motivos.map(x=>`<button class="opt" data-m="${esc(x)}"><div><b>${x}</b></div></button>`).join('')}</div>`);
+  m.querySelectorAll('[data-m]').forEach(b=>b.onclick=async()=>{const {error}=await SB.from('comunidad_reportes').insert({mensaje_id:msg.id,reportada_por:SBUID,motivo:b.dataset.m});
+    m.remove();if(error&&!/duplicate/.test(error.message))return toast(sbErr(error));toast('Gracias, lo revisaremos');after&&after()});
+}
+async function cmBloquear(uid,after){
+  if(!confirmar(`¿Bloquear a ${cmNom(uid)}? Dejarás de ver sus mensajes en todos los retos.`))return;
+  const {error}=await SB.from('comunidad_bloqueos').insert({user_id:SBUID,bloqueada:uid});if(error&&!/duplicate/.test(error.message))return toast(sbErr(error));
+  COM.bloq.add(uid);toast(`Has bloqueado a ${cmNom(uid)}`);after&&after();
+}
+async function cmVetar(uid,after){
+  if(!confirmar(`¿Vetar a ${cmNom(uid)} de la comunidad? No podrá escribir ni unirse a retos, y se borrarán sus mensajes.`))return;
+  const {error}=await SB.from('comunidad_vetadas').insert({user_id:uid,por:SBUID,motivo:'moderación'});if(error&&!/duplicate/.test(error.message))return toast(sbErr(error));
+  await SB.from('comunidad_mensajes').update({borrado:true}).eq('user_id',uid);toast(`${cmNom(uid)} ha sido vetada`);after&&after();
+}
+function cmChat(id,done){
+  const r=COM.retos.find(x=>x.id===id);if(!r)return;
+  const S={tab:'chat',msgs:[],ch:null,poll:null};
+  const m=modal(`<div class="cmchat"><div class="cmchh"><span class="cmi">${ico(r.icono,'mi')}</span><div style="flex:1;min-width:0"><div class="cmt">${esc(r.titulo)}</div><p class="tiny muted" id="cmsub"></p></div><button class="cmdots" id="cmmas" aria-label="Opciones">⋯</button><button class="close">✕</button></div>
+    <div class="cmtabs"><button class="on" data-tab="chat">Chat</button><button data-tab="pina">La piña</button></div>
+    <div class="cmbody" id="cmb"></div>
+    <div class="cmin" id="cmin"><div class="cmquick">${['¡Vamos, piña! 💪','Hoy cumplido ✓','Hoy me está costando…'].map(q=>`<button data-q="${esc(q)}">${q}</button>`).join('')}</div>
+      <div class="cmrow"><textarea id="cmtx" rows="1" maxlength="500" placeholder="Escribe a la piña…"></textarea><button class="btn" id="cmenv" aria-label="Enviar">Enviar</button></div></div></div>`,'cmsheet');
+  const B=m.querySelector('#cmb'),tx=m.querySelector('#cmtx');
+  const cerrar=()=>{if(S.ch)try{SB.removeChannel(S.ch)}catch(e){}clearInterval(S.poll);cmMarcar(id);done&&done()};
+  const obs=new MutationObserver(()=>{if(!document.body.contains(m)){obs.disconnect();cerrar()}});obs.observe(document.body,{childList:true});
+  const sub=()=>{const pr=cmProg(r,SBUID);m.querySelector('#cmsub').textContent=`${pr?(pr.fin?'Reto terminado':`Tu día ${pr.dia} de ${r.dias}`):''} · ${r.n_miembros} en la piña`};
+  const hora=t=>{const d=new Date(t),hoy=iso(d)===today();return (hoy?'':`${d.getDate()} ${MON[d.getMonth()]} · `)+pad(d.getHours())+':'+pad(d.getMinutes())};
+  const pinta=()=>{
+    if(S.tab==='pina'){
+      const ms=(COM.miembros[id]||[]).map(x=>({...x,pr:cmProg(r,x.user_id)})).filter(x=>x.pr).sort((a,b)=>b.pr.hechos-a.pr.hechos||b.pr.racha-a.pr.racha);
+      B.innerHTML=`<p class="small muted" style="margin:4px 2px 12px">Cada una empieza el día que se une. Aquí veis cómo va cada una.</p>`+ms.map(x=>`<div class="lb"><span class="av" style="background:${cmCol(x.user_id)};color:#fff">${esc((COM.nombres[x.user_id]||'?')[0].toUpperCase())}</span>
+        <div style="flex:1;min-width:0"><b style="font-size:13px">${cmNom(x.user_id)}${x.user_id===SBUID?' (tú)':''}</b><div class="tiny muted">Día ${x.pr.dia} de ${r.dias} · ${x.pr.racha} de racha${x.pr.hoy?' · hoy ✓':''}</div><div class="bar"><i style="width:${Math.min(x.pr.hechos/r.dias*100,100)}%"></i></div></div><span class="pts">${x.pr.hechos}</span></div>`).join('');
+      return}
+    const vis=S.msgs.filter(x=>!COM.bloq.has(x.user_id));
+    B.innerHTML=vis.length?vis.map(x=>{const mio=x.user_id===SBUID;
+      return `<div class="cmm ${mio?'mio':''}">${mio?'':`<span class="av" style="background:${cmCol(x.user_id)};color:#fff">${esc((COM.nombres[x.user_id]||'?')[0].toUpperCase())}</span>`}<div class="cmbub"><div class="cmmh"><b>${mio?'Tú':cmNom(x.user_id)}</b><span>${hora(x.creado)}</span>${x.borrado?'':`<button class="cmdots sm" data-mm="${x.id}" aria-label="Opciones del mensaje">⋯</button>`}</div>
+        ${x.borrado?'<i class="muted">Mensaje eliminado</i>':`<p>${esc(x.texto).replace(/\n/g,'<br>')}</p>`}</div></div>`}).join('')
+      :`<div class="cmvacio">${ico('chat','celico')}<b>Aún no hay mensajes</b><p class="small muted">Preséntate y cuenta por qué te has unido. ¡La primera siempre anima a las demás!</p></div>`;
+    B.querySelectorAll('[data-mm]').forEach(b=>b.onclick=()=>{const x=S.msgs.find(y=>y.id===b.dataset.mm),mio=x.user_id===SBUID,it=[];
+      if(mio||LIB.admin)it.push(['Borrar mensaje',async()=>{const {error}=await SB.from('comunidad_mensajes').update({borrado:true}).eq('id',x.id);if(error)return toast(sbErr(error));x.borrado=true;pinta()},'danger']);
+      if(!mio){it.push(['Reportar mensaje',()=>cmReportar(x)]);it.push([`Bloquear a ${cmNom(x.user_id)}`,()=>cmBloquear(x.user_id,pinta)]);if(LIB.admin)it.push([`Vetar a ${cmNom(x.user_id)}`,()=>cmVetar(x.user_id,cargar),'danger'])}
+      cmMenu(it)});
+    B.scrollTop=B.scrollHeight;
+  };
+  const cargar=async()=>{const {data,error}=await SB.from('comunidad_mensajes').select('id,reto_id,user_id,texto,borrado,creado').eq('reto_id',id).order('creado',{ascending:false}).limit(150);
+    if(error)return;const L=(data||[]).slice().reverse();await cmNombres(L.map(x=>x.user_id));
+    const cambio=L.length!==S.msgs.length||L.some((x,i)=>!S.msgs[i]||S.msgs[i].id!==x.id||S.msgs[i].borrado!==x.borrado);S.msgs=L;if(cambio&&S.tab==='chat')pinta()};
+  m.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{S.tab=b.dataset.tab;m.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('on',x===b));m.querySelector('#cmin').style.display=S.tab==='chat'?'':'none';pinta()});
+  m.querySelector('#cmmas').onclick=()=>cmMenu([['Salir del reto',async()=>{if(!confirmar(`¿Salir de «${r.titulo}»? Se borrará tu progreso en este reto.`))return;
+    const {error}=await SB.from('comunidad_miembros').delete().eq('reto_id',id).eq('user_id',SBUID);if(error)return toast(sbErr(error));m.remove();await cmLoad(true);toast('Has salido del reto');done&&done()},'danger']]);
+  const enviar=async t=>{t=(t||'').trim();if(!t)return;
+    if(COM.vetada)return toast('Tu cuenta no puede escribir en la comunidad');
+    if(/(https?:\/\/|www\.|[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,})/i.test(t))return toast('Por seguridad no se pueden compartir enlaces ni emails');
+    const bt=m.querySelector('#cmenv');bt.disabled=true;
+    const {data,error}=await SB.from('comunidad_mensajes').insert({reto_id:id,user_id:SBUID,texto:t}).select().single();bt.disabled=false;
+    if(error)return toast(/rápido/.test(error.message)?error.message:sbErr(error));
+    tx.value='';tx.style.height='';if(data&&!S.msgs.some(x=>x.id===data.id)){S.msgs.push(data);pinta()}};
+  m.querySelector('#cmenv').onclick=()=>enviar(tx.value);
+  tx.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();enviar(tx.value)}};
+  tx.oninput=()=>{tx.style.height='';tx.style.height=Math.min(tx.scrollHeight,120)+'px'};
+  m.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>enviar(b.dataset.q));
+  sub();pinta();cargar();cmMarcar(id);
+  try{S.ch=SB.channel('cm-'+id).on('postgres_changes',{event:'*',schema:'public',table:'comunidad_mensajes',filter:'reto_id=eq.'+id},async p=>{const x=p.new;if(!x||!x.id)return;
+    await cmNombres([x.user_id]);const i=S.msgs.findIndex(y=>y.id===x.id);if(i>=0)S.msgs[i]={...S.msgs[i],...x};else S.msgs.push(x);if(S.tab==='chat')pinta()}).subscribe()}catch(e){console.warn(e)}
+  S.poll=setInterval(()=>{if(document.visibilityState==='visible')cargar()},20000);
+}
+async function cmModeracion(done){
+  const m=modal(`<div class="top"><b>Moderación</b><button class="close">✕</button></div><div id="mdb"><p class="small muted">Cargando…</p></div>`);
+  const pinta=async()=>{const {data:rs}=await SB.from('comunidad_reportes').select('id,mensaje_id,motivo,creado').eq('resuelto',false).order('creado',{ascending:false}).limit(100);
+    const ids=[...new Set((rs||[]).map(x=>x.mensaje_id).filter(Boolean))];let ms=[];
+    if(ids.length){const {data}=await SB.from('comunidad_mensajes').select('id,reto_id,user_id,texto,borrado').in('id',ids);ms=data||[]}
+    await cmNombres(ms.map(x=>x.user_id));COM.reportes=(rs||[]).length;
+    const B=m.querySelector('#mdb');
+    B.innerHTML=(rs||[]).length?(rs||[]).map(x=>{const g=ms.find(y=>y.id===x.mensaje_id),r=g&&COM.retos.find(y=>y.id===g.reto_id);
+      return `<div class="card" style="margin-top:10px;padding:14px"><p class="cj">${esc(x.motivo)}</p><p style="margin-top:6px"><b>${g?cmNom(g.user_id):'?'}</b>${r?` <span class="tiny muted">en «${esc(r.titulo)}»</span>`:''}</p>
+        <p class="small" style="margin-top:4px">${g?(g.borrado?'<i class="muted">Ya eliminado</i>':esc(g.texto)):'<i class="muted">Mensaje no disponible</i>'}</p>
+        <div class="row" style="gap:6px;flex-wrap:wrap;margin-top:10px">${g&&!g.borrado?`<button class="btn danger sm" data-del="${x.id}">Borrar mensaje</button>`:''}${g?`<button class="btn ghost sm" data-vet="${x.id}">Vetar usuaria</button>`:''}<button class="btn soft sm" data-ok="${x.id}">Descartar</button></div></div>`}).join('')
+      :'<p class="small muted" style="margin-top:12px">No hay reportes pendientes. ✨</p>';
+    const res=id=>SB.from('comunidad_reportes').update({resuelto:true}).eq('id',id);
+    B.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{const x=rs.find(y=>y.id===b.dataset.del);await SB.from('comunidad_mensajes').update({borrado:true}).eq('id',x.mensaje_id);await res(x.id);pinta()});
+    B.querySelectorAll('[data-vet]').forEach(b=>b.onclick=async()=>{const x=rs.find(y=>y.id===b.dataset.vet),g=ms.find(y=>y.id===x.mensaje_id);await cmVetar(g.user_id);await res(x.id);pinta()});
+    B.querySelectorAll('[data-ok]').forEach(b=>b.onclick=async()=>{await res(b.dataset.ok);pinta()});
+  };
+  pinta();
+  const obs=new MutationObserver(()=>{if(!document.body.contains(m)){obs.disconnect();done&&done()}});obs.observe(document.body,{childList:true});
+}
+
 /* ---------- Juntas ---------- */
 const JT={toques:[],meta:null,loaded:false,loading:null,sent:{}};
 const TOQUES={vamos:['¡Vamos, tú puedes!','act-alta'],cierra:['Cierra tu día, que ya queda poco','cerrar-dia'],orgullo:['Estoy orgullosa de ti','corazon'],mueve:['¿Nos movemos hoy?','act-caminar'],agua:['Acuérdate de beber agua','consejo'],juntas:['Juntas es más fácil','compartido']};
@@ -1792,7 +2079,7 @@ function vJuntas(){
   if(!r){
     $('#view').innerHTML=heroHTML('Retos','Juntas','es más fácil.')+`
     ${inv.length?juntasCardHTML(u):''}
-    <div class="card jhero"><div class="jhx"><p class="cj" style="color:#fff;opacity:.85">Tu compañera de Vuelve</p><h2>Dos amigas, un mismo objetivo.</h2><p>Os ayudáis a ser constantes: veis cada día cómo va la otra, os mandáis toques de ánimo y tenéis una meta semanal juntas. Nunca se comparten pesos, medidas ni fotos: solo constancia.</p></div></div>
+    <div class="card jhero"><div class="jhx"><p class="cj jbut">Tu compañera de Vuelve</p><h2>Dos amigas, un mismo objetivo.</h2><p>Os ayudáis a ser constantes: veis cada día cómo va la otra, os mandáis toques de ánimo y tenéis una meta semanal juntas. Nunca se comparten pesos, medidas ni fotos: solo constancia.</p></div></div>
     <div class="card"><p class="cj">Invita a tu compañera</p><h2 class="ct">¿Con quién lo vas a hacer?</h2>
       <label class="f" style="margin-top:12px"><span>Email de tu compañera</span><input class="in" id="jem" type="email" placeholder="amiga@email.com" autocomplete="off"></label>
       <label class="f"><span>Nombre de vuestro dúo (opcional)</span><input class="in" id="jnm" placeholder="Ej. Nina y Mica" maxlength="60"></label>
