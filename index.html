@@ -746,6 +746,11 @@ html .jhero .cj.jbut,html[data-tema=ciruela] .jhero .cj.jbut{color:#f3e2a9!impor
 .etsug{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:16px;padding:12px 14px;border-radius:14px;background:#fbf3e2}.etsug b{display:block;font-size:13.5px}.etsug small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
 .etaviso,.etperi{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:14px;background:#f3eef0;margin-top:14px}.etaviso .mi,.etperi .mi{width:18px;height:18px;color:#6c2146;flex-shrink:0;margin-top:2px}.etaviso p,.etperi p{margin:0;font-size:12.5px;line-height:1.5;color:#5e5458}
 .ettop{display:flex;flex-direction:column;gap:14px;align-items:flex-start;background:linear-gradient(135deg,#f6e4ea,#efdbe8 55%,#e3d2ea);border:0}
+.rtabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:18px 0 4px;max-width:620px}.rtabs::-webkit-scrollbar{display:none}
+.rtab{position:relative;display:flex;align-items:center;justify-content:center;gap:6px;min-width:0;white-space:nowrap;border:1.5px solid #ece3d4;background:#f6efe3;color:#5e5458;border-radius:999px;padding:10px 8px;font:inherit;font-size:14px;font-weight:700;cursor:pointer}@media(max-width:640px){.rtab{font-size:12.5px;padding:9px 6px;gap:5px}.rtab .mi{width:15px!important;height:15px!important}.rdot{min-width:16px;height:16px;font-size:9.5px}}
+.rtab .mi{width:18px;height:18px}.rtab.nt{background:#fff;border-color:#e3c6d7;color:#3c383a;box-shadow:0 6px 16px -10px rgba(108,33,70,.5)}
+.rtab.on{border-color:#6c2146;color:#6c2146}.rdot{font-style:normal;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#6c2146;color:#fff;font-size:10.5px;font-weight:800;display:inline-grid;place-items:center}
+.rinvl{margin-top:10px}
 </style>
 </head>
 <body>
@@ -1009,6 +1014,7 @@ const RETOS_API={
     else if(error)throw error},null)
 };
 async function logout(){
+  try{liveStop()}catch(e){}
   PFOTO.url=null;PFOTO.loaded=false;const d=load();UI.view='diario';UI.date=today();UI.range='dia';MP.screen='home';LIB.admin=false;LIB.adminChecked=false;LIB.recetas=null;
   if(CLOUD.db){clearTimeout(CLOUD.timer);try{await flush();for(let i=0;i<20&&CLOUD.busy;i++)await new Promise(r=>setTimeout(r,100))}catch(e){}}
   if(SERVER&&SB){await SB.auth.signOut().catch(()=>{});MEM={users:{},session:null,retos:{}};CLOUD.db=null;CLOUD.last={};saveLocal()}
@@ -1787,16 +1793,49 @@ function metasModal(done){
   pinta();
 }
 const jRender=()=>UI.view==='retos'||UI.view==='juntas'?vRetosPage():vJuntas();
+function rNotifs(){const u=me(),n={mis:0,com:0,inv:0};try{
+  if(COM.loaded){n.mis+=Object.keys(COM.inv||{}).length;n.mis+=Object.keys(COM.ult||{}).filter(id=>COM.mios[id]&&COM.ult[id]>(cmLeido()[id]||'')).length}
+  if(JT.loaded){n.mis+=jNuevos().length+juntasInv(u).length}}catch(e){}return n}
+const RTABS=[['mis','Mis retos','compartido'],['com','Comunidad','corazon'],['inv','Invitar','menu-invitar']];
+function rtabsHTML(){const n=rNotifs(),ord=RTABS.slice().sort((a,b)=>(n[b[0]]>0)-(n[a[0]]>0));
+  return ord.map(([k,t,i])=>`<button class="rtab ${UI.rtab===k?'on':''} ${n[k]?'nt':''}" data-rt="${k}">${ico(i,'mi')}<span>${t}</span>${n[k]?`<i class="rdot">${n[k]>9?'9+':n[k]}</i>`:''}</button>`).join('')}
+function rtabsRefresh(){const b=document.querySelector('#rtabs');if(!b)return;b.innerHTML=rtabsHTML();b.querySelectorAll('[data-rt]').forEach(x=>x.onclick=()=>{UI.rtab=x.dataset.rt;vRetosPage();scrollTo(0,0)})}
 function vRetosPage(){
   const u=me();
+  if(!UI.rtab){const n=rNotifs();UI.rtab=n.mis?'mis':'mis'}
   vRetos();
-  const V=$('#view'),kids=[...V.children],hero=kids.shift(),nr=hero&&hero.querySelector('#nr');
+  const V=$('#view'),kids=[...V.children],hero=kids.shift();
   const frag=document.createDocumentFragment();kids.forEach(n=>frag.appendChild(n));
   vJuntas();
-  const hero2=V.querySelector('.hero');const ca=cuentaAtrasHTML(u.profile);
-  if(ca&&hero2)hero2.insertAdjacentHTML('afterend',ca);bindCuentaAtras(()=>vRetosPage());
-  V.insertAdjacentHTML('beforeend','<div id="cmsec"></div>');{const el=V.querySelector('#cmsec');cmSeccion(el);if(COM.loaded&&SERVER)cmSyncPasos().then(n=>{if(n&&document.body.contains(el))cmSeccion(el)}).catch(()=>{})}
-  if(retosOf(u).length||pendingInvites(u).length){V.insertAdjacentHTML('beforeend',`<div class="rsec"><div><p class="cj">Retos con puntos</p><h2 class="ct">Tus retos por email</h2></div></div>`);V.appendChild(frag)}
+  const J=[...V.children],hero2=J.shift();const jfrag=document.createDocumentFragment();J.forEach(n=>jfrag.appendChild(n));
+  const conPareja=JT.loaded&&!!juntasDe(u);
+  hero2.insertAdjacentHTML('afterend','<div class="rtabs" id="rtabs"></div><div id="rpane"></div>');
+  const P=V.querySelector('#rpane'),t=UI.rtab;
+  if(t==='mis'){
+    const ca=cuentaAtrasHTML(u.profile);if(ca)P.insertAdjacentHTML('beforeend',ca);
+    if(conPareja||(JT.loaded&&juntasInv(u).length))P.appendChild(jfrag);
+    P.insertAdjacentHTML('beforeend','<div id="cmsec"></div>');
+    if(retosOf(u).length||pendingInvites(u).length){P.insertAdjacentHTML('beforeend',`<div class="rsec"><div><p class="cj">Retos con puntos</p><h2 class="ct">Tus retos por email</h2></div></div>`);P.appendChild(frag)}
+    bindCuentaAtras(()=>vRetosPage());
+    const el=P.querySelector('#cmsec');cmSeccion(el,'mis');if(COM.loaded&&SERVER)cmSyncPasos().then(n=>{if(n&&document.body.contains(el))cmSeccion(el,'mis')}).catch(()=>{});
+  }else if(t==='com'){
+    P.insertAdjacentHTML('beforeend','<div id="cmsec"></div>');cmSeccion(P.querySelector('#cmsec'),'com');
+  }else{
+    if(!conPareja)P.appendChild(jfrag);
+    else P.insertAdjacentHTML('beforeend',`<div class="card"><p class="cj">Tu compañera</p><h2 class="ct">Ya tienes a tu compañera de Juntas</h2><p class="small muted" style="margin-top:6px">Lo veréis en «Mis retos». Para hacer un reto con más amigas, crea uno privado e invítalas por su @usuario.</p></div>`);
+    const mios=COM.loaded?COM.retos.filter(r=>COM.mios[r.id]):[];
+    P.insertAdjacentHTML('beforeend',`<div class="card"><p class="cj">Invitar a un reto</p><h2 class="ct">Invita a tus amigas por su @usuario</h2>
+      <p class="small muted" style="margin-top:6px">Sin pasaros el email: le aparecerá la invitación en «Mis retos».</p>
+      ${mios.length?`<div class="rinvl">${mios.map(r=>`<div class="wk"><span><b>${esc(r.titulo)}</b> <span class="tiny muted">${r.privado?'privado':'público'} · ${r.n_miembros} en la piña</span></span><button class="btn sm" data-rinv="${r.id}">Invitar</button></div>`).join('')}</div>`
+        :`<p class="small" style="margin-top:12px">Aún no estás en ningún reto.</p>`}
+      <button class="btn soft block" id="rinvnew" style="margin-top:14px">+ Crear un reto e invitar</button></div>
+      <div class="card"><p class="cj">¿Aún no tiene cuenta?</p><h2 class="ct">Mándale Vuelve</h2><p class="small muted" style="margin-top:6px">Cuando se registre y elija su @usuario, podrás invitarla a tus retos.</p><button class="btn block" id="rshare" style="margin-top:12px">Compartir el enlace de Vuelve</button></div>`);
+    P.querySelectorAll('[data-rinv]').forEach(b=>b.onclick=()=>cmInvitarModal(b.dataset.rinv));
+    P.querySelector('#rinvnew').onclick=()=>COM.perfil?cmCrear(()=>vRetosPage()):cmElegirUsuario(()=>cmCrear(()=>vRetosPage()));
+    P.querySelector('#rshare').onclick=cmShareApp;
+    if(SERVER&&!COM.loaded)cmLoad().then(()=>{if(UI.view==='retos'&&UI.rtab==='inv')vRetosPage()});
+  }
+  rtabsRefresh();
   tick();
 }
 /* ---------- Fotos de progreso (privadas) ---------- */
@@ -1872,7 +1911,7 @@ function fpICS(){
 }
 function navDot(k){try{const u=me();if(!u||!u.profile)return false;
   if(k==='progreso')return SERVER&&!!u.profile.fotoUlt&&u.profile.fotoAvisos!==false&&today()>=addDays(fpProx(u),-1);
-  if(k==='retos')return COM.loaded&&((COM.inv&&Object.keys(COM.inv).length>0)||Object.keys(COM.ult||{}).some(id=>COM.mios[id]&&COM.ult[id]>(cmLeido()[id]||'')));
+  if(k==='retos'){const n=rNotifs();return n.mis+n.com+n.inv>0}
   }catch(e){}return false}
 function renderNavDot(){document.querySelectorAll('nav.tabs [data-v]').forEach(b=>{const on=navDot(b.dataset.v),n=b.querySelector('.nic');if(!n)return;let d=n.querySelector('.ndot');if(on&&!d)n.insertAdjacentHTML('beforeend','<i class="ndot"></i>');if(!on&&d)d.remove()})}
 function fpSubirModal(done){
@@ -1992,6 +2031,26 @@ function vEtapa(){
   etBind($('#view'),u,vEtapa);
 }
 
+/* ---------- Avisos en vivo (sin recargar) ---------- */
+const LIVE={on:false,ch:null,t:null,uid:null,busy:false};
+function liveStart(){
+  if(!SERVER||!SB||!SBUID)return;if(LIVE.on&&LIVE.uid===SBUID)return;liveStop();LIVE.on=true;LIVE.uid=SBUID;
+  try{LIVE.ch=SB.channel('vuelve-live-'+SBUID)
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'comunidad_mensajes'},p=>{const x=p.new;if(!x||x.user_id===SBUID||!COM.mios[x.reto_id])return;if(!COM.ult[x.reto_id]||x.creado>COM.ult[x.reto_id])COM.ult[x.reto_id]=x.creado;liveUpd()})
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'comunidad_invitaciones',filter:'user_id=eq.'+SBUID},()=>{cmLoad(true).then(liveUpd)})
+    .subscribe()}catch(e){console.warn(e)}
+  LIVE.t=setInterval(livePoll,60000);
+}
+function liveStop(){try{if(LIVE.ch)SB.removeChannel(LIVE.ch)}catch(e){}clearInterval(LIVE.t);LIVE.on=false;LIVE.ch=null;LIVE.uid=null}
+async function livePoll(){
+  if(!LIVE.on||LIVE.busy||document.visibilityState!=='visible'||!me())return;LIVE.busy=true;
+  try{if(COM.loaded)await cmLoad(true);if(JT.loaded&&typeof jLoad==='function')await jLoad(true)}catch(e){}LIVE.busy=false;liveUpd();
+}
+function liveUpd(){
+  renderNavDot();rtabsRefresh();
+  if(UI.view==='retos'&&!document.querySelector('.modal')&&!(document.activeElement&&/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))){const el=document.querySelector('#cmsec');if(el)cmSeccion(el)}
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){renderNavDot();livePoll()}});
 /* ---------- Comunidad: usuarios, retos abiertos y chat por reto ---------- */
 const COM={loaded:false,loading:null,perfil:null,vetada:false,retos:[],mios:{},miembros:{},checks:{},nombres:{},bloq:new Set(),ult:{},reportes:0};
 const CM_NORMAS=['Respeto siempre: aquí venimos a animarnos.','Nada de dietas extremas ni consejos médicos: cada cuerpo es distinto.','No compartas datos personales, teléfonos ni enlaces.','Si algo no está bien, repórtalo y lo revisamos.'];
@@ -2040,7 +2099,7 @@ async function cmLoad(force){
     }
     if(!LIB.adminChecked)await libCheckAdmin().catch(()=>{});
     if(LIB.admin){const {data}=await SB.from('comunidad_reportes').select('id').eq('resuelto',false);COM.reportes=(data||[]).length}
-    COM.loaded=true;setTimeout(renderNavDot,0);
+    COM.loaded=true;setTimeout(renderNavDot,0);setTimeout(liveStart,0);
   }catch(e){console.warn('comunidad',e)}finally{COM.loading=null}})();
   return COM.loading;
 }
@@ -2077,21 +2136,24 @@ function cmRetoCard(r,mio){
     <div class="cmst"><span>${r.dias} días</span><span>${meta}</span><span><b>${r.n_miembros}</b> ${r.n_miembros===1?'participante':'participantes'}</span></div>
     <div class="cmact"><button class="btn" data-cmjoin="${r.id}">Unirme</button>${inv?`<button class="btn soft" data-cmno="${r.id}">Ahora no</button>`:''}${LIB.admin||r.creada_por===SBUID?`<button class="btn ghost" data-cmhide="${r.id}">${LIB.admin?'Ocultar':'Borrar'}</button>`:''}</div></div>`;
 }
-function cmSeccion(el){
-  if(!el)return;
+function cmSeccion(el,modo){
+  if(!el)return;modo=modo||el.dataset.modo||'todo';el.dataset.modo=modo;
   if(!SERVER){el.innerHTML=`<div class="card cmintro"><p class="small muted">La comunidad funciona con tu cuenta online de Vuelve.</p></div>`;return}
-  if(!COM.loaded){el.innerHTML=`<div class="card cmintro"><p class="small muted">Cargando la comunidad…</p></div>`;cmLoad().then(()=>{if(document.body.contains(el))cmSeccion(el)});return}
+  if(!COM.loaded){el.innerHTML=`<div class="card cmintro"><p class="small muted">Cargando la comunidad…</p></div>`;cmLoad().then(()=>{if(document.body.contains(el))cmSeccion(el,modo)});return}
   const mios=COM.retos.filter(r=>COM.mios[r.id]),invs=COM.retos.filter(r=>!COM.mios[r.id]&&COM.inv&&COM.inv[r.id]),otros=COM.retos.filter(r=>!COM.mios[r.id]&&!r.oculto&&!r.privado&&!(COM.inv&&COM.inv[r.id]));
   const quien=COM.perfil?`<p class="small" style="margin-top:4px">Eres <b>@${esc(COM.perfil)}</b> · <a href="#" id="cmuser">Cambiar</a></p>`:'';
-  el.innerHTML=`<div class="rsec"><div><p class="cj">Retos</p><h2 class="ct">Únete o crea el tuyo</h2>${quien}</div>${!COM.vetada?`<button class="btn sm" id="cmnew">+ Crear reto</button>`:''}</div>
+  const verMis=modo!=='com',verCom=modo!=='mis';
+  el.innerHTML=`<div class="rsec"><div><p class="cj">${modo==='mis'?'Mis retos':modo==='com'?'Comunidad':'Retos'}</p><h2 class="ct">${modo==='mis'?'Tus retos y tus invitaciones':modo==='com'?'Únete a otras mujeres':'Únete o crea el tuyo'}</h2>${quien}</div>${!COM.vetada?`<button class="btn sm" id="cmnew">+ Crear reto</button>`:''}</div>
     ${COM.vetada?`<div class="card cwarn"><span class="cic">${ico('aviso','mi')}</span><div style="flex:1"><b>Tu cuenta no puede participar en la comunidad</b><p class="small muted">Si crees que es un error, escríbenos.</p></div></div>`:''}
     ${!COM.perfil&&!COM.vetada?`<div class="card cmintro"><span class="cmi big">${ico('compartido','mi')}</span><div style="flex:1"><h3 class="h3">Únete a otras mujeres en un reto</h3><p class="small muted" style="margin-top:6px">Elige un nombre de usuario, apúntate a un reto y animaos en el chat del grupo. Nadie verá tu email ni tu diario: solo tu @usuario y cómo vas en el reto.</p><button class="btn" id="cmuser" style="margin-top:14px">Elegir mi nombre de usuario</button></div></div>`:''}
     ${LIB.admin?`<button class="btn soft block" id="cmmod" style="margin-top:12px">${ico('aviso','mi')} Moderación${COM.reportes?` · ${COM.reportes} reporte${COM.reportes>1?'s':''} pendiente${COM.reportes>1?'s':''}`:''}</button>`:''}
-    ${invs.length?`<p class="eyebrow" style="margin:18px 0 10px">Te han invitado</p><div class="cmg">${invs.map(r=>cmRetoCard(r,false)).join('')}</div>`:''}
-    ${mios.length?`<p class="eyebrow" style="margin:18px 0 10px">Tus retos</p><div class="cmg">${mios.map(r=>cmRetoCard(r,true)).join('')}</div>`:''}
-    ${otros.length?`<p class="eyebrow" style="margin:18px 0 10px">Retos públicos de la comunidad</p><div class="cmg">${otros.map(r=>cmRetoCard(r,false)).join('')}</div>`:''}`;
-  setTimeout(renderNavDot,0);
-  const re=()=>cmSeccion(el);
+    ${verMis&&invs.length?`<p class="eyebrow" style="margin:18px 0 10px">Te han invitado</p><div class="cmg">${invs.map(r=>cmRetoCard(r,false)).join('')}</div>`:''}
+    ${verMis&&modo==='mis'&&!mios.length&&!invs.length&&COM.perfil?`<div class="card cmintro"><p class="small muted">Aún no estás en ningún reto. Crea uno o únete a uno de la comunidad.</p><button class="btn soft sm" id="cmgocom">Ver retos de la comunidad</button></div>`:''}
+    ${verMis&&mios.length?`<p class="eyebrow" style="margin:18px 0 10px">Tus retos</p><div class="cmg">${mios.map(r=>cmRetoCard(r,true)).join('')}</div>`:''}
+    ${verCom&&otros.length?`<p class="eyebrow" style="margin:18px 0 10px">Retos públicos de la comunidad</p><div class="cmg">${otros.map(r=>cmRetoCard(r,false)).join('')}</div>`:''}`;
+  setTimeout(renderNavDot,0);setTimeout(rtabsRefresh,0);
+  const re=()=>cmSeccion(el,modo);
+  {const g=el.querySelector('#cmgocom');if(g)g.onclick=()=>{UI.rtab='com';vRetosPage();scrollTo(0,0)}}
   el.querySelectorAll('#cmuser').forEach(a=>a.onclick=e=>{e.preventDefault();cmElegirUsuario(re)});
   if(el.querySelector('#cmnew'))el.querySelector('#cmnew').onclick=()=>COM.perfil?cmCrear(re):cmElegirUsuario(()=>cmCrear(re));
   el.querySelectorAll('[data-cmno]').forEach(b=>b.onclick=async()=>{await SB.from('comunidad_invitaciones').delete().eq('reto_id',b.dataset.cmno).eq('user_id',SBUID);delete COM.inv[b.dataset.cmno];re()});
