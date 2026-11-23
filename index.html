@@ -1599,7 +1599,7 @@ function foodRef(u,fid){
   if(!fid)return null;
   if(/^b\d+$/.test(fid))return FOODS[+fid.slice(1)]||null;
   if(fid.startsWith('r_')){const r=(u.recetas||[]).find(x=>'r_'+x.id===fid);return r?{rec:r,n:r.n}:null}
-  return (u.off||[]).find(x=>x.id===fid)||(u.custom||[]).find(x=>x.id===fid)||null;
+  return (u.off||[]).find(x=>x.id===fid)||(u.custom||[]).find(x=>x.id===fid)||(fid.startsWith('lib_')?libFoods().find(x=>x.id===fid):null)||null;
 }
 // Micronutrientes por 100 g y fracción de kcal con datos (1 = todo)
 function microPer100(u,f,depth=0){
@@ -3433,7 +3433,10 @@ function recTot(r){const t={k:0,p:0,c:0,g:0,q:0};(r.items||[]).forEach(i=>{const
 function recToFood(r){const t=recTot(r),G=t.q||1,po=Math.max(1,Number(r.porc)||1);
   return {id:'r_'+r.id,rid:r.id,rec:true,n:r.n,k:t.k/G*100,p:t.p/G*100,c:t.c/G*100,g:t.g/G*100,ug:G/po,un:'porción',unp:'porciones',porc:po,kp:t.k/po,pp:t.p/po,cp:t.c/po,gp:t.g/po}}
 const misRecetas=u=>(u.recetas||[]).filter(r=>!r.borrada&&(r.items||[]).length);
+function libFoods(){return (LIB.recetas||[]).filter(r=>r.publicada!==false&&r.kcal).map(r=>{const G=Math.round((r.ingredientes||[]).reduce((a,i)=>a+((i.unidad==='g'||i.unidad==='ml')?(+i.cantidad||0):0),0))||300;
+  return {id:'lib_'+r.id,lib:true,n:(r.emoji?r.emoji+' ':'')+r.nombre,k:Math.round(r.kcal/G*100),p:Math.round(r.p/G*1000)/10,c:Math.round(r.c/G*1000)/10,g:Math.round(r.g/G*1000)/10,ug:G,un:'ración',unp:'raciones'}})}
 function openAdd(meal0){
+  if(!LIB.recetas)libLoad().catch(()=>{});
   let offT,qPrev=null;const u=me();let propioN='',meal=meal0||defaultMeal(),mode='menu',q='',qRaw='',sub='todos',offRes=null,offErr='',offLoading=false,scanCtl=null;const added=[];let rec=null,rq='',roff=null,roffLoading=false;
   const stopScan=()=>{try{scanCtl&&scanCtl.stop()}catch(e){}scanCtl=null};
   const m=modal(`<div class="top"><b id="mtitle"></b><button class="close">✕</button></div><div id="mb"></div>`);
@@ -3464,7 +3467,7 @@ function openAdd(meal0){
       return;
     }
     if(mode==='buscar'){
-      const RF=misRecetas(u).map(recToFood),all=[...RF,...u.custom,...(u.off||[]),...FOODS];
+      const RF=misRecetas(u).map(recToFood),all=[...RF,...libFoods(),...u.custom,...(u.off||[]),...FOODS];
       const recentIds=[...new Set(Object.keys(u.logs).sort().reverse().flatMap(d=>(u.logs[d].foods||[]).map(f=>f.fid)).filter(Boolean))];
       let list=sub==='mis'?RF:sub==='fav'?all.filter(f=>u.favs.includes(f.id)):sub==='rec'?recentIds.map(id=>all.find(f=>f.id===id)).filter(Boolean):all;
       if(q){const qt=toks(q);list=list.filter(f=>{const nt=toks(norm(f.n)+' '+norm(f.un||'')+' '+norm(f.unp||''));return qt.every(t=>nt.some(w=>w.startsWith(t)))})}
