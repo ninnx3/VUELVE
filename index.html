@@ -653,7 +653,19 @@ html[data-tema=ciruela] nav.tabs button.on{background:#ede1ee;color:#6c2146}
 html[data-tema=ciruela] .btn.soft{background:#ede1ee;color:#6c2146}
 html[data-tema=ciruela] .pill.ok,html[data-tema=ciruela] .bst.ok{background:#ddeae6;color:#325958}
 html[data-tema=ciruela] .bday.hoy .bd{background:#325958}
-html[data-tema=ciruela] .chigh,html[data-tema=ciruela] .jhero{background:linear-gradient(135deg,#6c2146,#915a92 55%,#915a92)}
+html[data-tema=ciruela] .jhero{background:linear-gradient(135deg,#6c2146,#915a92 55%,#915a92)}
+html[data-tema=ciruela] .chigh{background:linear-gradient(135deg,#f6e4ea 0%,#efdbe8 50%,#e3d2ea 100%);color:#6c2146;border:1px solid #ead8e6}
+html[data-tema=ciruela] .chigh .hbox{background:rgba(255,255,255,.6);border-color:rgba(255,255,255,.9)}
+html[data-tema=ciruela] .chigh .hbox small{color:#727c54;opacity:1}html[data-tema=ciruela] .chigh .hbox b{color:#6c2146}html[data-tema=ciruela] .chigh .hbox i{color:#8a7f84;opacity:1}
+html[data-tema=ciruela] .chigh .cener{color:#915a92}html[data-tema=ciruela] .chigh .cener i{background:#e6d3e6}html[data-tema=ciruela] .chigh .cener i.on{background:#915a92}
+html[data-tema=ciruela] .chigh .hcara .mi,html[data-tema=ciruela] .chigh .hcara svg path,html[data-tema=ciruela] .chigh .hmov svg path{fill:#915a92;color:#915a92}html[data-tema=ciruela] .chigh .hcara.on{background:#fff}
+html[data-tema=ciruela] .chigh .hent span{background:#fff;color:#6c2146}
+html[data-tema=ciruela] nav.tabs button.on{background:#eef0e3!important;color:#4f5a36!important}html[data-tema=ciruela] nav.tabs button.on svg path{fill:#4f5a36}
+html[data-tema=ciruela] .hero .eyebrow,html[data-tema=ciruela] .cj,html[data-tema=ciruela] .card>.eyebrow,html[data-tema=ciruela] .msub{color:#727c54}
+html[data-tema=ciruela] .jchips span.on,html[data-tema=ciruela] .pill.ok,html[data-tema=ciruela] .bst.ok{background:#eef0e3;color:#4f5a36}
+html[data-tema=ciruela] .bday.hoy .bd{background:#727c54}
+html[data-tema=ciruela] .cd div:nth-child(4){background:#727c54;color:#f9f6ee}
+html[data-tema=ciruela] .cmmac[style*='--g']{}
 html[data-tema=ciruela] .card{border-color:#ece2e7}html[data-tema=ciruela] .datenav .ar,html[data-tema=ciruela] .btn.ghost{border-color:#e3d5dd}
 html[data-tema=ciruela] .phero.fhero{background:linear-gradient(135deg,#f8f1f4 0%,#efe3ee 55%,#e6d6e8 100%)}
 html[data-tema=ciruela] .mtabs button.on{background:#6c2146;border-color:#6c2146}html[data-tema=ciruela] .mtabs button{border-color:#e3d5dd}
@@ -684,7 +696,7 @@ const THEME_MAP={
  '#f4e1e8':'#f1e3ea','#fdfafc':'#fffdfa','#fdf9fc':'#fffdfa','#fbf3ee':'#fbf6f1',
  '#c45c72':'#6c2146','#7b5ea7':'#915a92','#d4a72c':'#c9a35c','#d4ac52':'#c9a35c','#e2a08c':'#c29cc2','#a99bd0':'#a97aab',
  '#a993b0':'#c29cc2','#d3c2d6':'#d6bcd6','#f2edf4':'#f4ecef','#efe4ec':'#f1e6ec','#f3e9f0':'#f3eaee',
- '#2f6f5d':'#325958','#547969':'#527f7e','#7aa898':'#8aa8a6','#3f7a62':'#325958',
+ '#2f6f5d':'#325958','#a86a2d':'#727c54','#547969':'#527f7e','#7aa898':'#8aa8a6','#3f7a62':'#325958',
  '#e3efe9':'#ddeae6','#e5f1ea':'#ddeae6','#e3f4ea':'#ddeae6','#d9e7de':'#cfe0db','#e4f1ea':'#ddeae6','#dcece6':'#e2ede9'
 };
 const THEME_RE=new RegExp(Object.keys(THEME_MAP).join('|'),'gi');
