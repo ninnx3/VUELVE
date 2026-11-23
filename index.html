@@ -731,6 +731,8 @@ html .jhero .cj.jbut,html[data-tema=ciruela] .jhero .cj.jbut{color:#f3e2a9!impor
 .fpsl2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.fpsl2i{position:relative;border-radius:14px;overflow:hidden;background:#f3eef0;aspect-ratio:3/4}.fpsl2i img{width:100%;height:100%;object-fit:cover;display:block}.fptag{position:absolute;top:8px;font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;padding:4px 10px;border-radius:20px}.fptag.l{left:8px;background:#fff;color:#6c2146}.fptag.r{right:8px;background:#6c2146;color:#fff}
 .modal .sheet.fpcmpm{max-width:720px}.fpcmpm select.in{font-size:14px;padding-right:28px}
 @media(max-width:640px){.fpnext{flex-direction:column;align-items:stretch}.fpnext .btn{width:100%}}
+.cdsig{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:6px;align-items:center}.cdsig span{font-size:13.5px}.cdsig em{font-style:normal;color:var(--muted);font-size:12px;margin-left:4px}
+.cdadd{display:flex;align-items:center;gap:14px;width:100%;text-align:left;cursor:pointer;border:1.5px dashed #e3c6d7;background:#fffafc}.cdadd .mi{width:26px;height:26px;color:#6c2146;flex-shrink:0}.cdadd b{display:block;font-size:15px;color:var(--ink)}.cdadd small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
 </style>
 </head>
 <body>
@@ -1717,7 +1719,33 @@ function openCiclo(date){
     const med=cicloMedia(c.inicios);if(med)c.dur=Math.min(40,Math.max(21,med));save();m.remove();toast('Anotado ✓ · Día 1 de tu ciclo'+(med?' · media '+c.dur+' días':''));if(UI.view==='diario')vDiario()};
 }
 
-function cuentaAtrasHTML(pf){if(!(pf.meta&&pf.meta>=today()))return '';const md=parse(pf.meta);return `<div class="cdcard"><p class="eyebrow">Tu cuenta atrás</p><h2 class="h2">${esc(pf.metaNombre||'Tu meta')} · <span>el ${md.getDate()}.</span></h2><p class="small muted" style="margin-top:6px">Pequeños pasos cada día. Lista para el ${md.getDate()}.</p><div class="cd" id="cd"></div><p class="tiny muted" style="margin-top:12px;letter-spacing:1px;text-transform:uppercase">${md.getDate()} ${MONL[md.getMonth()]} ${md.getFullYear()} · hora de Madrid</p></div>`}
+function metasNorm(pf){
+  if(!pf)return [];let L=Array.isArray(pf.metas)?pf.metas.filter(x=>x&&x.fecha):[];
+  if(pf.meta&&pf.meta!==pf._metaPrev){const i=pf._metaPrev?L.findIndex(x=>x.fecha===pf._metaPrev):-1;const it={fecha:pf.meta,nombre:pf.metaNombre||''};if(i>=0)L[i]=it;else if(!L.some(x=>x.fecha===it.fecha&&x.nombre===it.nombre))L.push(it)}
+  else if(pf.meta&&pf.meta===pf._metaPrev){const x=L.find(x=>x.fecha===pf.meta);if(x&&pf.metaNombre!==undefined&&x.nombre!==pf.metaNombre)x.nombre=pf.metaNombre||''}
+  L=L.filter(x=>x.fecha>=today()).sort((a,b)=>a.fecha.localeCompare(b.fecha));
+  pf.metas=L;const a=L[0];pf.meta=a?a.fecha:'';pf.metaNombre=a?a.nombre:'';pf._metaPrev=pf.meta;return L;
+}
+function cuentaAtrasHTML(pf){const L=metasNorm(pf);if(!L.length)return `<button class="card cdadd" id="cdadd">${ico('dia-cerrado','mi')} <span><b>Añade una cuenta atrás</b><small>Un viaje, una boda, el verano… Te saldrá la más cercana al entrar.</small></span></button>`;
+  const md=parse(pf.meta),sig=L.slice(1),dd=x=>Math.round((parse(x.fecha)-parse(today()))/864e5);
+  return `<div class="cdcard"><p class="eyebrow">Tu cuenta atrás</p><h2 class="h2">${esc(pf.metaNombre||'Tu meta')} · <span>el ${md.getDate()}.</span></h2><p class="small muted" style="margin-top:6px">Pequeños pasos cada día. Lista para el ${md.getDate()}.</p><div class="cd" id="cd"></div><p class="tiny muted" style="margin-top:12px;letter-spacing:1px;text-transform:uppercase">${md.getDate()} ${MONL[md.getMonth()]} ${md.getFullYear()} · hora de Madrid</p>
+    ${sig.length?`<div class="cdsig"><p class="cj">Después</p>${sig.map(x=>`<span><b>${esc(x.nombre||'Meta')}</b> · ${parse(x.fecha).getDate()} ${MON[parse(x.fecha).getMonth()]} <em>en ${dd(x)} días</em></span>`).join('')}</div>`:''}
+    <button class="btn ghost sm" id="cdman" style="margin-top:14px">Gestionar cuentas atrás</button></div>`}
+function bindCuentaAtras(done){const a=$('#cdadd'),b=$('#cdman');[a,b].forEach(x=>{if(x)x.onclick=()=>metasModal(done)})}
+function metasModal(done){
+  const u=me(),pf=u.profile;metasNorm(pf);const st={L:pf.metas.map(x=>({...x}))};
+  const m=modal(`<div class="top"><b>Tus cuentas atrás</b><button class="close">✕</button></div><p class="small muted" style="margin-top:8px">Al entrar en Vuelve te saldrá siempre la más cercana. Cuando pase, aparecerá la siguiente.</p><div id="mtl"></div>
+    <div class="grid2" style="margin-top:14px"><label class="f" style="margin-top:0"><span>Nombre</span><input class="in" id="mtn" maxlength="40" placeholder="Ej. Viaje a Argentina"></label><label class="f" style="margin-top:0"><span>Fecha</span><input class="in" type="date" id="mtf" min="${today()}"></label></div>
+    <div class="err" id="mte"></div><button class="btn soft block" id="mta">+ Añadir</button><button class="btn block" id="mts" style="margin-top:10px">Guardar</button>`);
+  const pinta=()=>{st.L.sort((a,b)=>a.fecha.localeCompare(b.fecha));m.querySelector('#mtl').innerHTML=st.L.length?st.L.map((x,i)=>`<div class="wk"><span><b>${esc(x.nombre||'Meta')}</b> <span class="tiny muted">${parse(x.fecha).getDate()} ${MONL[parse(x.fecha).getMonth()]} ${parse(x.fecha).getFullYear()}${i===0?' · <b style="color:#325958">la que sale al entrar</b>':''}</span></span><button class="x" data-mq="${i}">✕</button></div>`).join(''):'<p class="small muted" style="margin-top:12px">Aún no tienes ninguna.</p>';
+    m.querySelectorAll('[data-mq]').forEach(b=>b.onclick=()=>{st.L.splice(+b.dataset.mq,1);pinta()})};
+  const add=()=>{const n=m.querySelector('#mtn').value.trim(),f=m.querySelector('#mtf').value,e=m.querySelector('#mte');e.textContent='';
+    if(!f)return e.textContent='Elige una fecha.',false;if(f<today())return e.textContent='La fecha tiene que ser hoy o más adelante.',false;
+    st.L.push({nombre:n,fecha:f});m.querySelector('#mtn').value='';m.querySelector('#mtf').value='';pinta();return true};
+  m.querySelector('#mta').onclick=add;
+  m.querySelector('#mts').onclick=()=>{if(m.querySelector('#mtf').value&&!add())return;pf.metas=st.L;pf.meta='';pf.metaNombre='';pf._metaPrev='';metasNorm(pf);save();m.remove();toast('Cuentas atrás guardadas ✓');done&&done()};
+  pinta();
+}
 const jRender=()=>UI.view==='retos'||UI.view==='juntas'?vRetosPage():vJuntas();
 function vRetosPage(){
   const u=me();
@@ -1726,7 +1754,7 @@ function vRetosPage(){
   const frag=document.createDocumentFragment();kids.forEach(n=>frag.appendChild(n));
   vJuntas();
   const hero2=V.querySelector('.hero');const ca=cuentaAtrasHTML(u.profile);
-  if(ca&&hero2)hero2.insertAdjacentHTML('afterend',ca);
+  if(ca&&hero2)hero2.insertAdjacentHTML('afterend',ca);bindCuentaAtras(()=>vRetosPage());
   V.insertAdjacentHTML('beforeend','<div id="cmsec"></div>');cmSeccion(V.querySelector('#cmsec'));
   if(retosOf(u).length||pendingInvites(u).length){V.insertAdjacentHTML('beforeend',`<div class="rsec"><div><p class="cj">Retos con puntos</p><h2 class="ct">Tus retos por email</h2></div></div>`);V.appendChild(frag)}
   tick();
@@ -2229,7 +2257,7 @@ function vJuntas(){
   if(!r){
     $('#view').innerHTML=heroHTML('Retos','Juntas','es más fácil.')+`
     ${inv.length?juntasCardHTML(u):''}
-    <div class="card jhero"><div class="jhx"><p class="cj jbut">Tu compañera de Vuelve</p><h2>Dos amigas, un mismo objetivo.</h2><p>Os ayudáis a ser constantes: veis cada día cómo va la otra, os mandáis toques de ánimo y tenéis una meta semanal juntas. Nunca se comparten pesos, medidas ni fotos: solo constancia.</p></div></div>
+    <div class="card jhero"><div class="jhx"><p class="cj jbut">Tu compañera de Vuelve</p><h2>Amigas, un mismo objetivo.</h2><p>Os ayudáis a ser constantes: veis cada día cómo va cada una, os mandáis toques de ánimo y tenéis una meta semanal juntas. Nunca se comparten pesos, medidas ni fotos: solo constancia.</p></div></div>
     <div class="card"><p class="cj">Invita a tu compañera</p><h2 class="ct">¿Con quién lo vas a hacer?</h2>
       <label class="f" style="margin-top:12px"><span>Email de tu compañera</span><input class="in" id="jem" type="email" placeholder="amiga@email.com" autocomplete="off"></label>
       <label class="f"><span>Nombre de vuestro dúo (opcional)</span><input class="in" id="jnm" placeholder="Ej. Nina y Mica" maxlength="60"></label>
@@ -3477,13 +3505,13 @@ function maybeWelcome(){
   const u=me();if(!u||!u.profile)return;
   if(WELCOME_DONE)return;WELCOME_DONE=true;
   u.lastWelcome=today();save();
-  const pf=u.profile,f=fotoBienvenida(u);
+  const pf=u.profile,f=fotoBienvenida(u);metasNorm(pf);
   const [ey,ti,tx]=FRASES[Math.floor(Math.random()*FRASES.length)];
   const m=modal(`<div class="l ${f?'foto':''}" style="padding:0">${f?`<img src="${esc(f)}" alt="" onerror="this.parentNode.classList.remove('foto');this.outerHTML=ILLU">`:ILLU}</div><div class="r"><button class="close wclose">✕</button>
     <p class="eyebrow" style="font-size:11px">${ey}</p>
     <h3 class="h2" style="font-size:28px;margin-top:10px;line-height:1.15">${ti}</h3>
     <p class="muted" style="margin-top:12px;font-size:14px;line-height:1.6">${tx}</p>
-    ${pf.meta&&pf.meta>=today()?`<p class="eyebrow" style="margin-top:22px">Hasta el ${parse(pf.meta).getDate()} de ${MONL[parse(pf.meta).getMonth()]}</p><div class="cd sm">${cdHTML(pf.meta)}</div>`:''}
+    ${pf.meta&&pf.meta>=today()?`<p class="eyebrow" style="margin-top:22px">${pf.metaNombre?esc(pf.metaNombre)+' · ':''}Hasta el ${parse(pf.meta).getDate()} de ${MONL[parse(pf.meta).getMonth()]}</p><div class="cd sm">${cdHTML(pf.meta)}</div>`:''}
     <button class="btn block" style="margin-top:20px" id="wgo">Vamos a por hoy →</button></div>`,'welcome');
   m.querySelector('#wgo').onclick=()=>m.remove();
   if(pf.meta)tick();
