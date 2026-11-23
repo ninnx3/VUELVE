@@ -4162,6 +4162,7 @@ function abrirPasosAuto(){
 function maybeWelcome(){
   const u=me();if(!u||!u.profile)return;
   if(WELCOME_DONE)return;WELCOME_DONE=true;
+  if(u.lastWelcome===today())return;   // solo una vez al día
   u.lastWelcome=today();save();
   const pf=u.profile,f=fotoBienvenida(u);metasNorm(pf);
   const [ey,ti,tx]=FRASES[Math.floor(Math.random()*FRASES.length)];
