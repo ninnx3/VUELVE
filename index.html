@@ -716,7 +716,7 @@ html .jhero .cj.jbut,html[data-tema=ciruela] .jhero .cj.jbut{color:#f3e2a9!impor
 .cmquick{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px}.cmquick button{flex-shrink:0;border:1px solid #e6d3e1;background:#fbf6f9;border-radius:999px;padding:6px 11px;font:inherit;font-size:12px;font-weight:600;color:#6c2146;cursor:pointer}
 .cmrow{display:flex;gap:8px;align-items:flex-end}.cmrow textarea{flex:1;resize:none;border:1px solid var(--line);border-radius:14px;padding:10px 12px;font:inherit;font-size:14px;max-height:120px;background:#fbf9f4}.cmrow .btn{padding:10px 16px}
 @media(max-width:640px){.cmg{grid-template-columns:1fr}.modal .sheet.cmsheet{height:calc(100dvh - 24px);max-height:none}.cmintro{flex-direction:column}}
-.ndot{position:absolute;top:7px;left:calc(50% + 9px);width:8px;height:8px;border-radius:50%;background:#c9a35c;box-shadow:0 0 0 2px #fff}[data-v=progreso]{position:relative}
+.nic{position:relative;display:inline-flex}.ndot{position:absolute;top:-3px;left:-4px;width:9px;height:9px;border-radius:50%;background:#c9a35c;box-shadow:0 0 0 2px #fff;pointer-events:none}
 .fplock{display:flex;align-items:center;gap:6px;font-size:12.5px;color:#325958;font-weight:600;margin-top:6px}.fplock .mi{width:15px;height:15px}
 .fpnext{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:14px;padding:14px 16px;border-radius:16px;background:#f6eef4}.fpnext.due{background:linear-gradient(135deg,#f6e4ea,#efdbe8);border:1.5px solid #e3c6d7}.fpnext b{display:block;font-size:15px;color:var(--ink)}.fpnext small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}.fpnext .btn .mi{width:16px;height:16px;vertical-align:-3px}
 .fplab{font-size:13px;font-weight:700;margin:16px 0 8px;color:var(--ink)}.cmchip em{font-style:normal;font-size:10px;font-weight:700;background:#f3e2a9;color:#6c2146;border-radius:20px;padding:2px 6px;margin-left:4px}.cmchip.on em{background:#f3e2a9}
@@ -734,6 +734,7 @@ html .jhero .cj.jbut,html[data-tema=ciruela] .jhero .cj.jbut{color:#f3e2a9!impor
 .cdsig{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:6px;align-items:center}.cdsig span{font-size:13.5px}.cdsig em{font-style:normal;color:var(--muted);font-size:12px;margin-left:4px}
 .cdadd{display:flex;align-items:center;gap:14px;width:100%;text-align:left;cursor:pointer;border:1.5px dashed #e3c6d7;background:#fffafc}.cdadd .mi{width:26px;height:26px;color:#6c2146;flex-shrink:0}.cdadd b{display:block;font-size:15px;color:var(--ink)}.cdadd small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
 .linkb{border:0;background:none;padding:0 0 0 8px;font:inherit;font-size:12.5px;font-weight:700;color:#6c2146;text-decoration:underline;cursor:pointer}
+.fpav{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#fff}.fpav b{display:block;font-size:13.5px}.fpav small{display:block;font-size:12px;color:var(--muted);margin-top:2px;line-height:1.4}.fpav .btn .mi{width:15px;height:15px}.fpsw{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600}.fpsw input{accent-color:#6c2146;width:16px;height:16px}
 </style>
 </head>
 <body>
@@ -1786,7 +1787,7 @@ const FP_FREC=[[7,'Cada semana'],[14,'Cada 2 semanas'],[28,'Cada mes'],[56,'Cada
 const FP_TIPS=[['Misma ropa','Ropa deportiva ajustada o ropa interior: siempre la misma.'],['Mismo lugar y misma luz','Frente a una pared lisa, con luz natural de frente y sin contraluz.'],['Misma hora','Por la mañana, en ayunas y después de ir al baño.'],['Mismo encuadre','Móvil a la altura del pecho y a la misma distancia, con el cuerpo entero. Usa el temporizador o apóyalo en algo.'],['Postura natural','Brazos sueltos, sin meter tripa ni posar: queremos ver tu cuerpo real.']];
 const fpFrec=u=>+(u.profile.fotoFrec)||14;
 function fpProx(u){const l=u.profile.fotoUlt;return l?addDays(l,fpFrec(u)):today()}
-function fpDue(u){return SERVER&&!!u&&!!u.profile&&!!u.profile.fotoUlt&&today()>=fpProx(u)}
+function fpDue(u){return SERVER&&!!u&&!!u.profile&&!!u.profile.fotoUlt&&u.profile.fotoAvisos!==false&&today()>=fpProx(u)}
 async function fpLoad(force){
   if(!SERVER||!SB||!SBUID)return [];if(FP.loaded&&!force)return FP.list;if(FP.loading&&!force)return FP.loading;
   FP.loading=(async()=>{try{
@@ -1815,15 +1816,45 @@ function fpCard(el){
     <p class="fplab">¿Cada cuánto quieres hacerte fotos?</p>
     <div class="cmdias">${FP_FREC.map(([d,t])=>`<button class="cmchip ${fpFrec(u)===d?'on':''}" data-fq="${d}">${t}${d===14?' <em>recomendado</em>':''}</button>`).join('')}</div>
     <p class="tiny muted" style="margin-top:8px">Te recomendamos cada 2 semanas: da tiempo a que se note el cambio sin estar pendiente cada día.</p>
+    <div class="fpav"><div style="flex:1;min-width:0"><b>Avisos</b><small>Te avisamos el día antes y el mismo día. Para que te llegue aunque no abras Vuelve, añádelos a tu calendario.</small></div>
+      <div class="row" style="gap:8px;flex-wrap:wrap"><label class="fpsw"><input type="checkbox" id="fpavon" ${u.profile.fotoAvisos===false?'':'checked'}> En la app</label><button class="btn soft sm" id="fpcal">${ico('dia-cerrado','mi')} Añadir a mi calendario</button></div></div>
     ${S.length>=2?`<button class="btn block fpcmp" id="fpcmp">Comparar antes y ahora</button>`:''}
     ${S.length?`<div class="fpses">${S.map(s=>`<div class="fps"><div class="fpsd"><b>${fpFecha(s.fecha)}</b>${fpPesoEn(u,s.fecha)?`<span>${fmt1(fpPesoEn(u,s.fecha))} kg</span>`:''}</div><div class="fpths">${FP_POSES.map(([p,l])=>s.poses[p]?`<button class="fpth" data-fv="${esc(s.poses[p].path)}"><img src="${esc(FP.urls[s.poses[p].path])}" alt="${l}" loading="lazy"><span>${l}</span></button>`:'').join('')}</div></div>`).join('')}</div>`:''}
   </div>`;
   el.querySelector('#fpadd').onclick=()=>fpSubirModal(()=>fpCard(el));
+  el.querySelector('#fpcal').onclick=()=>{if(!u.profile.fotoUlt&&!FP.list.length)toast('Primero haz tus primeras fotos y luego añadimos los avisos');else fpICS()};
+  el.querySelector('#fpavon').onchange=e=>{u.profile.fotoAvisos=e.target.checked;save();renderNavDot();toast(e.target.checked?'Avisos activados ✓':'Avisos desactivados')};
   el.querySelectorAll('[data-fq]').forEach(b=>b.onclick=()=>{u.profile.fotoFrec=+b.dataset.fq;save();fpCard(el);renderNavDot()});
   if(el.querySelector('#fpcmp'))el.querySelector('#fpcmp').onclick=()=>fpComparar();
   el.querySelectorAll('[data-fv]').forEach(b=>b.onclick=()=>fpVer(b.dataset.fv,()=>fpCard(el)));
 }
-function renderNavDot(){const b=document.querySelector('nav [data-v=progreso], [data-v=progreso]');if(!b)return;const on=fpDue(me());let d=b.querySelector('.ndot');if(on&&!d)b.insertAdjacentHTML('beforeend','<i class="ndot"></i>');if(!on&&d)d.remove()}
+function fpAvisos(){
+  const u=me();if(!SERVER||!u||!u.profile||!u.profile.fotoUlt||u.profile.fotoAvisos===false)return;const pf=u.profile,prox=fpProx(u),manana=addDays(prox,-1)===today(),hoy=today()>=prox;
+  if(!(manana||hoy)||pf.fotoAvisoDia===today())return;
+  const go=(k=0)=>{if(document.querySelector('.modal')&&k<150)return setTimeout(()=>go(k+1),800);if(pf.fotoAvisoDia===today())return;
+    pf.fotoAvisoDia=today();save();
+    const m=modal(`<div class="top"><b>${ico('fotos','mi')} Fotos de progreso</b><button class="close">✕</button></div>
+      <h2 class="h2" style="margin-top:12px">${manana?'Mañana te toca <span>tu foto de progreso</span>':'Hoy te toca <span>tu foto de progreso</span>'}</h2>
+      <p class="muted" style="margin-top:8px">${manana?'Déjalo preparado esta noche: la misma ropa de la última vez a mano y el móvil cargado. Mañana, por la mañana y en ayunas, en el mismo sitio y con la misma luz.':'Por la mañana y en ayunas, con la misma ropa, en el mismo sitio y con la misma luz. Frente, perfil y espalda: tardas 2 minutos.'}</p>
+      <p class="fplock" style="margin-top:10px">${ico('privado','mi')} Solo tú puedes verlas.</p>
+      <div class="row" style="gap:8px;margin-top:16px;flex-wrap:wrap">${manana?'':'<button class="btn" id="fphz">Hacer mis fotos</button>'}<button class="btn ${manana?'':'ghost'}" id="fpok">${manana?'Entendido':'Más tarde'}</button></div>`);
+    m.querySelector('#fpok').onclick=()=>m.remove();
+    if(m.querySelector('#fphz'))m.querySelector('#fphz').onclick=()=>{m.remove();UI.view='progreso';renderApp();fpLoad().then(()=>fpSubirModal(()=>{const c=$('#fpcard');if(c)fpCard(c)}))};
+    if('Notification' in window&&Notification.permission==='granted'){try{new Notification('Vuelve',{body:m.querySelector('h2').textContent,icon:'icon-192.png'})}catch(e){}}};
+  go();
+}
+function fpICS(){
+  const u=me(),frec=fpFrec(u),ini=fpProx(u)<today()?today():fpProx(u),f=d=>d.replace(/-/g,''),n=Math.max(1,Math.ceil(365/frec));
+  const ev=`BEGIN:VEVENT\r\nUID:vuelve-fotos-${f(ini)}-${frec}@vuelve\r\nDTSTAMP:${f(today())}T000000Z\r\nDTSTART;VALUE=DATE:${f(ini)}\r\nDTEND;VALUE=DATE:${f(addDays(ini,1))}\r\nRRULE:FREQ=DAILY;INTERVAL=${frec};COUNT=${n}\r\nSUMMARY:Vuelve · Foto de progreso\r\nDESCRIPTION:Por la mañana y en ayunas. Misma ropa\\, mismo sitio y misma luz. Frente\\, perfil y espalda.\r\nBEGIN:VALARM\r\nTRIGGER:-PT4H\r\nACTION:DISPLAY\r\nDESCRIPTION:Mañana te toca tu foto de progreso: deja la ropa preparada\r\nEND:VALARM\r\nBEGIN:VALARM\r\nTRIGGER:PT8H\r\nACTION:DISPLAY\r\nDESCRIPTION:Hoy te toca tu foto de progreso\r\nEND:VALARM\r\nEND:VEVENT`;
+  const txt=`BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Vuelve//Fotos//ES\r\nCALSCALE:GREGORIAN\r\n${ev}\r\nEND:VCALENDAR\r\n`;
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/calendar'}));a.download='vuelve-fotos-progreso.ics';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);
+  toast('Ábrelo para añadir los avisos a tu calendario ✓');
+}
+function navDot(k){try{const u=me();if(!u||!u.profile)return false;
+  if(k==='progreso')return SERVER&&!!u.profile.fotoUlt&&u.profile.fotoAvisos!==false&&today()>=addDays(fpProx(u),-1);
+  if(k==='retos')return COM.loaded&&((COM.inv&&Object.keys(COM.inv).length>0)||Object.keys(COM.ult||{}).some(id=>COM.mios[id]&&COM.ult[id]>(cmLeido()[id]||'')));
+  }catch(e){}return false}
+function renderNavDot(){document.querySelectorAll('nav.tabs [data-v]').forEach(b=>{const on=navDot(b.dataset.v),n=b.querySelector('.nic');if(!n)return;let d=n.querySelector('.ndot');if(on&&!d)n.insertAdjacentHTML('beforeend','<i class="ndot"></i>');if(!on&&d)d.remove()})}
 function fpSubirModal(done){
   const u=me(),S=fpSesiones(),ult={};FP_POSES.forEach(([p])=>{const s=S.find(x=>x.poses[p]);if(s)ult[p]=FP.urls[s.poses[p].path]});
   const st={fecha:today(),files:{}};
@@ -1881,7 +1912,7 @@ const CM_COL=['#6c2146','#915a92','#325958','#c9a35c','#727c54','#a2577a'];
 const cmCol=id=>{let h=0;for(const c of String(id))h=(h*31+c.charCodeAt(0))|0;return CM_COL[Math.abs(h)%CM_COL.length]};
 const cmNom=id=>COM.nombres[id]?'@'+COM.nombres[id]:'@usuaria';
 const cmLeido=()=>{try{return JSON.parse(localStorage.getItem('vuelve_cm_leido')||'{}')}catch(e){return{}}};
-const cmMarcar=id=>{try{const l=cmLeido();l[id]=new Date().toISOString();localStorage.setItem('vuelve_cm_leido',JSON.stringify(l))}catch(e){}};
+const cmMarcar=id=>{try{const l=cmLeido();l[id]=new Date().toISOString();localStorage.setItem('vuelve_cm_leido',JSON.stringify(l))}catch(e){}setTimeout(renderNavDot,0)};
 function cmDia(r,m){return Math.floor((parse(today())-parse(m.unido))/864e5)+1}
 function cmProg(r,uid){
   const m=(COM.miembros[r.id]||[]).find(x=>x.user_id===uid)||(uid===SBUID?COM.mios[r.id]:null);if(!m)return null;
@@ -1922,7 +1953,7 @@ async function cmLoad(force){
     }
     if(!LIB.adminChecked)await libCheckAdmin().catch(()=>{});
     if(LIB.admin){const {data}=await SB.from('comunidad_reportes').select('id').eq('resuelto',false);COM.reportes=(data||[]).length}
-    COM.loaded=true;
+    COM.loaded=true;setTimeout(renderNavDot,0);
   }catch(e){console.warn('comunidad',e)}finally{COM.loading=null}})();
   return COM.loading;
 }
@@ -1972,6 +2003,7 @@ function cmSeccion(el){
     ${invs.length?`<p class="eyebrow" style="margin:18px 0 10px">Te han invitado</p><div class="cmg">${invs.map(r=>cmRetoCard(r,false)).join('')}</div>`:''}
     ${mios.length?`<p class="eyebrow" style="margin:18px 0 10px">Tus retos</p><div class="cmg">${mios.map(r=>cmRetoCard(r,true)).join('')}</div>`:''}
     ${otros.length?`<p class="eyebrow" style="margin:18px 0 10px">Retos públicos de la comunidad</p><div class="cmg">${otros.map(r=>cmRetoCard(r,false)).join('')}</div>`:''}`;
+  setTimeout(renderNavDot,0);
   const re=()=>cmSeccion(el);
   el.querySelectorAll('#cmuser').forEach(a=>a.onclick=e=>{e.preventDefault();cmElegirUsuario(re)});
   if(el.querySelector('#cmnew'))el.querySelector('#cmnew').onclick=()=>COM.perfil?cmCrear(re):cmElegirUsuario(()=>cmCrear(re));
@@ -2562,7 +2594,7 @@ function renderApp(){
   </div></header>
   <main class="wrap v-${UI.view}" id="view"></main>
   <nav class="tabs"><div class="in2">
-    ${[['diario',ico('nav-diario',''),'Comidas'],['movimiento',ico('nav-movimiento',''),'Movimiento'],...(me()?.profile?.sexo==='Mujer'?[['ciclo',ico('corazon',''),'Ciclo']]:[]),['retos',ico('compartido',''),'Retos'],['progreso',ico('nav-progreso',''),'Progreso'],['menu',ico('nav-menu',''),'Menú']].map(([k,i,t])=>{const [l,s]=t.split('|');return `<button data-v="${k}" class="${UI.view===k?'on':''}">${k==='progreso'&&fpDue(me())?'<i class="ndot"></i>':''}${i}${s?`<span class="nav-l">${l}</span><span class="nav-s">${s}</span>`:l}</button>`}).join('')}
+    ${[['diario',ico('nav-diario',''),'Comidas'],['movimiento',ico('nav-movimiento',''),'Movimiento'],...(me()?.profile?.sexo==='Mujer'?[['ciclo',ico('corazon',''),'Ciclo']]:[]),['retos',ico('compartido',''),'Retos'],['progreso',ico('nav-progreso',''),'Progreso'],['menu',ico('nav-menu',''),'Menú']].map(([k,i,t])=>{const [l,s]=t.split('|');return `<button data-v="${k}" class="${UI.view===k?'on':''}"><span class="nic">${i}${navDot(k)?'<i class="ndot"></i>':''}</span>${s?`<span class="nav-l">${l}</span><span class="nav-s">${s}</span>`:l}</button>`}).join('')}
   </div></nav>`;
   $$('nav.tabs button').forEach(b=>b.onclick=()=>{UI.view=b.dataset.v;if(b.dataset.v==='menu'&&MP.screen!=='gen')MP.screen='home';renderApp();scrollTo(0,0)});
   $('#av').onclick=e=>{e.stopPropagation();toggleDD()};
@@ -4673,7 +4705,7 @@ function route(){
   maybeCelebrarAyer();
   programarPromoFotos();
   maybeBalanceSemana();
-  maybeCicloAvisos();
+  maybeCicloAvisos();setTimeout(fpAvisos,1500);
 }
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.edgrasa');if(!b)return;e.preventDefault();
   const u=me();if(!u||!u.profile)return;
