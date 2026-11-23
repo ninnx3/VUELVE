@@ -156,6 +156,7 @@ header.app .in2{max-width:1000px;margin:0 auto;padding:0 20px;height:72px;displa
 html[data-oscuro="1"]{color-scheme:dark}
 html[data-oscuro="1"]{--p:rgb(216,213,209);--c:rgb(143,201,174);--g:rgb(243,226,169)}
 html[data-oscuro="1"] body .eyebrow,html[data-oscuro="1"] body .cj,html[data-oscuro="1"] body .chigh .hbox small,html[data-oscuro="1"] body .hbox small,html[data-oscuro="1"] body .msub{color:rgb(206,203,199)!important}
+html[data-oscuro="1"] .legend span:nth-child(1) i{background:rgb(124,198,214)!important}html[data-oscuro="1"] .legend span:nth-child(2) i{background:rgb(243,226,169)!important}
 html[data-oscuro="1"] .cfases div{opacity:1!important}html[data-oscuro="1"] .cfases div:not(.on) b,html[data-oscuro="1"] .cfases div:not(.on) small{opacity:.8}html[data-oscuro="1"] .cfases i{opacity:1!important}
 html[data-oscuro="1"] .cener i.on,html[data-oscuro="1"] .cfuer i.on{background:rgb(226,223,219)!important}
 html[data-oscuro="1"] .cener i:not(.on),html[data-oscuro="1"] .cfuer i:not(.on){background:rgb(58,56,55)!important}
@@ -870,7 +871,7 @@ function darkHex(h){
   const r=parseInt(h.slice(1,3),16)/255,g=parseInt(h.slice(3,5),16)/255,b=parseInt(h.slice(5,7),16)/255;
   const mx=Math.max(r,g,b),mn=Math.min(r,g,b),L=(mx+mn)/2,d=mx-mn;let H=0,S=0;
   if(d>0){S=d/(1-Math.abs(2*L-1));H=mx===r?((g-b)/d)%6:mx===g?(b-r)/d+2:(r-g)/d+4;H=(H*60+360)%360}
-  const I=1-L;let L2=I<=.5?.075+I*.4:.275+(I-.5)*2.3;
+  const I=1-L;let L2=I<=.5?.125+I*.55:.40+(I-.5)*2.0;
   if(S>.18&&L2>.74)L2=.74+(L2-.74)*.4;               // acentos con color: vivos pero no pálidos
   const S2=L>=.55?(L>=.8?Math.min(S,.05):Math.min(S,.12)):(S<.12?Math.min(S,.05):S*.95); // fondos neutros, sin tinte beige ni rosa
   if(L<.55&&S>.18&&(H>=250||H<=20))return _DC[h]=hsl2hex(30,.05,Math.min(.94,Math.max(.88,L2+.06)));  // vino/ciruela/rosa fuertes -> gris claro de alto contraste
@@ -4414,10 +4415,10 @@ function vProgreso(){
   const bw=600,bh=170,slot=(bw-30)/8,goal=pf.dias.length;
   const bars=`<svg class="chart" viewBox="0 0 ${bw} ${bh+22}">
     ${[0,7].map(v=>`<line x1="24" x2="${bw}" y1="${bh-v/7*(bh-10)}" y2="${bh-v/7*(bh-10)}" stroke="#efe9ee"/><text x="0" y="${bh-v/7*(bh-10)+4}" font-size="${F1}" fill="#7d6c7a" font-family="Montserrat">${v}</text>`).join('')}
-    <line x1="24" x2="${bw}" y1="${bh-goal/7*(bh-10)}" y2="${bh-goal/7*(bh-10)}" stroke="#a99bd0" stroke-dasharray="4 4"/>
+    <line x1="24" x2="${bw}" y1="${bh-goal/7*(bh-10)}" y2="${bh-goal/7*(bh-10)}" stroke="${themeDark()?'rgb(150,147,143)':'#a99bd0'}" stroke-dasharray="4 4"/>
     ${data.map((d,i)=>{const x=30+i*slot,bwid=slot*0.3;return `
-      <rect x="${x+slot*0.14}" y="${bh-d.ok/7*(bh-10)}" width="${bwid}" height="${d.ok/7*(bh-10)}" rx="4" fill="#2f6f5d"><title>${d.ok} días cumplidos</title></rect>
-      <rect x="${x+slot*0.14+bwid+3}" y="${bh-d.gym/7*(bh-10)}" width="${bwid}" height="${d.gym/7*(bh-10)}" rx="4" fill="#a99bd0"><title>${d.gym} días de movimiento</title></rect>
+      <rect x="${x+slot*0.14}" y="${bh-d.ok/7*(bh-10)}" width="${bwid}" height="${d.ok/7*(bh-10)}" rx="4" fill="${themeDark()?'rgb(124,198,214)':'#2f6f5d'}"><title>${d.ok} días cumplidos</title></rect>
+      <rect x="${x+slot*0.14+bwid+3}" y="${bh-d.gym/7*(bh-10)}" width="${bwid}" height="${d.gym/7*(bh-10)}" rx="4" fill="${themeDark()?'rgb(243,226,169)':'#a99bd0'}"><title>${d.gym} días de movimiento</title></rect>
       <text x="${x+slot*0.45}" y="${bh+16}" font-size="${F2}" fill="#7d6c7a" font-family="Montserrat" text-anchor="middle">${i===7?(MOB?'hoy':'en curso'):parse(d.ws).getDate()+(MOB?'':' '+MON[parse(d.ws).getMonth()])}</text>`}).join('')}
   </svg>`;
   const lw=W[W.length-1];
