@@ -1472,6 +1472,8 @@ function renderOB(){
     body=`<p class="eyebrow">Paso 7 de 8 · Opcional</p><h2 class="h2" style="margin-top:10px">¿Tienes una <span>fecha en mente?</span></h2><p class="lead">Un viaje, un evento, un cumpleaños… Te mostraremos una cuenta atrás.</p>
     <label class="f"><span>Fecha objetivo</span><input class="in" type="date" data-k="meta" value="${esc(d.meta)}" min="${today()}"></label>
     <label class="f"><span>Nombre de la meta</span><input class="in" data-k="metaNombre" value="${esc(d.metaNombre||'')}" placeholder="Ej. Vacaciones de verano"></label>`;
+    if(OB.editing)body=`<p class="eyebrow">Paso 7 de 8</p><h2 class="h2" style="margin-top:10px">Tus <span>cuentas atrás</span></h2><p class="lead">Ahora puedes tener varias: un viaje, una boda, el verano… Te saldrá siempre la más cercana.</p>
+    <p class="small muted" style="margin-top:12px">Las gestionas desde <b>Retos</b> o desde <b>Mi Espacio → Cuentas atrás</b>. Pulsa «Siguiente» para seguir.</p>`;
   }
   $('#root').innerHTML=`<div class="ob">
     <div class="ob-top"><div class="row between"><div class="logo">${LOGO}<div><b>VUELVE</b><small data-notr>A tu ritmo, hacia ti</small></div></div>
@@ -3889,7 +3891,7 @@ function vEspacio(){
       <div class="tile"><div class="lbl">Alimentación</div><div class="big" style="font-size:20px;margin-top:10px">${fmt(targetFor(u,today()).kcal)}<small> kcal / día</small></div></div>
       <div class="tile"><div class="lbl">Movimiento</div><div class="big" style="font-size:20px;margin-top:10px">${pf.dias.length}<small> días / semana</small></div></div>
       <div class="tile"><div class="lbl">Check-in</div><div class="big" style="font-size:16px;margin-top:10px">Peso semanal</div></div>
-      <div class="tile"><div class="lbl">Meta</div><div class="big" style="font-size:16px;margin-top:10px">${pf.meta?parse(pf.meta).getDate()+' '+MON[parse(pf.meta).getMonth()]+' '+parse(pf.meta).getFullYear():'Sin fecha'}</div></div>
+      <button class="tile" id="espmetas" style="text-align:left;cursor:pointer;border:0;font:inherit"><div class="lbl">Cuentas atrás</div><div class="big" style="font-size:16px;margin-top:10px">${(()=>{const L=metasNorm(pf);return L.length?L.length+(L.length>1?' metas':' meta'):'Añadir'})()}</div></button>
     </div></div>
   <div class="card"><p class="eyebrow">Mis datos</p>
     <table class="calc">
@@ -3898,7 +3900,6 @@ function vEspacio(){
       <tr><td>% grasa</td><td>${pf.grasa!=null?fmt1(pf.grasa)+' %':'Estimado'}</td></tr>
       <tr><td>Actividad</td><td>${ACT.find(a=>a.v==pf.actividad).t}</td></tr>
       <tr><td>Días de entreno</td><td>${[1,2,3,4,5,6,0].filter(i=>pf.dias.includes(i)).map(i=>DOW[i]).join(' · ')||'—'}</td></tr>
-      <tr><td>Meta</td><td>${pf.meta?esc(pf.metaNombre||'Mi meta'):'—'}</td></tr>
     </table>
     <button class="btn block" style="margin-top:16px" id="ed">Editar mis datos</button></div>
   <div class="card"><p class="eyebrow">Estilo de color</p><p class="small muted" style="margin-top:6px">Elige cómo quieres ver Vuelve en este dispositivo.</p>
@@ -3921,7 +3922,7 @@ function vEspacio(){
     <div class="grid2" style="margin-top:14px">${SERVER?'':'<button class="btn ghost" id="lo">Cerrar sesión</button><button class="btn ghost" style="color:var(--warn)" id="dl">Borrar esta cuenta</button>'}</div>
   </div>
   <p class="foot">Vuelve por encima de perfección. Cada registro cuenta.</p>`;
-  $('#ed').onclick=()=>startOnboarding(true);
+  $('#ed').onclick=()=>startOnboarding(true);{const em=$('#espmetas');if(em)em.onclick=()=>metasModal(()=>vEspacio())}
   $('#lo').onclick=logout;
   $$('[data-sw]').forEach(b=>b.onclick=()=>{d.session=null;save();renderAuth('login',b.dataset.sw)});
   $('#dl').onclick=()=>{const m=modal(`<div class="top"><b>Borrar cuenta</b><button class="close">✕</button></div><h3 class="h2" style="font-size:24px;margin-top:12px">¿Borrar <span>esta cuenta?</span></h3><p class="muted" style="margin-top:8px">Se eliminarán todos los registros de ${esc(u.email)}. No se puede deshacer.</p>
@@ -3934,7 +3935,7 @@ function vEspacio(){
   $('#im').onclick=()=>{const m=modal(`<div class="top"><b>Importar copia</b><button class="close">✕</button></div><p class="small muted" style="margin-top:8px">Pega aquí una copia. Sustituirá los registros de esta cuenta.</p><textarea class="in" id="it" style="margin-top:12px"></textarea><button class="btn block" style="margin-top:12px" id="ia">Importar</button>`);
     m.querySelector('#ia').onclick=()=>{try{const x=JSON.parse(m.querySelector('#it').value);if(!x.profile)throw 0;
       Object.assign(u,{profile:x.profile,logs:x.logs||{},weights:x.weights||[],favs:x.favs||[],custom:x.custom||[],off:x.off||[]});save();m.remove();toast('Copia importada ✓');renderApp()}catch(e){toast('La copia no es válida')}}};
-  $$('[data-tema]').forEach(b=>b.onclick=()=>{setTheme(b.dataset.tema);toast(b.dataset.tema==='ciruela'?'Estilo jardín ✓':'Estilo clásico ✓')});
+  $$('button.tema[data-tema]').forEach(b=>b.onclick=()=>{setTheme(b.dataset.tema);toast(b.dataset.tema==='ciruela'?'Estilo jardín ✓':'Estilo clásico ✓')});
   $$('[data-semfin]').forEach(b=>b.onclick=()=>{const fin=+b.dataset.semfin;u.profile.semIni=(fin+1)%7;BAL_WS=null;save();toast('Tu semana ahora termina el '+DOWL[fin]+' ✓');vEspacio()});
 }
 
