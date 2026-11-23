@@ -733,6 +733,7 @@ html .jhero .cj.jbut,html[data-tema=ciruela] .jhero .cj.jbut{color:#f3e2a9!impor
 @media(max-width:640px){.fpnext{flex-direction:column;align-items:stretch}.fpnext .btn{width:100%}}
 .cdsig{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:6px;align-items:center}.cdsig span{font-size:13.5px}.cdsig em{font-style:normal;color:var(--muted);font-size:12px;margin-left:4px}
 .cdadd{display:flex;align-items:center;gap:14px;width:100%;text-align:left;cursor:pointer;border:1.5px dashed #e3c6d7;background:#fffafc}.cdadd .mi{width:26px;height:26px;color:#6c2146;flex-shrink:0}.cdadd b{display:block;font-size:15px;color:var(--ink)}.cdadd small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+.linkb{border:0;background:none;padding:0 0 0 8px;font:inherit;font-size:12.5px;font-weight:700;color:#6c2146;text-decoration:underline;cursor:pointer}
 </style>
 </head>
 <body>
@@ -3895,6 +3896,7 @@ function vEspacio(){
     </div></div>
   <div class="card"><p class="eyebrow">Mis datos</p>
     <table class="calc">
+      ${SERVER?`<tr><td>Usuario</td><td id="espuser">${COM.loaded?(COM.perfil?`@${esc(COM.perfil)} <button class="linkb" id="espuc">Cambiar</button>`:`<button class="btn sm" id="espuc">Crear mi @usuario</button>`):'…'}</td></tr>`:''}
       <tr><td>Sexo</td><td>${pf.sexo}</td></tr><tr><td>Edad</td><td>${pf.edad} años</td></tr>
       <tr><td>Altura</td><td>${pf.altura} cm</td></tr><tr><td>Peso</td><td>${fmt1(pf.peso)} kg</td></tr>
       <tr><td>% grasa</td><td>${pf.grasa!=null?fmt1(pf.grasa)+' %':'Estimado'}</td></tr>
@@ -3923,6 +3925,7 @@ function vEspacio(){
   </div>
   <p class="foot">Vuelve por encima de perfección. Cada registro cuenta.</p>`;
   $('#ed').onclick=()=>startOnboarding(true);{const em=$('#espmetas');if(em)em.onclick=()=>metasModal(()=>vEspacio())}
+  {const uc=$('#espuc');if(uc)uc.onclick=()=>cmElegirUsuario(()=>vEspacio());if(SERVER&&!COM.loaded)cmLoad().then(()=>{if(UI.view==='espacio'&&!SCREEN.busy&&$('#espuser'))vEspacio()})}
   $('#lo').onclick=logout;
   $$('[data-sw]').forEach(b=>b.onclick=()=>{d.session=null;save();renderAuth('login',b.dataset.sw)});
   $('#dl').onclick=()=>{const m=modal(`<div class="top"><b>Borrar cuenta</b><button class="close">✕</button></div><h3 class="h2" style="font-size:24px;margin-top:12px">¿Borrar <span>esta cuenta?</span></h3><p class="muted" style="margin-top:8px">Se eliminarán todos los registros de ${esc(u.email)}. No se puede deshacer.</p>
