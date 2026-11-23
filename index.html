@@ -752,6 +752,7 @@ html .jhero .cj.jbut,html[data-tema=ciruela] .jhero .cj.jbut{color:#f3e2a9!impor
 .rtab.on{border-color:#6c2146;color:#6c2146}.rdot{font-style:normal;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#6c2146;color:#fff;font-size:10.5px;font-weight:800;display:inline-grid;place-items:center}
 .rinvl{margin-top:10px}
 .rsec .btn{white-space:nowrap;flex-shrink:0}.cmhoy{white-space:normal;text-align:center}
+.rtab.on{background:#fff}.cmc{position:relative}.cmcdot{position:absolute;top:16px;right:16px;width:11px;height:11px;border-radius:50%;background:#d33a4c;box-shadow:0 0 0 3px #fff}
 </style>
 </head>
 <body>
@@ -2126,13 +2127,13 @@ function cmRetoCard(r,mio){
   if(mio){
     const hoyTxt=r.tipo==='calorias'||r.tipo==='movimiento'?`<span class="cmhoy ${pr.hoy?'ok':''}">${pr.hoy?'Hoy cumplido':r.tipo==='movimiento'&&r.meta?`Hoy ${pr.valor||0} / ${r.meta} min`:'Se marca con tu diario'}</span>`:r.tipo==='pasos'?`<span class="cmhoy ${pr.hoy?'ok':''}">Hoy ${fmt(pr.valor)} / ${fmt(r.meta)}</span>`
       :`<button class="cmhoy ${pr.hoy?'ok':''}" data-cmhoy="${r.id}">${pr.hoy?'Hoy cumplido':'Marcar hoy'}</button>`;
-    return `<div class="card cmc mio"><div class="cmh"><span class="cmi">${ico(r.icono,'mi')}</span><div style="flex:1;min-width:0">${priv}<p class="cj">${pr.fin?'Reto terminado':`Día ${pr.dia} de ${r.dias}`}</p><div class="cmt">${esc(r.titulo)}</div></div>${nuevo?'<span class="cmnew">Nuevos mensajes</span>':''}</div>
+    return `<div class="card cmc mio">${nuevo?'<i class="cmcdot" title="Mensajes nuevos"></i>':''}<div class="cmh"><span class="cmi">${ico(r.icono,'mi')}</span><div style="flex:1;min-width:0">${priv}<p class="cj">${pr.fin?'Reto terminado':`Día ${pr.dia} de ${r.dias}`}</p><div class="cmt">${esc(r.titulo)}</div></div></div>
       <div class="bar" style="margin-top:12px"><i style="width:${Math.min(pr.hechos/r.dias*100,100)}%"></i></div>
       <div class="cmst"><span><b>${pr.hechos}</b>/${r.dias} días cumplidos</span><span><b>${pr.racha}</b> de racha</span><span><b>${r.n_miembros}</b> en la piña</span></div>
       <div class="cmact">${pr.fin?`<button class="btn soft" data-cmrei="${r.id}">Empezar de nuevo</button>`:hoyTxt}<button class="btn" data-cmchat="${r.id}">Abrir chat</button></div></div>`;
   }
   const inv=COM.inv&&COM.inv[r.id];
-  return `<div class="card cmc ${inv?'inv':''}"><div class="cmh"><span class="cmi">${ico(r.icono,'mi')}</span><div style="flex:1;min-width:0">${inv?`<p class="cj">${cmNom(inv)} te invita</p>`:''}${priv}${r.oficial?'<span class="cmof">Reto Vuelve</span>':inv?'':`<p class="cj">Creado por ${cmNom(r.creada_por)}</p>`}<div class="cmt">${esc(r.titulo)}</div></div></div>
+  return `<div class="card cmc ${inv?'inv':''}">${inv?'<i class="cmcdot" title="Invitación nueva"></i>':''}<div class="cmh"><span class="cmi">${ico(r.icono,'mi')}</span><div style="flex:1;min-width:0">${inv?`<p class="cj">${cmNom(inv)} te invita</p>`:''}${priv}${r.oficial?'<span class="cmof">Reto Vuelve</span>':inv?'':`<p class="cj">Creado por ${cmNom(r.creada_por)}</p>`}<div class="cmt">${esc(r.titulo)}</div></div></div>
     ${r.descripcion?`<p class="small muted" style="margin-top:8px">${esc(r.descripcion)}</p>`:''}
     <div class="cmst"><span>${r.dias} días</span><span>${meta}</span><span><b>${r.n_miembros}</b> ${r.n_miembros===1?'participante':'participantes'}</span></div>
     <div class="cmact"><button class="btn" data-cmjoin="${r.id}">Unirme</button>${inv?`<button class="btn soft" data-cmno="${r.id}">Ahora no</button>`:''}${LIB.admin||r.creada_por===SBUID?`<button class="btn ghost" data-cmhide="${r.id}">${LIB.admin?'Ocultar':'Borrar'}</button>`:''}</div></div>`;
@@ -2141,7 +2142,7 @@ function cmSeccion(el,modo){
   if(!el)return;modo=modo||el.dataset.modo||'todo';el.dataset.modo=modo;
   if(!SERVER){el.innerHTML=`<div class="card cmintro"><p class="small muted">La comunidad funciona con tu cuenta online de Vuelve.</p></div>`;return}
   if(!COM.loaded){el.innerHTML=`<div class="card cmintro"><p class="small muted">Cargando la comunidad…</p></div>`;cmLoad().then(()=>{if(document.body.contains(el))cmSeccion(el,modo)});return}
-  const mios=COM.retos.filter(r=>COM.mios[r.id]),invs=COM.retos.filter(r=>!COM.mios[r.id]&&COM.inv&&COM.inv[r.id]),otros=COM.retos.filter(r=>!COM.mios[r.id]&&!r.oculto&&!r.privado&&!(COM.inv&&COM.inv[r.id]));
+  const nuevoR=r=>COM.ult[r.id]&&COM.ult[r.id]>(cmLeido()[r.id]||'')?1:0,mios=COM.retos.filter(r=>COM.mios[r.id]).sort((a,b)=>nuevoR(b)-nuevoR(a)),invs=COM.retos.filter(r=>!COM.mios[r.id]&&COM.inv&&COM.inv[r.id]),otros=COM.retos.filter(r=>!COM.mios[r.id]&&!r.oculto&&!r.privado&&!(COM.inv&&COM.inv[r.id]));
   const quien=COM.perfil?`<p class="small" style="margin-top:4px">Eres <b>@${esc(COM.perfil)}</b> · <a href="#" id="cmuser">Cambiar</a></p>`:'';
   const verMis=modo!=='com',verCom=modo!=='mis';
   el.innerHTML=`<div class="rsec"><div><p class="cj">${modo==='mis'?'Mis retos':modo==='com'?'Comunidad':'Retos'}</p><h2 class="ct">${modo==='mis'?'Tus retos y tus invitaciones':modo==='com'?'Únete a otras mujeres':'Únete o crea el tuyo'}</h2>${quien}</div>${!COM.vetada?`<button class="btn sm" id="cmnew">+ Crear reto</button>`:''}</div>
