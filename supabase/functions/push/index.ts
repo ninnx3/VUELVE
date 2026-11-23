@@ -24,7 +24,8 @@ async function cfg() {
 async function enviar(c: any, userIds: string[], payload: Record<string, unknown>) {
   if (!userIds.length) return 0;
   webpush.setVapidDetails("mailto:ninnx3@gmail.com", c.vapid_pub, c.vapid_priv);
-  const { data: subs } = await sb.from("push_subs").select("endpoint,p256dh,auth,user_id").in("user_id", userIds);
+  const { data: subs, error: se } = await sb.from("push_subs").select("endpoint,p256dh,auth,user_id").in("user_id", userIds);
+  console.log("enviar", JSON.stringify({ dest: userIds.length, subs: (subs || []).length, se: se && se.message }));
   let n = 0;
   await Promise.all((subs || []).map(async (s: any) => {
     try {
@@ -32,7 +33,7 @@ async function enviar(c: any, userIds: string[], payload: Record<string, unknown
       n++;
     } catch (e: any) {
       if (e && (e.statusCode === 404 || e.statusCode === 410)) await sb.from("push_subs").delete().eq("endpoint", s.endpoint);
-      else console.warn("push", e && e.statusCode, e && e.body);
+      else console.error("push fallo", e && e.statusCode, e && e.body, String(e));
     }
   }));
   return n;
@@ -58,6 +59,7 @@ Deno.serve(async (req) => {
         sb.from("comunidad_bloqueos").select("user_id").eq("bloqueada", m.user_id),
         sb.from("push_prefs").select("user_id,chat_on").eq("chat_on", false)]);
       const fuera = new Set([...(bl || []).map((x: any) => x.user_id), ...(pr || []).map((x: any) => x.user_id), m.user_id]);
+      console.log("mensaje", JSON.stringify({ miembros: (mm || []).length, bl: (bl || []).length, pr: (pr || []).length }));
       const dest = (mm || []).filter((x: any) => !x.silenciado && !fuera.has(x.user_id)).map((x: any) => x.user_id);
       const n = await enviar(c, dest, { title: `${await nombre(m.user_id)} · ${r?.titulo || "Tu reto"}`, body: corta(m.texto), tag: "reto-" + m.reto_id, url: "./?v=retos&reto=" + m.reto_id });
       return json({ ok: true, n });
