@@ -756,6 +756,7 @@ html .jhero .cj.jbut,html[data-tema=ciruela] .jhero .cj.jbut{color:#f3e2a9!impor
 .rsec0{margin-top:24px;padding-top:0}
 .pguia{margin:10px 0 0 18px;font-size:13.5px;line-height:1.6}.pguia li{margin-top:4px}
 .pban{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:#fff;border:1.5px solid #e3c6d7}.pban b{display:block;font-size:14px}.pban small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}@media(max-width:640px){.pban{flex-direction:column;align-items:stretch}.pban .row .btn{flex:1}}
+.pios{margin-top:14px;background:#f6eef4;border-radius:14px;padding:14px}.pstep{display:flex;gap:10px;align-items:flex-start;margin-top:10px}.pstep>span{width:22px;height:22px;border-radius:50%;background:#6c2146;color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center;flex-shrink:0}.pstep p{margin:0;font-size:13.5px;line-height:1.45}
 </style>
 </head>
 <body>
@@ -2108,6 +2109,32 @@ function bindPushBanner(redraw){
   const v=$('#pbver');if(v)v.onclick=()=>{UI.view='espacio';renderApp();setTimeout(()=>{const c=$('#pushcard');if(c)c.scrollIntoView({behavior:'smooth',block:'center'})},200)};
   const n=$('#pbno');if(n)n.onclick=()=>{try{localStorage.setItem('vuelve_push_no','1')}catch(e){}redraw()};
 }
+function pushPopup(next){
+  next=next||(()=>{});const e=pushEstado();if(!(e==='off'||e==='ios-instalar'))return next();
+  let st={n:0,t:0};try{st=JSON.parse(localStorage.getItem('vuelve_push_pop')||'{"n":0,"t":0}')}catch(x){}
+  if(st.n>=3||Date.now()-st.t<7*864e5)return next();
+  const go=(k=0)=>{if(document.querySelector('.modal')&&k<60)return setTimeout(()=>go(k+1),500);
+    st={n:st.n+1,t:Date.now()};try{localStorage.setItem('vuelve_push_pop',JSON.stringify(st))}catch(x){}
+    const ios=e==='ios-instalar';
+    const m=modal(`<div class="top"><b>${ico('compartido','mi')} Avisos de Vuelve</b><button class="close">✕</button></div>
+      <h2 class="h2" style="margin-top:12px">¿Te avisamos <span>en el móvil?</span></h2>
+      <p class="muted" style="margin-top:8px">Cuando te escriban en tus retos, te inviten, tu compañera te mande un toque o te toque tu foto de progreso, aunque tengas Vuelve cerrada.</p>
+      ${ios?`<div class="pios"><p class="small" style="font-weight:700">En iPhone, primero añade Vuelve a tu pantalla de inicio:</p>
+        <div class="pstep"><span>1</span><p>Abre Vuelve en <b>Safari</b>.</p></div>
+        <div class="pstep"><span>2</span><p>Toca <b>Compartir</b>: el cuadrado con la flecha hacia arriba, abajo en la pantalla.</p></div>
+        <div class="pstep"><span>3</span><p>Elige <b>«Añadir a pantalla de inicio»</b> y pulsa <b>Añadir</b>.</p></div>
+        <div class="pstep"><span>4</span><p>Abre Vuelve desde el icono nuevo. Te volveremos a preguntar y solo tendrás que tocar <b>Activar</b>.</p></div></div>
+        <button class="btn block" id="ppok" style="margin-top:16px">Entendido</button>`
+      :`<button class="btn block" id="ppon" style="margin-top:16px">Activar avisos</button>`}
+      <button class="btn ghost block" id="ppno" style="margin-top:8px">Ahora no</button>
+      <p class="tiny muted" style="margin-top:10px">Puedes cambiarlo cuando quieras en Mi Espacio.</p>`);
+    const fin=()=>{m.remove()};
+    const ob=new MutationObserver(()=>{if(!document.body.contains(m)){ob.disconnect();next()}});ob.observe(document.body,{childList:true});
+    if(m.querySelector('#ppon'))m.querySelector('#ppon').onclick=async()=>{const b=m.querySelector('#ppon');b.disabled=true;b.textContent='Activando…';await pushActivar();fin()};
+    if(m.querySelector('#ppok'))m.querySelector('#ppok').onclick=fin;
+    m.querySelector('#ppno').onclick=fin;};
+  go();
+}
 function pushAbrirDesdeURL(){
   try{const q=new URLSearchParams(location.search),v=q.get('v'),reto=q.get('reto');if(!v)return;
     history.replaceState(null,'',location.pathname+location.hash);
@@ -2796,7 +2823,7 @@ function renderResult(){
   </div>`;
   bindObInvites(renderResult);
   $('#goback').onclick=()=>{if(typeof OB==='undefined'||!OB||!OB.d)startOnboarding(true);OB.step=STEPS.length-1;renderOB();scrollTo(0,0)};
-  $('#go').onclick=()=>{SCREEN.busy=false;UI.view='diario';UI.date=today();UI.range='dia';renderApp();pedirUsuarioInicio(()=>{})};
+  $('#go').onclick=()=>{SCREEN.busy=false;UI.view='diario';UI.date=today();UI.range='dia';renderApp();pedirUsuarioInicio(()=>pushPopup())};
 }
 
 /* =========================================================
@@ -4941,7 +4968,7 @@ function route(){
   renderApp();
   if(SERVER&&!PUSH.inited){PUSH.inited=true;pushInit()}
   pushAbrirDesdeURL();
-  if(!maybeCheckin())pedirUsuarioInicio(()=>{if(SERVER&&!FOTOS.loaded)Promise.race([fotosLoad(),new Promise(r=>setTimeout(r,2500))]).catch(()=>{}).then(()=>{if(me()?.profile&&!document.querySelector('.modal'))maybeWelcome()});else if(!document.querySelector('.modal'))maybeWelcome()});
+  if(!maybeCheckin())pedirUsuarioInicio(()=>pushPopup(()=>{if(SERVER&&!FOTOS.loaded)Promise.race([fotosLoad(),new Promise(r=>setTimeout(r,2500))]).catch(()=>{}).then(()=>{if(me()?.profile&&!document.querySelector('.modal'))maybeWelcome()});else if(!document.querySelector('.modal'))maybeWelcome()}));
   maybeCelebrarAyer();
   programarPromoFotos();
   maybeBalanceSemana();
