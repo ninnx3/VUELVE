@@ -109,6 +109,8 @@ nav.tabs{transform:translateZ(0)}
 .h1 span,.h2 span{font-weight:500;color:var(--accent)}
 .h2{font-size:28px;font-weight:800;letter-spacing:-1.2px;line-height:1.1}
 .h3{font-size:16px;font-weight:700}
+.obmv .tag{border-radius:14px;text-align:left;padding:11px 14px;line-height:1.3}.obmv .tag small{display:block;font-weight:500;opacity:.75;font-size:11.5px;margin-top:2px}
+.malo{background:linear-gradient(135deg,#f6eef3,#fbf9f4);border:1px solid #ead9e2}.malo b{color:var(--plum)}
 @media(max-width:560px){.h1{font-size:34px;letter-spacing:-1.6px}.h2{font-size:24px}}
 
 /* Buttons */
@@ -1143,6 +1145,25 @@ const ACT=[
   {v:1.55,t:'Actividad moderada',s:'Ejercicio 3–5 días por semana',ic:ico('act-moderada','mi')},
   {v:1.725,t:'Actividad alta',s:'Ejercicio intenso 6–7 días por semana',ic:ico('act-alta','mi')}
 ];
+/* Movilidad y respuesta al esfuerzo (opcionales, sin diagnósticos).
+   Orientativo: en personas que usan silla de ruedas el gasto en reposo y el factor de actividad son más bajos
+   (p. ej. factor de corrección ≈ 1,15 en lesión medular; gasto en reposo hasta ~20 % menor en tetraplejia). */
+const MOVIL=[
+  {v:'normal',t:'Camino sin problema',s:'Me muevo con normalidad'},
+  {v:'ayuda',t:'Camino, pero poco o con ayuda',s:'Bastón, muletas, andador o distancias cortas'},
+  {v:'silla',t:'Me desplazo en silla de ruedas',s:'Brazos y tronco sin limitación'},
+  {v:'silla2',t:'Silla de ruedas, con movilidad limitada también en brazos o tronco',s:'El esfuerzo físico es más reducido'}
+];
+const MOVIL_F={ayuda:{t:1,a:.05,max:1.55},silla:{t:.95,a:.1,max:1.55},silla2:{t:.85,a:.1,max:1.375}};
+const ENERGIA=[
+  {v:'alta',t:'Aguanto bien entrenos intensos',s:''},
+  {v:'moderada',t:'Prefiero un esfuerzo moderado',s:''},
+  {v:'suave',t:'Necesito ir suave',s:'Me canso o me duele con facilidad'},
+  {v:'variable',t:'Depende del día',s:'Tengo días buenos y días malos'}
+];
+const esSilla=pf=>pf&&(pf.movilidad==='silla'||pf.movilidad==='silla2');
+const vaSuave=pf=>pf&&(pf.energia==='suave'||pf.energia==='variable');
+const adaptado=pf=>pf&&((pf.movilidad&&pf.movilidad!=='normal')||vaSuave(pf));
 
 /* ---------- ALGORITMO (instrucciones del proyecto) ---------- */
 function estimarGrasa(imc,edad,sexo){
@@ -1160,17 +1181,19 @@ function calcular(pf){
   const grasaEst=tiene?Number(pf.grasa):estimarGrasa(imc,edad,sexo);
   const obes=(sexo==='Mujer'&&grasaEst>30)||(sexo==='Hombre'&&grasaEst>25)||imc>30;
   const pc=obes?altura-100:peso;
-  const tmb=sexo==='Mujer'?(10*peso)+(6.25*altura)-(5*edad)-161:(10*peso)+(6.25*altura)-(5*edad)+5;
-  const get=tmb*actividad;
-  const M=sexo==='Mujer';
+  const MV=MOVIL_F[pf.movilidad];
+  const tmb=(sexo==='Mujer'?(10*peso)+(6.25*altura)-(5*edad)-161:(10*peso)+(6.25*altura)-(5*edad)+5)*(MV?MV.t:1);
+  const actEf=MV?Math.max(1.1,Math.min(actividad,MV.max)-MV.a):actividad;
+  const get=tmb*actEf;
+  const M=sexo==='Mujer',sv=vaSuave(pf),F=x=>sv&&x<1?Math.max(x,0.9):x;
   let plan;
   switch(Number(pf.enfoque)){
-    case 1: plan={normal:macros(get*0.80,pc*2.0,pc*0.8)};break;
-    case 2: plan={normal:macros(get*0.90,pc*2.2,M?pc*0.8:pc*0.9)};break;
+    case 1: plan={normal:macros(get*F(0.80),pc*2.0,pc*0.8)};break;
+    case 2: plan={normal:macros(get*F(0.90),pc*2.2,M?pc*0.8:pc*0.9)};break;
     case 3: plan={normal:macros(get*1.05,M?pc*1.8:pc*2.0,pc*1.0)};break;
-    case 4: plan={normal:macros(get*0.85,M?pc*2.3:pc*2.4,pc*0.7)};break;
+    case 4: plan={normal:macros(get*F(0.85),M?pc*2.3:pc*2.4,pc*0.7)};break;
     case 5: plan={normal:macros(get*1.0,pc*1.8,pc*1.0)};break;
-    case 6: plan={entreno:macros(get*1.0,pc*2.0,pc*0.7),descanso:macros(get*0.85,pc*2.0,pc*1.1)};break;
+    case 6: plan={entreno:macros(get*1.0,pc*2.0,pc*0.7),descanso:macros(get*F(0.85),pc*2.0,pc*1.1)};break;
   }
   const cE=pf.ciclo;if(cE&&cE.activo&&cE.etapa==='embarazo'&&cE.fpp&&sexo==='Mujer'){
     const sem=Math.floor((280-Math.round((parse(cE.fpp)-parse(today()))/864e5))/7),T=EMB_TRI[sem<14?1:sem<28?2:3],k=get+T.kcal;
@@ -1178,7 +1201,7 @@ function calcular(pf){
     return {imc,grasa:grasaEst,grasaFuente:tiene?'indicada':'estimada',estado:obes?'Obesidad':'Normal',pc,tmb:R(tmb),get:R(get),plan:pe,embarazo:true,
       ajuste:{modo:'embarazo',recomendado:R(k),kcal:R(k),kgSem:0,avisos:['Estás embarazada: calculamos tu mantenimiento más la energía extra de tu trimestre (+'+T.kcal+' kcal), sin déficit. '+EMB_AVISO]}};
   }
-  return aplicarAjuste(pf,{imc,grasa:grasaEst,grasaFuente:tiene?'indicada':'estimada',estado:obes?'Obesidad':'Normal',pc,tmb:R(tmb),get:R(get),plan});
+  return aplicarAjuste(pf,{imc,grasa:grasaEst,grasaFuente:tiene?'indicada':'estimada',estado:obes?'Obesidad':'Normal',pc,tmb:R(tmb),get:R(get),plan,actEf,movAj:!!MV,suave:sv&&[1,2,4,6].includes(Number(pf.enfoque))});
 }
 
 /* ---------- Ajuste de calorías (ritmo elegido por la persona) ---------- */
@@ -1507,7 +1530,12 @@ function renderOB(){
   }
   if(s==='actividad'){
     body=`<p class="eyebrow">Paso 4 de 8</p><h2 class="h2" style="margin-top:10px">¿Cómo de activa es <span>tu semana?</span></h2><p class="lead">Piensa en una semana normal, con trabajo y ejercicio.</p>
-    <div class="opts">${ACT.map(a=>`<button class="opt ${d.actividad==a.v?'on':''}" data-k="actividad" data-v="${a.v}"><span class="ic">${a.ic}</span><div><b>${a.t}</b><small>${a.s}</small></div></button>`).join('')}</div>`;
+    <div class="opts">${ACT.map(a=>`<button class="opt ${d.actividad==a.v?'on':''}" data-k="actividad" data-v="${a.v}"><span class="ic">${a.ic}</span><div><b>${a.t}</b><small>${a.s}</small></div></button>`).join('')}</div>
+    <h3 class="h3" style="margin-top:26px">¿Cómo te mueves en tu día a día? <span class="tiny muted" style="font-weight:600">· Opcional</span></h3>
+    <div class="optc obmv" style="margin-top:10px">${MOVIL.map(a=>`<button class="tag ${d.movilidad===a.v?'on':''}" data-k="movilidad" data-v="${a.v}" title="${esc(a.s)}">${a.t}</button>`).join('')}</div>
+    <h3 class="h3" style="margin-top:20px">¿Cómo responde tu cuerpo al esfuerzo? <span class="tiny muted" style="font-weight:600">· Opcional</span></h3>
+    <div class="optc obmv" style="margin-top:10px">${ENERGIA.map(a=>`<button class="tag ${d.energia===a.v?'on':''}" data-k="energia" data-v="${a.v}">${a.t}${a.s?`<small>${a.s}</small>`:''}</button>`).join('')}</div>
+    <p class="tiny muted" style="margin-top:10px">No te preguntamos por enfermedades: solo cómo te mueves, para ajustar tus calorías y lo que te proponemos. Puedes cambiarlo cuando quieras.</p>`;
     ok=!!d.actividad;
   }
   if(s==='enfoque'){
@@ -1543,7 +1571,7 @@ function renderOB(){
     ${OB.step>(OB.editing?1:0)?'<button class="btn soft" id="obb" style="white-space:nowrap">← Atrás</button>':''}
     <button class="btn block" id="obn" ${ok?'':'disabled'}>${OB.step===tot-1?'Calcular mi plan ✓':OB.step===0?'Empezar →':'Siguiente →'}</button>
   </div></div>`;
-  $$('[data-k][data-v]').forEach(b=>b.onclick=()=>{const k=b.dataset.k;d[k]=k==='sexo'?b.dataset.v:Number(b.dataset.v);renderOB()});
+  $$('[data-k][data-v]').forEach(b=>b.onclick=()=>{const k=b.dataset.k;d[k]=['movilidad','energia'].includes(k)?(d[k]===b.dataset.v?null:b.dataset.v):k==='sexo'?b.dataset.v:Number(b.dataset.v);renderOB()});
   if(s==='ritmo')ajusteEditor($('#ajw'),d,v=>{$('#obn').disabled=!v});
   $$('input[data-k]').forEach(i=>i.oninput=()=>{const k=i.dataset.k;d[k]=(i.type==='number'||i.classList.contains('dec')||i.inputMode==='numeric')?num(i.value):i.value;
     const s=STEPS[OB.step];if(s==='cuerpo')$('#obn').disabled=!okCuerpo(d);if(s==='grasa')$('#obn').disabled=!okGrasa(d)});
@@ -2278,7 +2306,7 @@ const INTRO=[
   {ic:'menu-espacio',ey:'Te damos la bienvenida',t:'Cuídate a tu ritmo,',s:'sin obsesionarte.',d:'Vuelve es tu diario de comida, movimiento y bienestar, para ellas y para ellos, y para cada etapa de tu vida. Te enseñamos lo que puedes hacer en un minuto.'},
   {ic:'nav-diario',ey:'Comidas',t:'Apunta lo que comes',s:'en segundos.',d:'Calculamos tus calorías y macros según tu objetivo. Busca alimentos de supermercados de España, escanea etiquetas, guarda favoritos y tus propias recetas.'},
   {ic:'nav-menu',ey:'Menú',t:'Tu mealprep',s:'de la semana.',d:'Crea un menú semanal ajustado a tus macros y gustos, con recetas paso a paso y la lista de la compra hecha. Cocinas una vez y comes bien toda la semana.'},
-  {ic:'nav-movimiento',ey:'Movimiento',t:'Muévete',s:'a tu manera.',d:'Gimnasio, pilates, paseos o pasos del móvil: lo registras y tus calorías del día se ajustan solas.'},
+  {ic:'nav-movimiento',ey:'Movimiento',t:'Muévete',s:'a tu manera.',d:'Gimnasio, pilates, paseos, agua o entreno sentado: Vuelve se adapta a tu cuerpo y a tu forma de moverte, también si vas en silla o necesitas ir suave.'},
   {ic:'corazon',ey:'Tu cuerpo',t:'En cada etapa',s:'de tu vida.',d:'Si tienes ciclo, te contamos cómo cambian tu energía y tu ánimo en cada fase. Y también te acompañamos en el embarazo, la perimenopausia y la menopausia.'},
   {ic:'compartido',ey:'Retos',t:'En equipo',s:'es más fácil.',d:'Haz retos con tus amigos y amigas o con la comunidad, animaos en el chat y mandaos toques. Nunca se comparten tu peso, tus medidas ni tus fotos.'},
   {ic:'nav-progreso',ey:'Progreso',t:'Mira lo lejos',s:'que has llegado.',d:'Tu peso, tus medidas y tus fotos de progreso, que solo ves tú. Y tu plan, siempre a mano.'}
@@ -2348,9 +2376,10 @@ function cmDia(r,m){return Math.floor((parse(today())-parse(m.unido))/864e5)+1}
 function cmProg(r,uid){
   const m=(COM.miembros[r.id]||[]).find(x=>x.user_id===uid)||(uid===SBUID?COM.mios[r.id]:null);if(!m)return null;
   const fin=addDays(m.unido,r.dias-1),cs=(COM.checks[r.id]||[]).filter(c=>c.user_id===uid&&c.hecho&&c.fecha>=m.unido&&c.fecha<=fin);
-  const set=new Set(cs.map(c=>c.fecha));let racha=0,d=set.has(today())?today():addDays(today(),-1);while(set.has(d)&&d>=m.unido){racha++;d=addDays(d,-1)}
+  const set=new Set(cs.map(c=>c.fecha)),pz=new Set((COM.checks[r.id]||[]).filter(c=>c.user_id===uid&&!c.hecho&&c.valor===-1).map(c=>c.fecha));
+  let racha=0,d=set.has(today())||pz.has(today())?today():addDays(today(),-1);while((set.has(d)||pz.has(d))&&d>=m.unido){if(set.has(d))racha++;d=addDays(d,-1)}
   const hoy=(COM.checks[r.id]||[]).find(c=>c.user_id===uid&&c.fecha===today());
-  return {dia:Math.min(cmDia(r,m),r.dias),hechos:set.size,racha,hoy:!!(hoy&&hoy.hecho),valor:hoy?.valor||0,fin:today()>fin,unido:m.unido};
+  return {dia:Math.min(cmDia(r,m),r.dias),hechos:set.size,racha,hoy:!!(hoy&&hoy.hecho),pausa:!!(hoy&&!hoy.hecho&&hoy.valor===-1),valor:hoy&&hoy.valor>0?hoy.valor:0,fin:today()>fin,unido:m.unido};
 }
 async function cmNombres(ids){
   const f=[...new Set(ids)].filter(i=>i&&!COM.nombres[i]);if(!f.length)return;
@@ -2388,16 +2417,24 @@ async function cmLoad(force){
   }catch(e){console.warn('comunidad',e)}finally{COM.loading=null}})();
   return COM.loading;
 }
+async function cmPausa(on){
+  if(!SERVER||!SBUID||!COM.loaded)return;let n=0;
+  for(const r of COM.retos){if(!COM.mios[r.id])continue;const pr=cmProg(r,SBUID);if(!pr||pr.fin||pr.hoy)continue;
+    const row={reto_id:r.id,user_id:SBUID,fecha:today(),hecho:false,valor:on?-1:null};
+    const {error}=await SB.from('comunidad_checkins').upsert(row);if(error){console.warn(error);continue}
+    const C=COM.checks[r.id]=COM.checks[r.id]||[],i=C.findIndex(c=>c.user_id===SBUID&&c.fecha===today());if(i>=0)C[i]=row;else C.push(row);n++}
+  if(n&&on)toast('Tus retos quedan en pausa hoy 💜');
+}
 async function cmSyncPasos(){
   const u=me(),p=+(dayLog(u,today()).pasos)||0;let n=0;
   for(const r of COM.retos){if(!COM.mios[r.id]||!['calorias','movimiento'].includes(r.tipo))continue;const pr=cmProg(r,SBUID);if(!pr)continue;
     for(const d of [addDays(today(),-1),today()]){if(d<pr.unido)continue;const L=u.logs[d];
       const mins=L?(L.mov||[]).reduce((a,m)=>a+(+m.min||0),0):0,h=r.tipo==='calorias'?!!(L&&(L.foods||[]).length&&dayStatus(u,d)==='ok'):r.meta?mins>=r.meta:!!(L&&(L.mov||[]).length);
-      const C=COM.checks[r.id]=COM.checks[r.id]||[],cur=C.find(c=>c.user_id===SBUID&&c.fecha===d);if(cur?(cur.hecho===h&&(r.tipo!=='movimiento'||cur.valor===mins)):!h&&!mins)continue;
+      const C=COM.checks[r.id]=COM.checks[r.id]||[],cur=C.find(c=>c.user_id===SBUID&&c.fecha===d);if(cur&&cur.valor===-1&&!h)continue;if(cur?(cur.hecho===h&&(r.tipo!=='movimiento'||cur.valor===mins)):!h&&!mins)continue;
       const row={reto_id:r.id,user_id:SBUID,fecha:d,hecho:h,valor:r.tipo==='movimiento'?mins:null};const {error}=await SB.from('comunidad_checkins').upsert(row);if(error){console.warn(error);continue}
       const i=C.findIndex(c=>c.user_id===SBUID&&c.fecha===d);if(i>=0)C[i]={...C[i],...row};else C.push(row);n++}}
   for(const r of COM.retos){if(r.tipo!=='pasos'||!COM.mios[r.id])continue;const pr=cmProg(r,SBUID);if(!pr||pr.fin)continue;
-    const cur=(COM.checks[r.id]||[]).find(c=>c.user_id===SBUID&&c.fecha===today());if(cur&&cur.valor===p)continue;if(!p&&!cur)continue;
+    const cur=(COM.checks[r.id]||[]).find(c=>c.user_id===SBUID&&c.fecha===today());if(cur&&cur.valor===p)continue;if(cur&&cur.valor===-1&&p<(r.meta||6000))continue;if(!p&&!cur)continue;
     const row={reto_id:r.id,user_id:SBUID,fecha:today(),valor:p,hecho:p>=(r.meta||6000)};
     const {error}=await SB.from('comunidad_checkins').upsert(row);if(error){console.warn(error);continue}
     const L=COM.checks[r.id]=COM.checks[r.id]||[];const i=L.findIndex(c=>c.user_id===SBUID&&c.fecha===today());if(i>=0)L[i]=row;else L.push(row);n++;
@@ -2408,7 +2445,7 @@ function cmRetoCard(r,mio){
   const pr=mio?cmProg(r,SBUID):null,nuevo=mio&&COM.ult[r.id]&&COM.ult[r.id]>(cmLeido()[r.id]||'');
   const meta=CM_TIPOS[r.tipo]?.(r)||'Hábito diario',priv=r.privado?`<span class="cmpriv">${ico('privado','mi')} Privado</span> `:'';
   if(mio){
-    const hoyTxt=r.tipo==='calorias'||r.tipo==='movimiento'?`<span class="cmhoy ${pr.hoy?'ok':''}">${pr.hoy?'Hoy cumplido':r.tipo==='movimiento'&&r.meta?`Hoy ${pr.valor||0} / ${r.meta} min`:'Se marca con tu diario'}</span>`:r.tipo==='pasos'?`<span class="cmhoy ${pr.hoy?'ok':''}">Hoy ${fmt(pr.valor)} / ${fmt(r.meta)}</span>`
+    const hoyTxt=pr.pausa&&['calorias','movimiento','pasos'].includes(r.tipo)?`<span class="cmhoy">Hoy en pausa</span>`:r.tipo==='calorias'||r.tipo==='movimiento'?`<span class="cmhoy ${pr.hoy?'ok':''}">${pr.hoy?'Hoy cumplido':r.tipo==='movimiento'&&r.meta?`Hoy ${pr.valor||0} / ${r.meta} min`:'Se marca con tu diario'}</span>`:r.tipo==='pasos'?`<span class="cmhoy ${pr.hoy?'ok':''}">Hoy ${fmt(pr.valor)} / ${fmt(r.meta)}</span>`
       :`<button class="cmhoy ${pr.hoy?'ok':''}" data-cmhoy="${r.id}">${pr.hoy?'Hoy cumplido':'Marcar hoy'}</button>`;
     return `<div class="card cmc mio">${nuevo?'<i class="cmcdot" title="Mensajes nuevos"></i>':''}<div class="cmh"><span class="cmi">${ico(r.icono,'mi')}</span><div style="flex:1;min-width:0">${priv}<p class="cj">${pr.fin?'Reto terminado':`Día ${pr.dia} de ${r.dias}`}</p><div class="cmt">${esc(r.titulo)}</div></div></div>
       <div class="bar" style="margin-top:12px"><i style="width:${Math.min(pr.hechos/r.dias*100,100)}%"></i></div>
@@ -2954,8 +2991,9 @@ function calcTable(r,pf){
     <tr><td>Tu peso (para las calorías)</td><td>${fmt1(+pf.peso)} kg</td></tr>
     <tr><td>Peso de referencia para proteína y grasa</td><td>${fmt1(r.pc)} kg${r.estado==='Obesidad'?' <span class="tiny muted">(altura − 100)</span>':''}</td></tr>
     <tr><td>Metabolismo basal (TMB)</td><td>${fmt(r.tmb)} kcal</td></tr>
-    <tr><td>Mantenimiento (TMB × ${String(pf.actividad).replace('.',',')})</td><td>${fmt(r.get)} kcal</td></tr>
+    <tr><td>Mantenimiento (TMB × ${String(Math.round((r.actEf||pf.actividad)*1000)/1000).replace('.',',')})</td><td>${fmt(r.get)} kcal</td></tr>
   </table>
+  ${r.movAj||r.suave?`<div class="tip" style="background:var(--lilac);color:var(--plum)">${ico('corazon','mi')} <b>Adaptado a cómo te mueves.</b> ${r.movAj?'Con tu movilidad el cuerpo gasta algo menos en reposo y al moverse, así que usamos un metabolismo y un factor de actividad más bajos. ':''}${r.suave?'Como necesitas ir suave, el déficit es más pequeño (máx. 10 %), para que no pases hambre ni te falte energía. ':''}Es una estimación orientativa: si tu médico, fisio o nutricionista te ha dado otra cifra, ponla en «Ajustar calorías».</div>`:''}
   ${r.estado==='Obesidad'?`<div class="tip" style="background:var(--lilac);color:var(--plum)">ℹ️ <b>¿Por qué ${fmt1(r.pc)} kg y no ${fmt1(+pf.peso)} kg?</b> Cuando el % de grasa supera el ${pf.sexo==='Mujer'?'30':'25'}% (o el IMC pasa de 30), la proteína y la grasa se calculan sobre "altura − 100" para no pedirte más gramos de los que tu músculo necesita. Tus calorías sí usan tu peso real.${r.grasaFuente==='estimada'?' Tu % de grasa es una <b>estimación</b> por IMC: si te has medido (báscula de bioimpedancia, DEXA…), ponlo y el cálculo será más preciso.':''}</div>`:''}
   <p class="tiny muted" style="margin-top:10px">Metabolismo basal con la fórmula Mifflin-St Jeor.</p>`;
 }
@@ -4068,8 +4106,20 @@ const ACTS={
   hiit:{ic:ico('act-pasos-auto','mi'),t:'HIIT / funcional',k:'int',met:{Suave:6,Media:8,Alta:10}},
   clase:{ic:ico('act-clase','mi'),t:'Clase dirigida',k:'int',met:{Suave:4.5,Media:6.5,Alta:8.5}},
   yoga:{ic:ico('act-yoga','mi'),t:'Yoga / pilates',k:'int',met:{Suave:2.5,Media:3,Alta:4}},
-  otro:{ic:ico('act-tiempo','mi'),t:'Otra actividad',k:'int',met:{Suave:3.5,Media:5,Alta:7}}
+  otro:{ic:ico('act-tiempo','mi'),t:'Otra actividad',k:'int',met:{Suave:3.5,Media:5,Alta:7}},
+  // Adaptadas (valores MET orientativos; para silla de ruedas, Wheelchair Compendium 2024)
+  estirar:{ic:ico('act-yoga','mi'),t:'Estiramientos / movilidad',k:'int',met:{Suave:2,Media:2.3,Alta:2.8},ad:1},
+  sentado:{ic:ico('act-fuerza','mi'),t:'Entreno sentado / gomas',k:'int',met:{Suave:2,Media:3,Alta:4},ad:1},
+  agua:{ic:ico('act-ligera','mi'),t:'Agua / aquagym',k:'int',met:{Suave:3,Media:4,Alta:5.5},ad:1},
+  brazos:{ic:ico('act-bici-estatica','mi'),t:'Handbike / ergómetro de brazos',k:'int',met:{Suave:2.5,Media:4,Alta:6},ad:1},
+  silla:{ic:ico('act-tiempo','mi'),t:'Desplazarme en silla',k:'int',met:{Suave:2,Media:3,Alta:4.5},ad:1,silla:1}
 };
+const ACT_PIE=['cinta','caminar','correr','escaladora','eliptica'];
+function actsOrden(pf){
+  const all=Object.keys(ACTS).filter(k=>!(esSilla(pf)&&ACT_PIE.includes(k))&&!(ACTS[k].silla&&!esSilla(pf)));
+  if(!adaptado(pf))return {top:all.filter(k=>!ACTS[k].ad||k==='estirar'||k==='agua'),mas:all.filter(k=>ACTS[k].ad&&k!=='estirar'&&k!=='agua')};
+  return {top:all.filter(k=>ACTS[k].ad||k==='yoga'),mas:all.filter(k=>!ACTS[k].ad&&k!=='yoga')};
+}
 const MAQUINAS=['Prensa de piernas','Sentadilla','Hip thrust','Peso muerto rumano','Zancadas','Extensión de cuádriceps','Curl femoral','Abductores (máquina)','Aductores (máquina)','Patada de glúteo en polea',
   'Press banca','Press inclinado','Aperturas / pec deck','Jalón al pecho','Remo sentado en polea','Remo con mancuerna','Press de hombro','Elevaciones laterales','Face pull',
   'Curl de bíceps','Tríceps en polea','Fondos asistidos','Dominadas asistidas','Crunch abdominal','Plancha','Elevación de piernas'];
@@ -4111,7 +4161,7 @@ function vMov(){
   const u=me(),log=peekLog(u,UI.date),ws=weekStart(UI.date);
   const days=[...Array(7)].map((_,i)=>addDays(ws,i));
   const done=days.filter(d=>(u.logs[d]?.mov||[]).length).length,goal=u.profile.dias.length;
-  const tot=log.mov.reduce((a,m)=>a+exKcalM(u,m),0)+pasosKcal(u,log),mins=log.mov.reduce((a,m)=>a+(+m.min||0),0),pasos=+log.pasos||0,objP=+u.profile.objPasos||8000;
+  const tot=log.mov.reduce((a,m)=>a+exKcalM(u,m),0)+pasosKcal(u,log),mins=log.mov.reduce((a,m)=>a+(+m.min||0),0),pasos=+log.pasos||0,objP=+u.profile.objPasos||8000,objM=+u.profile.objMin||30;
   $('#view').innerHTML=heroHTML('Movimiento','Mueve el','cuerpo.')+`
   <div class="datenav"><button class="ar" id="dp">←</button><div class="t"><b>${dateTitle(UI.date)}</b><small>${UI.date===today()?'Hoy':'Registro del día'}</small></div><button class="ar" id="dn">→</button></div>
   <div class="card"><div class="row between movwk"><div><p class="eyebrow">Esta semana</p><div style="font-size:30px;font-weight:800;letter-spacing:-1.2px;margin-top:4px">${done}<span style="font-weight:500;color:var(--accent)"> / ${goal} días</span></div></div>
@@ -4121,7 +4171,13 @@ function vMov(){
   <div class="grid2" style="margin-top:14px">
     <div class="tile"><div class="lbl">Quemadas hoy</div><div class="big">${fmt(tot)}<small> kcal</small></div></div>
     <div class="tile"><div class="lbl">Tiempo activo</div><div class="big">${fmt(mins)}<small> min</small></div></div></div>
-  <div class="card" style="padding:18px">
+${esSilla(u.profile)?`  <div class="card" style="padding:18px">
+    <div class="row between"><p class="eyebrow">${ico('act-tiempo','mi')} Minutos activos</p><button class="small" id="mobj" style="color:var(--plum);font-weight:700">Objetivo: ${objM} min</button></div>
+    <div style="font-size:30px;font-weight:800;letter-spacing:-1.2px;margin-top:6px">${fmt(mins)}<span style="font-weight:500;color:var(--accent)"> / ${objM} min</span></div>
+    <div class="minibar" style="margin-top:12px"><i style="width:${Math.min(mins/objM*100,100)}%;background:${mins>=objM?'var(--base)':'var(--plum)'}"></i></div>
+    <p class="small muted" style="margin-top:8px">${mins>=objM?ico('confeti','mi')+' ¡Objetivo de hoy cumplido!':'Suma cualquier actividad: desplazarte en silla, gomas, brazos, agua…'}</p>
+  </div>
+`:`  <div class="card" style="padding:18px">
     <div class="row between"><p class="eyebrow">${ico('act-pasos','mi')} Pasos del día</p><button class="small" id="pobj" style="color:var(--plum);font-weight:700">Objetivo: ${fmt(objP)}</button></div>
     <div class="row" style="margin-top:10px;gap:8px"><input class="in" id="ppas" type="text" inputmode="numeric" placeholder="Ej. 8500" value="${pasos||''}" style="font-size:20px;font-weight:800">
       <button class="btn" id="psave" style="padding:12px 16px">Guardar</button></div>
@@ -4129,6 +4185,11 @@ function vMov(){
     <p class="small muted" style="margin-top:8px">${log.pasosAuto?ico('act-pasos-auto','mi')+' ':''}${pasos?`${fmt(pasos)} pasos · ${fmt1(pasosKm(u,pasos))} km · ${fmt(pasosKcal(u,log))} kcal${pasos>=objP?' · '+ico('confeti','mi')+' ¡objetivo cumplido!':` · te faltan ${fmt(objP-pasos)}`}`:'Copia los pasos que marca la app Salud de tu iPhone o tu reloj.'}</p>
     ${SERVER?`<button class="btn ghost block" style="margin-top:12px" id="pauto">${ico('act-pasos-auto','mi')} ${PAUTO.estado?'Pasos automáticos activados':'Que lleguen solos desde mi iPhone'}</button>`:''}
   </div>
+`}
+  ${log.malo?`<div class="card malo"><p class="eyebrow">${ico('corazon','mi')} Hoy toca ir suave</p>
+    <p class="small" style="margin-top:8px;line-height:1.6">Descansar también es cuidarte. Si te apetece, unos minutos de estiramientos suaves pueden sentar bien; si no, no pasa nada. Tus retos quedan en pausa hoy y no pierdes la racha.</p>
+    <div class="row" style="gap:8px;margin-top:12px;flex-wrap:wrap">${log.mov.some(x=>x.tipo==='estirar')?'':'<button class="btn sm" id="malo5">Apuntar 5 min de estiramientos</button>'}<button class="btn ghost sm" id="malox">Hoy ya estoy mejor</button></div></div>`
+    :`<button class="btn ghost block" style="margin-top:14px" id="malo">${ico('corazon','mi')} Hoy es un día malo</button>`}
   <button class="btn block" style="margin-top:14px" id="madd">+ Añadir actividad</button>
   <div class="card"><p class="eyebrow">Actividad del día</p>
     ${log.mov.length?log.mov.map((x,i)=>{const A=ACTS[x.tipo];return `<div class="item" style="align-items:center"><span class="actic">${A?A.ic:ico('act-ligera','mi')}</span><div class="n"><b>${esc(x.t)}</b><small>${esc(movDetail(x))}</small>
@@ -4142,8 +4203,17 @@ function vMov(){
   const savePasos=()=>{const v=Math.round(num($('#ppas').value)||0);if(v<0||v>150000){toast('Número de pasos no válido');return}
     const lg=dayLog(u,UI.date),antes=lg.pasos||0,obj=u.profile.objPasos||8000;lg.pasos=v||undefined;save();vMov();
     if(v>=obj&&antes<obj)celebrate('act-pasos','¡Objetivo de pasos cumplido!',`${fmt(v)} pasos hoy`,{n:110,ms:3200});else toast(v?'Pasos guardados ✓':'Pasos borrados')};
-  $('#psave').onclick=savePasos;$('#ppas').onkeydown=e=>{if(e.key==='Enter')savePasos()};
-  $('#pobj').onclick=()=>{const m=modal(`<div class="top"><b>Objetivo de pasos</b><button class="close">✕</button></div>
+  if($('#psave')){$('#psave').onclick=savePasos;$('#ppas').onkeydown=e=>{if(e.key==='Enter')savePasos()}}
+  if($('#mobj'))$('#mobj').onclick=()=>{const m=modal(`<div class="top"><b>Minutos activos al día</b><button class="close">✕</button></div>
+    <label class="f"><span>Minutos</span><input class="in" id="mo" type="text" inputmode="numeric" value="${objM}"></label>
+    <div class="optc three" style="margin-top:10px">${[15,30,45].map(n=>`<button class="tag" data-mo="${n}">${n} min</button>`).join('')}</div>
+    <button class="btn block" style="margin-top:14px" id="mos">Guardar</button>`);
+    m.querySelectorAll('[data-mo]').forEach(b=>b.onclick=()=>m.querySelector('#mo').value=b.dataset.mo);
+    m.querySelector('#mos').onclick=()=>{const v=Math.round(num(m.querySelector('#mo').value)||0);if(!(v>=5&&v<=300)){toast('Entre 5 y 300');return}u.profile.objMin=v;save();m.remove();vMov()}};
+  if($('#malo'))$('#malo').onclick=()=>{dayLog(u,UI.date).malo=true;save();vMov();if(UI.date===today())cmPausa(true)};
+  if($('#malox'))$('#malox').onclick=()=>{delete dayLog(u,UI.date).malo;save();vMov();if(UI.date===today())cmPausa(false)};
+  if($('#malo5'))$('#malo5').onclick=()=>{const e={tipo:'estirar',t:ACTS.estirar.t,min:5,int:'Suave'};e.kcal=Math.round(movKcal(e,+u.profile.peso));dayLog(u,UI.date).mov.push(e);save();vMov();toast('5 minutos apuntados. Bien hecho 💜')};
+  if($('#pobj'))$('#pobj').onclick=()=>{const m=modal(`<div class="top"><b>Objetivo de pasos</b><button class="close">✕</button></div>
     <label class="f"><span>Pasos al día</span><input class="in" id="po" type="text" inputmode="numeric" value="${objP}"></label>
     <div class="optc three" style="margin-top:10px">${[6000,8000,10000].map(n=>`<button class="tag" data-po="${n}">${fmt(n)}</button>`).join('')}</div>
     <button class="btn block" style="margin-top:14px" id="pos">Guardar</button>`);
@@ -4161,7 +4231,10 @@ function openActividad(editIdx){
   const field=(id,label,val,ph,mode='decimal')=>`<label class="f" style="margin-top:10px"><span>${label}</span><input class="in dec" id="${id}" type="text" inputmode="${mode}" value="${esc(dec(val))}" placeholder="${ph}"></label>`;
   const pickTipo=()=>{
     m.querySelector('#atit').textContent='¿Qué has hecho?';
-    ab().innerHTML=`<div class="grid2" style="margin-top:14px">${Object.entries(ACTS).map(([k,a])=>`<button class="opt" data-tp="${k}" style="padding:12px;flex-direction:column;align-items:flex-start;gap:6px"><span style="font-size:24px">${a.ic}</span><b style="font-size:13px">${a.t}</b></button>`).join('')}</div>`;
+    const O=actsOrden(u.profile),bt=k=>{const a=ACTS[k];return `<button class="opt" data-tp="${k}" style="padding:12px;flex-direction:column;align-items:flex-start;gap:6px"><span style="font-size:24px">${a.ic}</span><b style="font-size:13px">${a.t}</b></button>`};
+    ab().innerHTML=adaptado(u.profile)?`<p class="eyebrow" style="margin-top:14px">Para ti</p><div class="grid2" style="margin-top:8px">${O.top.map(bt).join('')}</div>
+      <details style="margin-top:14px"><summary class="small" style="font-weight:700;color:var(--plum);cursor:pointer">Más actividades</summary><div class="grid2" style="margin-top:8px">${O.mas.map(bt).join('')}</div></details>`
+      :`<div class="grid2" style="margin-top:14px">${[...O.top,...O.mas].map(bt).join('')}</div>`;
     ab().querySelectorAll('[data-tp]').forEach(b=>b.onclick=()=>{st.tipo=b.dataset.tp;if(ACTS[st.tipo].k==='aire'&&!st.vel)st.vel=ACTS[st.tipo].v;form()});
   };
   const read=()=>{const g=id=>{const e=ab().querySelector('#'+id);return e?num(e.value):''};
@@ -4417,6 +4490,8 @@ function vEspacio(){
       <tr><td>Altura</td><td>${pf.altura} cm</td></tr><tr><td>Peso</td><td>${fmt1(pf.peso)} kg</td></tr>
       <tr><td>% grasa</td><td>${pf.grasa!=null?fmt1(pf.grasa)+' %':'Estimado'}</td></tr>
       <tr><td>Actividad</td><td>${ACT.find(a=>a.v==pf.actividad).t}</td></tr>
+      ${pf.movilidad?`<tr><td>Movilidad</td><td>${MOVIL.find(a=>a.v===pf.movilidad)?.t||''}</td></tr>`:''}
+      ${pf.energia?`<tr><td>Esfuerzo</td><td>${ENERGIA.find(a=>a.v===pf.energia)?.t||''}</td></tr>`:''}
       <tr><td>Días de entreno</td><td>${[1,2,3,4,5,6,0].filter(i=>pf.dias.includes(i)).map(i=>DOW[i]).join(' · ')||'—'}</td></tr>
     </table>
     <button class="btn block" style="margin-top:16px" id="ed">Editar mis datos</button></div>
