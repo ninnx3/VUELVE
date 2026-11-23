@@ -760,6 +760,16 @@ html .jhero .cj.jbut,html[data-tema=ciruela] .jhero .cj.jbut{color:#f3e2a9!impor
 .usst{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:14px}.usst div{background:#f6eef4;border-radius:12px;padding:10px;text-align:center}.usst b{display:block;font-size:22px;color:#6c2146}.usst small{font-size:11.5px;color:var(--muted)}
 .usl{margin-top:10px}.usr{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}.usr .av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:800;flex-shrink:0}.usr b{display:block;font-size:14px}.usem{display:block;font-size:13px;color:#6c2146;word-break:break-all}.usr small{display:block;font-size:11.5px;color:var(--muted);margin-top:2px}.ustags{display:flex;flex-direction:column;gap:4px;align-items:flex-end}
 @media(max-width:640px){.usst{grid-template-columns:repeat(2,minmax(0,1fr))}.usr{align-items:flex-start}}
+.embtop{display:flex;gap:20px;align-items:center;flex-wrap:wrap;background:linear-gradient(135deg,#fbf3e2,#f6e4ea 55%,#efdbe8);border:0}
+.embfruta{width:120px;height:120px;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 10px 30px -14px rgba(108,33,70,.45);flex-shrink:0}.embfruta span{font-size:64px;line-height:1}
+.embbar{position:relative;height:8px;border-radius:8px;background:#fff;margin-top:14px;overflow:visible}.embbar i{display:block;height:100%;border-radius:8px;background:linear-gradient(90deg,#c995c6,#6c2146)}.embbar span{position:absolute;top:-2px;width:2px;height:12px;background:#e3c6d7}
+.embtri{display:flex;justify-content:space-between;margin-top:4px}.embtri small{font-size:11px;color:var(--muted)}
+.embkcal{font-size:14px;margin-top:10px}.embkcal b{font-size:22px;color:#6c2146}.embkcal small{color:var(--muted)}
+.embcaf{margin-top:14px;padding:10px 12px;border-radius:12px;background:#e8f0ed}.embcaf.over{background:#fbe4e6}.embcaf b{display:block;font-size:13.5px}.embcaf small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.embries{margin-top:12px;padding:10px 12px;border-radius:12px;background:#fbf3e2}.embries b{font-size:13.5px}.embries p{margin:6px 0 0;font-size:12.5px;line-height:1.45}
+.embevit{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}.embevit div{background:#f6eef4;border-radius:12px;padding:12px}.embevit b{display:block;font-size:13.5px}.embevit small{display:block;font-size:12px;color:var(--muted);margin-top:3px;line-height:1.4}
+.embsem{display:flex;gap:8px;overflow-x:auto;margin-top:12px;padding-bottom:6px;scrollbar-width:thin}.embsem div{flex:0 0 74px;text-align:center;border-radius:14px;background:#f6eef4;padding:10px 4px}.embsem div.on{background:#6c2146;color:#fff}.embsem span{font-size:26px;display:block}.embsem b{display:block;font-size:14px}.embsem small{display:block;font-size:10.5px;line-height:1.2;opacity:.8}
+@media(max-width:640px){.embevit{grid-template-columns:1fr}.embtop{flex-direction:column;text-align:center}.embfruta{margin:0 auto}}
 </style>
 </head>
 <body>
@@ -1151,6 +1161,12 @@ function calcular(pf){
     case 4: plan={normal:macros(get*0.85,M?pc*2.3:pc*2.4,pc*0.7)};break;
     case 5: plan={normal:macros(get*1.0,pc*1.8,pc*1.0)};break;
     case 6: plan={entreno:macros(get*1.0,pc*2.0,pc*0.7),descanso:macros(get*0.85,pc*2.0,pc*1.1)};break;
+  }
+  const cE=pf.ciclo;if(cE&&cE.activo&&cE.etapa==='embarazo'&&cE.fpp&&sexo==='Mujer'){
+    const sem=Math.floor((280-Math.round((parse(cE.fpp)-parse(today()))/864e5))/7),T=EMB_TRI[sem<14?1:sem<28?2:3],k=get+T.kcal;
+    const pe={normal:macros(k,pc*1.5+T.p,pc*1.0)};
+    return {imc,grasa:grasaEst,grasaFuente:tiene?'indicada':'estimada',estado:obes?'Obesidad':'Normal',pc,tmb:R(tmb),get:R(get),plan:pe,embarazo:true,
+      ajuste:{modo:'embarazo',recomendado:R(k),kcal:R(k),kgSem:0,avisos:['Estás embarazada: calculamos tu mantenimiento más la energía extra de tu trimestre (+'+T.kcal+' kcal), sin déficit. '+EMB_AVISO]}};
   }
   return aplicarAjuste(pf,{imc,grasa:grasaEst,grasaFuente:tiene?'indicada':'estimada',estado:obes?'Obesidad':'Normal',pc,tmb:R(tmb),get:R(get),plan});
 }
@@ -1662,7 +1678,7 @@ const CICLO_FASES={
     porque:'Carbohidratos complejos (boniato, pan integral) para la saciedad y el ánimo, magnesio y vitamina B6 (plátano, garbanzos, chocolate negro), calcio (yogur) y menos sal y cafeína si notas hinchazón.',
     mueve:'Fuerza moderada, pilates, caminar o nadar. Si te notas más cansada, baja un poco la intensidad sin culpa.'},
 };
-function cicloDe(u){const c=u.profile&&u.profile.ciclo;return c&&c.activo&&c.etapa!=='post'&&(c.inicios||[]).length?c:null}
+function cicloDe(u){const c=u.profile&&u.profile.ciclo;return c&&c.activo&&c.etapa!=='post'&&c.etapa!=='embarazo'&&(c.inicios||[]).length?c:null}
 function cicloDia(u,date){
   const c=cicloDe(u);if(!c)return null;
   const ini=[...c.inicios].sort().filter(d=>d<=date);if(!ini.length)return null;
@@ -1734,15 +1750,32 @@ function openCicloAjustes(after){
     <p class="tiny muted">Si no lo sabes, deja 28 y 5. Cada vez que marques «Me ha bajado la regla», calculamos tu media real.</p>
     <label class="chk" style="margin-top:12px;display:flex;gap:10px;align-items:center"><input type="checkbox" id="cadj2" ${c.ajusta?'checked':''}> <span class="small">Ajustar mis calorías a mi ciclo: <b>+100 kcal en la fase lútea</b> (sobre todo carbohidratos), cuando el cuerpo gasta un poco más y el hambre sube.</span></label>
     <label class="chk" style="margin-top:12px;display:flex;gap:10px;align-items:center"><input type="checkbox" id="canti" ${c.anti?'checked':''}> <span class="small">Uso anticoncepción hormonal (píldora, anillo, DIU hormonal, implante…)</span></label></div>
+    <div id="cembw" style="display:none">
+      <label class="f" style="margin-top:14px"><span>¿Cómo prefieres indicarlo?</span></label>
+      <div class="cmdias" id="cemm">${[['sem','Semanas'],['mes','Meses'],['fpp','Fecha de parto'],['fur','Última regla']].map(([k,t],i)=>`<button class="cmchip ${i===0?'on':''}" data-em="${k}">${t}</button>`).join('')}</div>
+      <div class="grid2" data-emf="sem"><label class="f"><span>Semanas</span><input class="in dec" id="cesem" inputmode="numeric" placeholder="Ej. 12"></label><label class="f"><span>Días (opcional)</span><input class="in dec" id="cedia" inputmode="numeric" placeholder="0–6"></label></div>
+      <label class="f" data-emf="mes" style="display:none"><span>Meses de embarazo</span><input class="in dec" id="cemes" inputmode="decimal" placeholder="Ej. 3,5"></label>
+      <label class="f" data-emf="fpp" style="display:none"><span>Fecha probable de parto</span><input class="in" type="date" id="cefpp" value="${c.fpp||''}"></label>
+      <label class="f" data-emf="fur" style="display:none"><span>Primer día de tu última regla</span><input class="in" type="date" id="cefur" max="${today()}"></label>
+      <p class="tiny muted" style="margin-top:10px">${EMB_AVISO} Mientras estés embarazada no te proponemos déficit de calorías.</p></div>
     <p class="tiny muted" id="cpostx" style="margin-top:12px;display:none">En esta etapa no hay fases. En Ciclo verás tu diario de síntomas, tus patrones y lo que más te cuida ahora. ${ET_AVISO}</p>
     <p class="tiny muted" style="margin-top:12px">Tus datos del ciclo se guardan en tu cuenta igual que tu diario y solo los ves tú. Vuelve no es un método anticonceptivo ni de diagnóstico.</p>
     <p class="err" id="cerr"></p>
     <button class="btn block" id="csv" style="margin-top:12px">Guardar</button>
     ${c.activo?'<button class="btn ghost block" id="coff" style="margin-top:8px">Desactivar el seguimiento del ciclo</button>':''}`);
-  const vis=()=>{m.querySelector('#cregw').style.display=st.etapa==='post'?'none':'';m.querySelector('#cpostx').style.display=st.etapa==='post'?'':'none'};vis();
+  st.em=c.fpp?'fpp':'sem';
+  const vis=()=>{m.querySelector('#cregw').style.display=st.etapa==='post'||st.etapa==='embarazo'?'none':'';m.querySelector('#cpostx').style.display=st.etapa==='post'?'':'none';m.querySelector('#cembw').style.display=st.etapa==='embarazo'?'':'none';
+    m.querySelectorAll('[data-em]').forEach(x=>x.classList.toggle('on',x.dataset.em===st.em));m.querySelectorAll('[data-emf]').forEach(x=>x.style.display=x.dataset.emf===st.em?'':'none')};vis();
+  m.querySelectorAll('[data-em]').forEach(b=>b.onclick=()=>{st.em=b.dataset.em;vis()});
   m.querySelectorAll('[data-et]').forEach(b=>b.onclick=()=>{st.etapa=b.dataset.et;m.querySelectorAll('[data-et]').forEach(x=>x.classList.toggle('on',x===b));vis()});
   m.querySelector('#csv').onclick=()=>{
     if(st.etapa==='post'){u.profile.ciclo={...c,activo:true,etapa:'post',inicios:c.inicios||[]};save();m.remove();toast('Etapa guardada ✓');after&&after();return}
+    if(st.etapa==='embarazo'){let dias=null;const er=t=>{m.querySelector('#cerr').textContent=t};
+      if(st.em==='sem'){const w=num(m.querySelector('#cesem').value),d=num(m.querySelector('#cedia').value)||0;if(w===''||w<0||w>42)return er('Indica las semanas (de 0 a 42).');dias=Math.round(w)*7+Math.min(6,Math.max(0,Math.round(d)))}
+      else if(st.em==='mes'){const mm=num(m.querySelector('#cemes').value);if(mm===''||mm<0||mm>10)return er('Indica los meses (de 0 a 10).');dias=Math.round(mm*30.4)}
+      else if(st.em==='fpp'){const f=m.querySelector('#cefpp').value;if(!f)return er('Indica la fecha probable de parto.');dias=280-Math.round((parse(f)-parse(today()))/864e5);if(dias<0||dias>300)return er('Revisa la fecha: debería estar en los próximos 9 meses.')}
+      else{const f=m.querySelector('#cefur').value;if(!f)return er('Indica el primer día de tu última regla.');dias=Math.round((parse(today())-parse(f))/864e5);if(dias<0||dias>300)return er('Revisa la fecha de tu última regla.')}
+      u.profile.ciclo={...c,activo:true,etapa:'embarazo',fpp:addDays(today(),280-dias)};save();m.remove();toast('¡Enhorabuena! 💜 Embarazo guardado');after&&after();return}
     const L=m.querySelector('#cl').value,dur=Math.round(num(m.querySelector('#cdur').value)||28),reg=Math.round(num(m.querySelector('#creg').value)||5);
     if(!L){m.querySelector('#cerr').textContent='Indica el primer día de tu última regla.';return}
     if(L>today()){m.querySelector('#cerr').textContent='La fecha no puede ser futura.';return}
@@ -1973,9 +2006,70 @@ function fpComparar(){
   };pinta();
 }
 
+/* ---------- Embarazo ---------- */
+const EMB_AVISO='Información orientativa y general. Cada embarazo es distinto: lo que manda es lo que te indiquen tu matrona y tu ginecóloga.';
+const BEBE=[[4,'una semilla de amapola','🌱','0,1 cm'],[5,'una semilla de sésamo','🌱','0,2 cm'],[6,'una lenteja','🫘','0,5 cm'],[7,'un arándano','🫐','1 cm'],[8,'una frambuesa','🍇','1,6 cm'],[9,'una cereza','🍒','2,3 cm'],[10,'una fresa','🍓','3 cm'],[11,'un higo','🟣','4 cm'],[12,'una lima','🍋','5,4 cm'],[13,'un limón','🍋','7 cm'],[14,'un melocotón','🍑','8,5 cm'],[15,'una manzana','🍎','10 cm'],[16,'un aguacate','🥑','11,5 cm'],[17,'una granada','🔴','13 cm'],[18,'un pimiento','🫑','14 cm'],[19,'un tomate grande','🍅','15 cm'],[20,'un plátano','🍌','25 cm'],[21,'una zanahoria','🥕','27 cm'],[22,'una papaya','🥭','28 cm'],[23,'un pomelo','🍊','29 cm'],[24,'una mazorca de maíz','🌽','30 cm'],[25,'una coliflor','🥦','34 cm'],[26,'una lechuga','🥬','35 cm'],[27,'un brócoli grande','🥦','36 cm'],[28,'una berenjena','🍆','37 cm'],[29,'una calabaza moscada','🎃','38 cm'],[30,'una col','🥬','39 cm'],[31,'un coco','🥥','41 cm'],[32,'una piña pequeña','🍍','42 cm'],[33,'una piña','🍍','43 cm'],[34,'un melón','🍈','45 cm'],[35,'un melón grande','🍈','46 cm'],[36,'una lechuga romana','🥬','47 cm'],[37,'un manojo de acelgas','🥬','48 cm'],[38,'un puerro grande','🌿','49 cm'],[39,'una sandía pequeña','🍉','50 cm'],[40,'una calabaza','🎃','51 cm']];
+const EMB_TRI={1:{t:'Primer trimestre',kcal:70,p:1,txt:'Se forman los órganos principales. Es normal sentir cansancio, náuseas o pechos sensibles.',come:'Ácido fólico (lo suele indicar tu ginecóloga desde antes), comidas pequeñas y frecuentes si tienes náuseas, y mucha agua.',mov:'Si te encuentras bien, puedes seguir moviéndote: caminar, pilates, yoga suave, fuerza ligera. Escucha a tu cuerpo.'},
+  2:{t:'Segundo trimestre',kcal:260,p:8,txt:'Suele ser el trimestre con más energía. Notarás los primeros movimientos del bebé hacia la semana 18–22.',come:'Hierro, calcio y proteína ganan protagonismo. Pescado 3–4 veces por semana, eligiendo los bajos en mercurio.',mov:'Caminar, nadar, pilates o fuerza adaptada. Evita tumbarte boca arriba mucho rato y los deportes con riesgo de caída o golpes.'},
+  3:{t:'Tercer trimestre',kcal:500,p:26,txt:'El bebé gana peso rápido. Pueden aparecer acidez, hinchazón y peor descanso.',come:'Comidas más pequeñas si tienes acidez, omega-3 (pescado azul pequeño) y fibra para el tránsito.',mov:'Movimiento suave y de calidad: paseos, ejercicios de suelo pélvico, respiración y estiramientos.'}};
+const EMB_RIESGO=[[/pez espada|emperador|at[uú]n rojo|tibur[oó]n|caz[oó]n|lucio/i,'Pescado con mucho mercurio: mejor evitarlo en el embarazo.'],[/sushi|sashimi|tartar|ceviche|carpaccio|crudo|ahumado/i,'Crudos o ahumados: riesgo de listeria y otros microorganismos. Mejor bien cocinado.'],[/jam[oó]n (serrano|ib[eé]rico|curado)|chorizo|salchich[oó]n|lomo embuchado|fuet|cecina/i,'Embutidos curados: riesgo de toxoplasma si no son seguros. Pregunta a tu matrona.'],[/leche cruda|sin pasteurizar|camembert|brie|roquefort|queso azul|queso de cabra fresco/i,'Quesos blandos o sin pasteurizar: riesgo de listeria.'],[/pat[eé]|foie/i,'Patés refrigerados: riesgo de listeria.'],[/huevo crudo|mayonesa casera|tiramis[uú]/i,'Huevo crudo: riesgo de salmonella.'],[/vino|cerveza|cava|champ[aá]n|sidra|vermut|ginebra|ron\b|vodka|whisky|licor|sangr[ií]a|mojito|c[oó]ctel/i,'Alcohol: en el embarazo, nada es la cantidad segura.'],[/brotes|alfalfa/i,'Brotes crudos: riesgo de salmonella.']];
+const CAFE=[[/espresso|expreso|caf[eé] solo|cortado/i,65],[/caf[eé]/i,80],[/t[eé] (negro|rojo|verde)|matcha|t[eé]\b/i,35],[/coca.?cola|cola\b|pepsi/i,30],[/energ[eé]tica|red ?bull|monster/i,80],[/chocolate negro/i,20]];
+function embInfo(u){
+  const c=u&&u.profile&&u.profile.ciclo;if(!c||!c.activo||c.etapa!=='embarazo'||!c.fpp)return null;
+  const falta=Math.round((parse(c.fpp)-parse(today()))/864e5),dias=280-falta,sem=Math.floor(dias/7),dia=dias%7;
+  const s=Math.max(1,Math.min(42,sem)),tri=s<14?1:s<28?2:3;
+  const B=BEBE.slice().reverse().find(x=>x[0]<=s)||null;
+  return {fpp:c.fpp,falta,sem:s,dia:Math.max(0,dia),tri,T:EMB_TRI[tri],B,pasada:falta<0};
+}
+const embRiesgo=n=>{const r=EMB_RIESGO.find(([re])=>re.test(n||''));return r?r[1]:null};
+function embCafeina(L){return (L.foods||[]).reduce((a,f)=>{const r=CAFE.find(([re])=>re.test(f.n||''));if(!r)return a;const q=+f.q||0,uq=+f.uq||1;return a+(f.un?r[1]*uq:q>40?r[1]*Math.max(1,q/150):r[1])},0)}
+function embAlertaAlAnadir(n){const u=me();if(!embInfo(u))return;const r=embRiesgo(n);if(r)setTimeout(()=>toast('🤰 '+r),400)}
+function vEmbarazo(){
+  const u=me(),E=embInfo(u);
+  if(!E){$('#view').innerHTML=heroHTML('Embarazo','Tu embarazo,','semana a semana.')+`<div class="card"><p class="small">Cuéntanos de cuántas semanas estás para empezar.</p><button class="btn" id="eset" style="margin-top:12px">Indicar mis semanas</button></div>`;$('#eset').onclick=()=>openCicloAjustes(()=>{UI.view='ciclo';renderApp()});return}
+  const L=dayLog(u,today()),dm=dayMicro(u,L.foods),caf=Math.round(embCafeina(L)),ries=(L.foods||[]).map(f=>[f.n,embRiesgo(f.n)]).filter(x=>x[1]);
+  const pct=Math.min(100,E.sem/40*100),tg=targetFor(u,today()),tt=totals(L.foods);
+  const bar=(lab,v,ref,un,txt)=>`<div class="etob"><div class="mtop"><span class="mn">${lab}</span><span class="mv"><b>${microFmt(v)}</b> ${un} <small>/ ${dec(ref)} ${un}</small></span></div><div class="mbar"><i style="width:${Math.min(100,v/ref*100)}%"></i></div><small>${txt}</small></div>`;
+  $('#view').innerHTML=heroHTML('Embarazo','Tu embarazo,','semana a semana.')+`
+  <div class="card embtop">
+    <div class="embfruta"><span>${E.B?E.B[2]:'🌱'}</span></div>
+    <div style="flex:1;min-width:0">
+      <p class="cj">${E.pasada?'Fecha probable superada':`Semana ${E.sem}${E.dia?` + ${E.dia} día${E.dia>1?'s':''}`:''} · ${E.T.t}`}</p>
+      <h2 class="h2" style="margin-top:4px">${E.B?`Tu bebé es como <span>${E.B[1]}</span>`:'Tu bebé está empezando <span>a crecer</span>'}</h2>
+      <p class="small muted" style="margin-top:6px">${E.B?`Mide unos ${E.B[3]} aproximadamente. `:''}${E.pasada?'Ya has pasado la fecha probable: sigue las indicaciones de tu matrona.':`Faltan ${Math.ceil(E.falta/7)} semanas · fecha probable el ${fmtD(E.fpp)}`}</p>
+      <div class="embbar"><i style="width:${pct}%"></i><span style="left:${14/40*100}%"></span><span style="left:${28/40*100}%"></span></div>
+      <div class="embtri"><small>1.º</small><small>2.º</small><small>3.º trimestre</small></div>
+      <button class="btn ghost sm" id="eadj" style="margin-top:12px">Ajustar semanas</button>
+    </div></div>
+  <div class="cgrid2">
+    <div class="card"><div class="csec0"><h3>${ico('corazon','mi')} Esta etapa</h3><p>${E.T.txt}</p></div><div class="csec"><h3>${ico('comida-almuerzo','mi')} Qué te ayuda a comer</h3><p>${E.T.come}</p></div><div class="csec"><h3>${ico('act-alta','mi')} Movimiento</h3><p>${E.T.mov}</p></div></div>
+    <div class="card"><p class="eyebrow">Tu día de hoy</p>
+      <div class="embkcal"><b>${fmt(tt.k)}</b> / ${fmt(tg.kcal)} kcal <small>· incluye +${E.T.kcal} kcal de tu trimestre</small></div>
+      ${bar('Ácido fólico',dm.t.fol||0,600,'µg','Verdura de hoja verde, legumbres, cítricos. El suplemento te lo indica tu ginecóloga.')}
+      ${bar('Hierro',dm.t.fe||0,16,'mg','Legumbres, carne, huevo. Con vitamina C se absorbe mejor.')}
+      ${bar('Calcio',dm.t.ca||0,1000,'mg','Lácteos pasteurizados, bebidas vegetales enriquecidas, almendras.')}
+      ${bar('Vitamina D',dm.t.vd||0,15,'µg','Pescado azul pequeño, huevo y un rato de sol.')}
+      <div class="embcaf ${caf>200?'over':''}"><b>Cafeína hoy ≈ ${caf} mg</b><small>Máximo recomendado: 200 mg al día (1–2 cafés). Estimación según lo que has apuntado.</small></div>
+      ${ries.length?`<div class="embries"><b>Revisa lo que has apuntado hoy</b>${ries.map(([n,t])=>`<p><b>${esc(n)}:</b> ${t}</p>`).join('')}</div>`:''}
+    </div>
+  </div>
+  <div class="card"><p class="eyebrow">Mejor evitar en el embarazo</p><div class="embevit">
+    <div><b>Pescados con mucho mercurio</b><small>Pez espada o emperador, atún rojo, tiburón (cazón) y lucio.</small></div>
+    <div><b>Crudos y poco hechos</b><small>Carne, pescado, marisco y huevo crudos o poco cocinados; sushi, tartar, ahumados.</small></div>
+    <div><b>Lácteos sin pasteurizar</b><small>Leche cruda y quesos blandos o de corteza enmohecida si no están pasteurizados.</small></div>
+    <div><b>Alcohol</b><small>Ninguna cantidad es segura.</small></div>
+    <div><b>Cafeína</b><small>Como mucho 200 mg al día: café, té, cola, energéticas y chocolate suman.</small></div>
+    <div><b>Higiene en la cocina</b><small>Lava bien frutas y verduras y separa crudos de cocinados.</small></div></div></div>
+  <div class="card"><p class="eyebrow">Tamaño de tu bebé, semana a semana</p><div class="embsem">${BEBE.map(b=>`<div class="${b[0]===E.sem?'on':''}"><span>${b[2]}</span><b>${b[0]}</b><small>${b[1].replace(/^(una?|un manojo de) /,'')}</small></div>`).join('')}</div>
+    <p class="tiny muted" style="margin-top:8px">Medidas aproximadas: cada bebé crece a su ritmo.</p></div>
+  <div class="etaviso">${ico('aviso','mi')}<p>${EMB_AVISO} Mientras estés embarazada no te proponemos déficit de calorías ni objetivos de perder peso.</p></div>`;
+  $('#eadj').onclick=()=>openCicloAjustes(()=>{UI.view='ciclo';renderApp()});
+  setTimeout(()=>{const on=document.querySelector('.embsem .on');if(on)on.scrollIntoView({block:'nearest',inline:'center'})},50);
+}
+
 /* ---------- Etapa: perimenopausia y posmenopausia ---------- */
 const etapaDe=u=>(u&&u.profile&&u.profile.ciclo&&u.profile.ciclo.activo&&u.profile.ciclo.etapa)||'regular';
-const ETAPAS={regular:['Ciclo regular','Tengo la regla con normalidad'],peri:['Perimenopausia','Reglas irregulares, sofocos, cambios de sueño o de ánimo'],post:['Menopausia y posmenopausia','Llevo 12 meses o más sin regla']};
+const ETAPAS={regular:['Ciclo regular','Tengo la regla con normalidad'],embarazo:['Embarazada','Cuéntanos de cuántas semanas estás'],peri:['Perimenopausia','Reglas irregulares, sofocos, cambios de sueño o de ánimo'],post:['Menopausia y posmenopausia','Llevo 12 meses o más sin regla']};
 const SINT=[['sofocos','Sofocos'],['sudores','Sudores nocturnos'],['sueno','Dormir mal'],['niebla','Niebla mental'],['animo','Ánimo bajo o irritable'],['articular','Dolor articular'],['cabeza','Dolor de cabeza']];
 const SINT_N=['Nada','Leve','Media','Fuerte'];
 const ET_AVISO='Todo es orientativo y no sustituye a una consulta médica. Para cifras y recomendaciones ajustadas a ti, habla con tu ginecóloga.';
@@ -2703,6 +2797,7 @@ function cicloICS(u){
 }
 function vCiclo(){
   if(etapaDe(me())==='post')return vEtapa();
+  if(etapaDe(me())==='embarazo')return vEmbarazo();
   const u=me(),c=u.profile.ciclo,cd=cicloDia(u,today());
   const H=heroHTML('Ciclo','Tu ritmo,','tu cuerpo.');
   if(!c||!c.activo||!cd){
@@ -2862,7 +2957,7 @@ function renderApp(){
   </div></header>
   <main class="wrap v-${UI.view}" id="view"></main>
   <nav class="tabs"><div class="in2">
-    ${[['diario',ico('nav-diario',''),'Comidas'],['movimiento',ico('nav-movimiento',''),'Movimiento'],...(me()?.profile?.sexo==='Mujer'?[['ciclo',ico('corazon',''),etapaDe(me())==='post'?'Etapa':'Ciclo']]:[]),['retos',ico('compartido',''),'Retos'],['progreso',ico('nav-progreso',''),'Progreso'],['menu',ico('nav-menu',''),'Menú']].map(([k,i,t])=>{const [l,s]=t.split('|');return `<button data-v="${k}" class="${UI.view===k?'on':''}"><span class="nic">${i}${navDot(k)?'<i class="ndot"></i>':''}</span>${s?`<span class="nav-l">${l}</span><span class="nav-s">${s}</span>`:l}</button>`}).join('')}
+    ${[['diario',ico('nav-diario',''),'Comidas'],['movimiento',ico('nav-movimiento',''),'Movimiento'],...(me()?.profile?.sexo==='Mujer'?[['ciclo',ico('corazon',''),etapaDe(me())==='post'?'Etapa':etapaDe(me())==='embarazo'?'Embarazo':'Ciclo']]:[]),['retos',ico('compartido',''),'Retos'],['progreso',ico('nav-progreso',''),'Progreso'],['menu',ico('nav-menu',''),'Menú']].map(([k,i,t])=>{const [l,s]=t.split('|');return `<button data-v="${k}" class="${UI.view===k?'on':''}"><span class="nic">${i}${navDot(k)?'<i class="ndot"></i>':''}</span>${s?`<span class="nav-l">${l}</span><span class="nav-s">${s}</span>`:l}</button>`}).join('')}
   </div></nav>`;
   $$('nav.tabs button').forEach(b=>b.onclick=()=>{UI.view=b.dataset.v;if(b.dataset.v==='menu'&&MP.screen!=='gen')MP.screen='home';renderApp();scrollTo(0,0)});
   $('#av').onclick=e=>{e.stopPropagation();toggleDD()};
@@ -3539,7 +3634,7 @@ function openAdd(meal0){
       const tg=mb.querySelector('#tog');if(tg)tg.onclick=()=>{const v=mb.querySelector('#qg').value;modo='g';render();mb.querySelector('#qg').value=v;upd()}};
     render();
   };
-  const add=item=>{dayLog(u,UI.date).foods.push({...item,meal});save();added.push({n:item.n,k:item.k||0,meal});toast('Añadido a '+meal+' ✓');UI.showMeals=true;if(UI.view==='diario'){UI.range='dia';vDiario()}
+  const add=item=>{dayLog(u,UI.date).foods.push({...item,meal});save();embAlertaAlAnadir(item.n);added.push({n:item.n,k:item.k||0,meal});toast('Añadido a '+meal+' ✓');UI.showMeals=true;if(UI.view==='diario'){UI.range='dia';vDiario()}
     clearTimeout(offT);q='';qRaw='';offRes=null;offErr='';offLoading=false;if(mode==='qty')mode=qPrev==='codigo'?'codigo':'buscar';if(mode==='menu'||mode==='receta'){mode='buscar';rec=null}draw();const qi=m.querySelector('#q');if(qi&&!matchMedia('(pointer:coarse)').matches)qi.focus();m.querySelector('.sheet').scrollTop=0};
   draw();
 }
