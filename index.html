@@ -753,6 +753,7 @@ html .jhero .cj.jbut,html[data-tema=ciruela] .jhero .cj.jbut{color:#f3e2a9!impor
 .rinvl{margin-top:10px}
 .rsec .btn{white-space:nowrap;flex-shrink:0}.cmhoy{white-space:normal;text-align:center}
 .rtab.on{background:#fff}.cmc{position:relative}.cmcdot{position:absolute;top:16px;right:16px;width:11px;height:11px;border-radius:50%;background:#d33a4c;box-shadow:0 0 0 3px #fff}
+.rsec0{margin-top:24px;padding-top:0}
 </style>
 </head>
 <body>
@@ -1817,7 +1818,6 @@ function vRetosPage(){
     const ca=cuentaAtrasHTML(u.profile);if(ca)P.insertAdjacentHTML('beforeend',ca);
     if(conPareja||(JT.loaded&&juntasInv(u).length))P.appendChild(jfrag);
     P.insertAdjacentHTML('beforeend','<div id="cmsec"></div>');
-    if(retosOf(u).length||pendingInvites(u).length){P.insertAdjacentHTML('beforeend',`<div class="rsec"><div><p class="cj">Retos con puntos</p><h2 class="ct">Tus retos por email</h2></div></div>`);P.appendChild(frag)}
     bindCuentaAtras(()=>vRetosPage());
     const el=P.querySelector('#cmsec');cmSeccion(el,'mis');if(COM.loaded&&SERVER)cmSyncPasos().then(n=>{if(n&&document.body.contains(el))cmSeccion(el,'mis')}).catch(()=>{});
   }else if(t==='com'){
@@ -2145,17 +2145,18 @@ function cmSeccion(el,modo){
   const nuevoR=r=>COM.ult[r.id]&&COM.ult[r.id]>(cmLeido()[r.id]||'')?1:0,mios=COM.retos.filter(r=>COM.mios[r.id]).sort((a,b)=>nuevoR(b)-nuevoR(a)),invs=COM.retos.filter(r=>!COM.mios[r.id]&&COM.inv&&COM.inv[r.id]),otros=COM.retos.filter(r=>!COM.mios[r.id]&&!r.oculto&&!r.privado&&!(COM.inv&&COM.inv[r.id]));
   const quien=COM.perfil?`<p class="small" style="margin-top:4px">Eres <b>@${esc(COM.perfil)}</b> · <a href="#" id="cmuser">Cambiar</a></p>`:'';
   const verMis=modo!=='com',verCom=modo!=='mis';
-  el.innerHTML=`<div class="rsec"><div><p class="cj">${modo==='mis'?'Mis retos':modo==='com'?'Comunidad':'Retos'}</p><h2 class="ct">${modo==='mis'?'Tus retos y tus invitaciones':modo==='com'?'Únete a otras mujeres':'Únete o crea el tuyo'}</h2>${quien}</div>${!COM.vetada?`<button class="btn sm" id="cmnew">+ Crear reto</button>`:''}</div>
+  el.innerHTML=`${modo==='mis'?'<div class="rsec rsec0"></div>':`<div class="rsec"><div><p class="cj">${modo==='mis'?'Mis retos':modo==='com'?'Comunidad':'Retos'}</p><h2 class="ct">${modo==='mis'?'Tus retos y tus invitaciones':modo==='com'?'Únete a otras mujeres':'Únete o crea el tuyo'}</h2>${quien}</div>${!COM.vetada?`<button class="btn sm" id="cmnew">+ Crear reto</button>`:''}</div>`}
     ${COM.vetada?`<div class="card cwarn"><span class="cic">${ico('aviso','mi')}</span><div style="flex:1"><b>Tu cuenta no puede participar en la comunidad</b><p class="small muted">Si crees que es un error, escríbenos.</p></div></div>`:''}
     ${!COM.perfil&&!COM.vetada?`<div class="card cmintro"><span class="cmi big">${ico('compartido','mi')}</span><div style="flex:1"><h3 class="h3">Únete a otras mujeres en un reto</h3><p class="small muted" style="margin-top:6px">Elige un nombre de usuario, apúntate a un reto y animaos en el chat del grupo. Nadie verá tu email ni tu diario: solo tu @usuario y cómo vas en el reto.</p><button class="btn" id="cmuser" style="margin-top:14px">Elegir mi nombre de usuario</button></div></div>`:''}
     ${LIB.admin?`<button class="btn soft block" id="cmmod" style="margin-top:12px">${ico('aviso','mi')} Moderación${COM.reportes?` · ${COM.reportes} reporte${COM.reportes>1?'s':''} pendiente${COM.reportes>1?'s':''}`:''}</button>`:''}
     ${verMis&&invs.length?`<p class="eyebrow" style="margin:18px 0 10px">Te han invitado</p><div class="cmg">${invs.map(r=>cmRetoCard(r,false)).join('')}</div>`:''}
-    ${verMis&&modo==='mis'&&!mios.length&&!invs.length&&COM.perfil?`<div class="card cmintro"><p class="small muted">Aún no estás en ningún reto. Crea uno o únete a uno de la comunidad.</p><button class="btn soft sm" id="cmgocom">Ver retos de la comunidad</button></div>`:''}
-    ${verMis&&mios.length?`<p class="eyebrow" style="margin:18px 0 10px">Tus retos</p><div class="cmg">${mios.map(r=>cmRetoCard(r,true)).join('')}</div>`:''}
+    ${verMis&&modo==='mis'&&!mios.length&&!invs.length&&COM.perfil?`<div class="card cmintro"><p class="small muted">Aún no estás en ningún reto. Crea uno o únete a uno de la comunidad.</p><div class="row" style="gap:8px;margin-top:10px;flex-wrap:wrap"><button class="btn sm" id="cmnew2">+ Crear reto</button><button class="btn soft sm" id="cmgocom">Ver retos de la comunidad</button></div></div>`:''}
+    ${verMis&&mios.length?`<p class="eyebrow" style="margin:18px 0 10px">Retos</p><div class="cmg">${mios.map(r=>cmRetoCard(r,true)).join('')}</div>`:''}
     ${verCom&&otros.length?`<p class="eyebrow" style="margin:18px 0 10px">Retos públicos de la comunidad</p><div class="cmg">${otros.map(r=>cmRetoCard(r,false)).join('')}</div>`:''}`;
   setTimeout(renderNavDot,0);setTimeout(rtabsRefresh,0);
   const re=()=>cmSeccion(el,modo);
   {const g=el.querySelector('#cmgocom');if(g)g.onclick=()=>{UI.rtab='com';vRetosPage();scrollTo(0,0)}}
+  {const c2=el.querySelector('#cmnew2');if(c2)c2.onclick=()=>cmCrear(re)}
   el.querySelectorAll('#cmuser').forEach(a=>a.onclick=e=>{e.preventDefault();cmElegirUsuario(re)});
   if(el.querySelector('#cmnew'))el.querySelector('#cmnew').onclick=()=>COM.perfil?cmCrear(re):cmElegirUsuario(()=>cmCrear(re));
   el.querySelectorAll('[data-cmno]').forEach(b=>b.onclick=async()=>{await SB.from('comunidad_invitaciones').delete().eq('reto_id',b.dataset.cmno).eq('user_id',SBUID);delete COM.inv[b.dataset.cmno];re()});
