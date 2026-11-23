@@ -680,6 +680,12 @@ html[data-tema=ciruela] .fc-t{color:#3c383a}
 html .eyebrow,html .cj,html .msub,html .welcome .eyebrow{text-transform:uppercase;font-weight:700;letter-spacing:2.2px}
 html .card>p.eyebrow:first-child,html .card>.row.between>p.eyebrow:first-child,html #balcard>p.eyebrow:first-child{font-size:22px!important;letter-spacing:-.5px!important;text-transform:none!important;color:var(--ink)!important;font-weight:800!important;line-height:1.2}
 html .ct,html .csec h3,html .csec0 h3,html .cpt,html .mtit,html .h3{color:var(--ink)!important}
+.chigh{grid-template-columns:repeat(5,minmax(0,1fr))}.hhorm{grid-column:span 2;align-items:stretch}.hhorm small{text-align:center}
+.hgraph{width:100%;height:86px;display:block}.hleg{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 10px;font-size:11px;font-weight:600}.hleg span{display:inline-flex;align-items:center;gap:4px}.hleg i{width:8px;height:8px;border-radius:50%}.hleg em{font-style:normal;opacity:.7;font-weight:500}
+.hent2 b{font-size:13.5px}
+.hlist{margin-top:10px;display:flex;flex-direction:column;gap:6px}.hlist div{display:flex;gap:8px;align-items:flex-start}.hlist i{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:7px}.hlist p{margin:0!important;font-size:13.5px}
+@media(max-width:640px){.chigh{grid-template-columns:repeat(2,minmax(0,1fr))}.hhorm,.hent2{grid-column:span 2}}
+html[data-tema=ciruela] .chigh .hleg{color:#3c383a}html[data-tema=ciruela] .chigh .hent2 b{color:#6c2146}
 </style>
 </head>
 <body>
@@ -1856,14 +1862,30 @@ const CICLO_EXTRA={
   ovulatoria:{caras:['muy_bien'],entreno:['Marcas de fuerza','HIIT','Clases en grupo'],mov:'Máxima',movT:'Tu mejor momento'},
   lutea:{caras:['regular','mal'],entreno:['Fuerza moderada','Pilates','Caminar'],mov:'Moderada',movT:'Sin culpa si bajas'}
 };
+const HORM=[['e','Estrógeno','#915a92','Da energía, mejora el ánimo y la piel y ayuda a construir músculo.'],['p','Progesterona','#6c2146','Calma y prepara el cuerpo; sube la temperatura, el hambre y la retención de líquidos.'],['lh','LH','#527f7e','Su pico dispara la ovulación.'],['fsh','FSH','#c9a35c','Hace madurar los folículos al inicio del ciclo.']];
+function hormNivel(k,d,dur,reg){const ov=dur-14,g=(x,m,s)=>Math.exp(-((x-m)**2)/(2*s*s));
+  if(k==='e')return Math.min(1,.12+.88*g(d,ov-1,3.2)+.42*g(d,ov+7,3.6));
+  if(k==='p')return Math.min(1,.05+.95*g(d,ov+7,3.4));
+  if(k==='lh')return Math.min(1,.06+.94*g(d,ov,.9));
+  return Math.min(1,.18+.32*g(d,3,3)+.5*g(d,ov,1.1));}
+function hormGraph(cd){
+  const W=260,H=96,pad=4,dur=cd.dur,x=d=>pad+(d-1)/(dur-1)*(W-2*pad),y=v=>H-6-v*(H-14);
+  const paths=HORM.map(([k,n,col])=>{let pts=[];for(let d=1;d<=dur;d+=.5)pts.push([x(d),y(hormNivel(k,d,dur,cd.reg))]);
+    const line=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+    return `<path d="${line} L${x(dur).toFixed(1)} ${H-6} L${x(1).toFixed(1)} ${H-6} Z" fill="${col}" fill-opacity=".22"/><path d="${line}" fill="none" stroke="${col}" stroke-width="2" stroke-linecap="round"/>`}).join('');
+  const cx=x(Math.min(cd.dia,dur));
+  const lvl=v=>v>.66?'alto':v>.33?'medio':'bajo';
+  return `<svg class="hgraph" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">${paths}<line x1="${cx}" x2="${cx}" y1="4" y2="${H-6}" stroke="#3c383a" stroke-width="1.5" stroke-dasharray="3 3"/><circle cx="${cx}" cy="4" r="3.5" fill="#3c383a"/></svg>
+    <div class="hleg">${HORM.map(([k,n,col])=>`<span><i style="background:${col}"></i>${n} <em>${lvl(hormNivel(k,Math.min(cd.dia,dur),dur,cd.reg))}</em></span>`).join('')}</div>`;
+}
 function cicloHighlights(cd){
   const X=CICLO_EXTRA[cd.f],F=cd.F;
   const caras=ANIMOS.map(a=>`<span class="hcara ${X.caras.includes(a[0])?'on':''}" title="${a[2]}">${a[1]}</span>`).join('');
   return `<div class="chigh">
     <div class="hbox"><small>Energía</small>${cicloEnergia(F.e)}<b>${['','Muy baja','Baja','Media','Alta','Muy alta'][F.e]}</b></div>
     <div class="hbox"><small>Ánimo</small><div class="hcaras">${caras}</div><b>${X.caras.includes('muy_bien')?'Más alegre':'Más sensible'}</b></div>
-    <div class="hbox"><small>Entreno</small><div class="hent">${X.entreno.map(t=>`<span>${t}</span>`).join('')}</div></div>
-    <div class="hbox"><small>Movimiento</small><span class="hmov">${ico(F.e>=4?'act-alta':F.e===3?'act-moderada':'act-ligera','mi')}</span><b>${X.mov}</b><i>${X.movT}</i></div>
+    <div class="hbox hhorm"><small>Nivel hormonal · hoy</small>${hormGraph(cd)}</div>
+    <div class="hbox hent2"><small>Entreno</small><span class="hmov">${ico(F.e>=4?'act-alta':F.e===3?'act-moderada':'act-ligera','mi')}</span><b>Intensidad ${X.mov.toLowerCase()}</b><div class="hent">${X.entreno.map(t=>`<span>${t}</span>`).join('')}</div></div>
   </div>`;
 }
 function cicloICS(u){
@@ -1894,7 +1916,7 @@ function vCiclo(){
   ${cicloHighlights(cd)}
   ${cd.faltan>=0&&cd.faltan<=3&&!cd.tarde?`<div class="card cwarn"><span class="cic">${ico('aviso','mi')}</span><div style="flex:1"><b>${cd.faltan===0?'Tu regla podría llegar hoy':`Tu regla podría llegar en ${cd.faltan} día${cd.faltan>1?'s':''}`}</b><p class="small muted">Lleva lo que necesites en el bolso, bebe agua y prioriza alimentos ricos en hierro y magnesio.</p></div></div>`:''}
   <div class="cgrid2">
-    <div class="card"><div class="csec0"><h3>${ico('consejo','mi')} Tus hormonas</h3><p>${F.hor}</p></div><div class="csec"><h3>${ico('act-alta','mi')} Tu energía</h3><p>${F.energia}</p></div><div class="csec"><h3>${ico('animo-muy-bien','mi')} Tu ánimo</h3><p>${F.animo}</p></div><div class="csec"><h3>${ico('corazon','mi')} Tu cuerpo</h3><p>${F.cuerpo}</p></div></div>
+    <div class="card"><div class="csec0"><h3>${ico('consejo','mi')} Tus hormonas</h3><p>${F.hor}</p><div class="hlist">${HORM.map(([k,n,col,t])=>`<div><i style="background:${col}"></i><p><b>${n}.</b> ${t}</p></div>`).join('')}</div></div><div class="csec"><h3>${ico('act-alta','mi')} Tu energía</h3><p>${F.energia}</p></div><div class="csec"><h3>${ico('animo-muy-bien','mi')} Tu ánimo</h3><p>${F.animo}</p></div><div class="csec"><h3>${ico('corazon','mi')} Tu cuerpo</h3><p>${F.cuerpo}</p></div></div>
     <div class="card"><div class="csec0"><h3>${ico('comida-almuerzo','mi')} Alimentos que te favorecen ahora</h3><div class="cchips">${F.come.map(chip).join('')}</div><p style="margin-top:8px">${F.porque}</p>
       <button class="btn block" id="cmp" style="margin-top:14px">${ico('lista-compra','mi')} Crear un mealprep para mi fase</button><button class="btn soft block" id="ccm" style="margin-top:8px">${ico('comida-almuerzo','mi')} Una comida para mi fase</button></div>
       <div class="csec"><h3>${ico('act-fuerza','mi')} Movimiento</h3><p>${F.mueve}</p></div></div>
