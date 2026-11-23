@@ -1820,9 +1820,11 @@ function cicloMedia(inicios){const s=[...new Set(inicios)].sort(),d=[];for(let i
 function cicloRueda(cd,size=120){
   const r=size/2-10,C=2*Math.PI*r,seg=(a,b,col)=>{const len=(b-a+1)/cd.dur*C;return `<circle r="${r}" fill="none" stroke="${col}" stroke-width="12" stroke-dasharray="${Math.max(0,len-3).toFixed(1)} ${C.toFixed(1)}" stroke-dashoffset="${(-(a-1)/cd.dur*C).toFixed(1)}"/>`};
   const ang=((Math.min(cd.dia,cd.dur)-0.5)/cd.dur)*2*Math.PI-Math.PI/2;
-  return `<svg viewBox="${-size/2} ${-size/2} ${size} ${size}" width="${size}" height="${size}" aria-hidden="true"><g transform="rotate(-90)">${seg(1,cd.reg,'#5e3a55')}${seg(cd.reg+1,cd.ov-2,'#8a5a7c')}${seg(cd.ov-1,cd.ov+1,'#b07fa3')}${seg(cd.ov+2,cd.dur,'#d3c2d6')}</g>
-    <circle cx="${(r*Math.cos(ang)).toFixed(1)}" cy="${(r*Math.sin(ang)).toFixed(1)}" r="9" fill="#fff" stroke="${cd.F.col}" stroke-width="4"/>
-    <text y="2" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="${size/4.2}" font-weight="800" fill="#3a2f38">${cd.dia}</text><text y="${size/6.5}" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="${size/13}" font-weight="700" letter-spacing="1" fill="#9a7c93">DÍA</text></svg>`;
+  const dk=themeDark(),WC=dk?['rgb(236,150,190)','rgb(214,172,226)','rgb(250,206,228)','rgb(184,168,240)']:['#5e3a55','#8a5a7c','#b07fa3','#d3c2d6'];
+  const mk=dk?WC[['menstrual','folicular','ovulatoria','lutea'].indexOf(cd.f)]||WC[0]:cd.F.col;
+  return `<svg viewBox="${-size/2} ${-size/2} ${size} ${size}" width="${size}" height="${size}" aria-hidden="true"><g transform="rotate(-90)">${seg(1,cd.reg,WC[0])}${seg(cd.reg+1,cd.ov-2,WC[1])}${seg(cd.ov-1,cd.ov+1,WC[2])}${seg(cd.ov+2,cd.dur,WC[3])}</g>
+    <circle cx="${(r*Math.cos(ang)).toFixed(1)}" cy="${(r*Math.sin(ang)).toFixed(1)}" r="9" fill="${dk?'rgb(255,255,255)':'#fff'}" stroke="${mk}" stroke-width="4"/>
+    <text y="2" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="${size/4.2}" font-weight="800" fill="#3a2f38">${cd.dia}</text><text y="${size/6.5}" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="${size/13}" font-weight="700" letter-spacing="1" fill="${dk?'rgb(206,203,199)':'#9a7c93'}">DÍA</text></svg>`;
 }
 const cicloEnergia=n=>`<span class="cener" aria-label="Energía ${n} de 5">${[1,2,3,4,5].map(i=>`<i class="${i<=n?'on':''}"></i>`).join('')}</span>`;
 function cicloCardHTML(u,date){
