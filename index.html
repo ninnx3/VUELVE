@@ -643,12 +643,54 @@ nav.tabs button.on{color:var(--plum);font-weight:700}
 .mpfase{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;background:#f6eef4;border:1.5px solid #e6d3e1;margin-bottom:14px}.mpfase.big{margin:14px 0 0}.mpfase .cic{width:42px;height:42px;border-radius:12px}.mpfase .cic .mi{width:26px;height:26px}.mpfase b{display:block;font-size:14.5px;color:#4e3048}.mpfase small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px;line-height:1.4}
 @media(max-width:520px){.mpfase.big{flex-wrap:wrap}.mpfase.big .btn{width:100%}}
 .cmfase{margin-top:12px}.cmfase small{display:flex;align-items:center;gap:6px;font-weight:700;color:#6b4462;font-size:12.5px}.cmfase small .mi{width:18px;height:18px}.cmfase div{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.cmfase button{border:1.5px solid #e6d3e1;background:#fff;border-radius:99px;padding:6px 12px;font:600 12.5px Montserrat,sans-serif;color:#6b4462;cursor:pointer}
+.temas .tema{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:14px;border-radius:16px;border:1.5px solid var(--line);background:#fff;cursor:pointer;text-align:left;font:inherit;color:inherit}.temas .tema.on{border-color:var(--plum);box-shadow:0 0 0 2px var(--plum) inset}.temas .tsw{display:flex;gap:4px}.temas .tsw i{width:24px;height:24px;border-radius:50%}.temas b{font-size:14px}.temas small{color:var(--muted);font-size:12px}
+html[data-tema=ciruela] .h1 span,html[data-tema=ciruela] .h2 span,html[data-tema=ciruela] .auth .art blockquote span{color:#7a4a57}
+html[data-tema=ciruela] .hero .eyebrow,html[data-tema=ciruela] .cj,html[data-tema=ciruela] .card>.eyebrow,html[data-tema=ciruela] .msub{color:#24402f}
+html[data-tema=ciruela] nav.tabs button.on{background:#e3ebe4;color:#24402f}html[data-tema=ciruela] nav.tabs button.on svg path{fill:#24402f}
+html[data-tema=ciruela] .btn.soft{background:#efe9e4;color:#412229}
+html[data-tema=ciruela] .pill.ok,html[data-tema=ciruela] .bst.ok{background:#e3ebe4;color:#24402f}
+html[data-tema=ciruela] .bday.hoy .bd{background:#24402f}
+html[data-tema=ciruela] .chigh,html[data-tema=ciruela] .jhero{background:linear-gradient(135deg,#2c161c,#412229 55%,#5c2f3c)}
+html[data-tema=ciruela] .cfases i,html[data-tema=ciruela] .ctop{filter:none}
+html[data-tema=ciruela] .cd div:nth-child(1){background:#412229;color:#f7efe1}html[data-tema=ciruela] .cd div:nth-child(2){background:#f1e8e3;color:#412229}html[data-tema=ciruela] .cd div:nth-child(3){background:#f1e8e3;color:#5c2f3c}html[data-tema=ciruela] .cd div:nth-child(4){background:#24402f;color:#f3efe6}
+html[data-tema=ciruela] .cd div:nth-child(1) small,html[data-tema=ciruela] .cd div:nth-child(4) small{color:inherit;opacity:.8}
 </style>
 </head>
 <body>
 <div id="root"></div>
 
 <script>
+/* ---------- Tema de color ---------- */
+const THEME_MAP={
+ '#744a69':'#412229','#6b4462':'#412229','#5e3a55':'#2c161c','#8a5a7c':'#5c2f3c','#a47a9a':'#7a4a57','#8a4f6e':'#5c2f3c','#b07fa3':'#8a5f68',
+ '#372333':'#2a1a1e','#3a2436':'#2a1a1e','#3d383c':'#2a1a1e','#3a2f38':'#2a1a1e','#4e3048':'#2a1a1e',
+ '#7d6c7a':'#6a5a5d','#5d4a59':'#5e4f52','#94738b':'#7a5d63','#a17998':'#7a5d63','#9a7c93':'#7a5d63','#9c8b98':'#8a7d7f',
+ '#fbf8fb':'#fcfaf7','#f5eff4':'#fcfaf7','#f4f0f7':'#f6f2ee','#f1e8f1':'#f6f2ee','#f4eef2':'#f5f0ec','#faf4f8':'#f8f4f0','#faf6f9':'#f8f4f0','#fbf6f9':'#f8f4f0',
+ '#ede7ee':'#efe9e4','#e9e1e8':'#ece4de','#e2d4de':'#ece4de','#ead9e5':'#e8ddd6','#e6d3e1':'#e6dad2','#e6d6e3':'#e6dad2','#f1e7ef':'#f0e9e4','#f0e4ec':'#efe7e1','#efe9ee':'#efe9e4',
+ '#eae3f3':'#f1ebe6','#ebe1f3':'#f1ebe6','#ece3f4':'#f1ebe6','#efe6f3':'#f1ebe6','#ecdcf0':'#efe5df','#ece2f3':'#f1ebe6','#f4e6ef':'#f5ede8',
+ '#dfd2e5':'#e5dcd5','#ddd0ea':'#e5dcd5','#d9cbe8':'#e2d8d0','#e4d4ea':'#e5dcd5','#efe4ec':'#f2ebe6','#f3e9f0':'#f4eee9','#f6edf3':'#f6f0ec','#f3e2ea':'#f5ece8','#f4e9f1':'#f4eee9','#f6eef4':'#f5efea',
+ '#f4e1e8':'#f5e9e8','#fdfafc':'#fffdfa','#fdf9fc':'#fffdfa','#fbf3ee':'#fbf6f1',
+ '#2f6f5d':'#24402f','#547969':'#3d5a48','#7aa898':'#6b8a74','#3f7a62':'#24402f',
+ '#e3efe9':'#e3ebe4','#e5f1ea':'#e3ebe4','#e3f4ea':'#e3ebe4','#d9e7de':'#d6e2d8','#e4f1ea':'#e3ebe4','#dcece6':'#dde7df'
+};
+const THEME_RE=new RegExp(Object.keys(THEME_MAP).join('|'),'gi');
+const themeMapStr=t=>t.replace(THEME_RE,m=>THEME_MAP[m.toLowerCase()]||m);
+let THEME_ORIG=null,THEME_OBS=null;
+const themeOn=()=>{try{return localStorage.getItem('vuelve_tema')!=='clasico'}catch(e){return true}};
+function themeFix(root){const els=root.nodeType===1?[root,...root.querySelectorAll('[style],[fill],[stroke],[stop-color]')]:[];
+  for(const el of els){if(!el.getAttribute)continue;for(const a of ['style','fill','stroke','stop-color']){const v=el.getAttribute(a);if(v&&THEME_RE.test(v)){THEME_RE.lastIndex=0;el.setAttribute(a,themeMapStr(v))}THEME_RE.lastIndex=0}}}
+function applyTheme(){
+  const st=document.querySelector('head style')||document.querySelector('style');if(!st)return;
+  if(THEME_ORIG==null)THEME_ORIG=st.textContent;
+  const on=themeOn();document.documentElement.dataset.tema=on?'ciruela':'clasico';
+  st.textContent=on?themeMapStr(THEME_ORIG):THEME_ORIG;
+  if(on&&!THEME_OBS){THEME_OBS=new MutationObserver(ms=>{for(const m of ms)for(const n of m.addedNodes)if(n.nodeType===1)themeFix(n)});THEME_OBS.observe(document.body,{childList:true,subtree:true});themeFix(document.body)}
+  if(!on&&THEME_OBS){THEME_OBS.disconnect();THEME_OBS=null}
+}
+function setTheme(t){try{localStorage.setItem('vuelve_tema',t)}catch(e){}applyTheme();if(typeof renderApp==='function'&&me())renderApp()}
+
+try{applyTheme()}catch(e){}
+
 /* =========================================================
    VUELVE · Prototipo
    Guardado: nube (cuenta de Claude del visitante) cuando está
@@ -3322,6 +3364,11 @@ function vEspacio(){
       <tr><td>Meta</td><td>${pf.meta?esc(pf.metaNombre||'Mi meta'):'—'}</td></tr>
     </table>
     <button class="btn block" style="margin-top:16px" id="ed">Editar mis datos</button></div>
+  <div class="card"><p class="eyebrow">Estilo de color</p><p class="small muted" style="margin-top:6px">Elige cómo quieres ver Vuelve en este dispositivo.</p>
+    <div class="grid2 temas" style="margin-top:12px">
+      <button class="tema ${themeOn()?'on':''}" data-tema="ciruela"><span class="tsw"><i style="background:#412229"></i><i style="background:#24402f"></i><i style="background:#fcfaf7;border:1px solid #e5dcd5"></i></span><b>Ciruela y verde</b><small>Nuevo</small></button>
+      <button class="tema ${themeOn()?'':'on'}" data-tema="clasico"><span class="tsw"><i style="background:#744a69"></i><i style="background:#c45c72"></i><i style="background:#f5eff4;border:1px solid #e2d4de"></i></span><b>Clásico</b><small>Lila y rosa</small></button>
+    </div></div>
   <div class="card"><p class="eyebrow">Tu semana</p><p class="small muted" style="margin-top:6px">¿Qué día cierras tu semana? Por ejemplo, el día que te pesas y te mides. Las semanas de tu progreso, tus notas y Movimiento irán hasta ese día.</p>
     <div class="seg semfin" style="margin-top:12px">${[1,2,3,4,5,6,0].map(d=>`<button data-semfin="${d}" class="${(semIni()+6)%7===d?'on':''}">${['D','L','M','X','J','V','S'][d]}</button>`).join('')}</div>
     <p class="small" style="margin-top:8px">Tu semana va de <b>${DOWL[semIni()]}</b> a <b>${DOWL[(semIni()+6)%7]}</b>.</p></div>
@@ -3350,6 +3397,7 @@ function vEspacio(){
   $('#im').onclick=()=>{const m=modal(`<div class="top"><b>Importar copia</b><button class="close">✕</button></div><p class="small muted" style="margin-top:8px">Pega aquí una copia. Sustituirá los registros de esta cuenta.</p><textarea class="in" id="it" style="margin-top:12px"></textarea><button class="btn block" style="margin-top:12px" id="ia">Importar</button>`);
     m.querySelector('#ia').onclick=()=>{try{const x=JSON.parse(m.querySelector('#it').value);if(!x.profile)throw 0;
       Object.assign(u,{profile:x.profile,logs:x.logs||{},weights:x.weights||[],favs:x.favs||[],custom:x.custom||[],off:x.off||[]});save();m.remove();toast('Copia importada ✓');renderApp()}catch(e){toast('La copia no es válida')}}};
+  $$('[data-tema]').forEach(b=>b.onclick=()=>{setTheme(b.dataset.tema);toast(b.dataset.tema==='ciruela'?'Estilo ciruela y verde ✓':'Estilo clásico ✓')});
   $$('[data-semfin]').forEach(b=>b.onclick=()=>{const fin=+b.dataset.semfin;u.profile.semIni=(fin+1)%7;BAL_WS=null;save();toast('Tu semana ahora termina el '+DOWL[fin]+' ✓');vEspacio()});
 }
 
