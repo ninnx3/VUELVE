@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#744a69">
+<meta name="theme-color" content="#6c2146">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -754,6 +754,8 @@ html .jhero .cj.jbut,html[data-tema=ciruela] .jhero .cj.jbut{color:#f3e2a9!impor
 .rsec .btn{white-space:nowrap;flex-shrink:0}.cmhoy{white-space:normal;text-align:center}
 .rtab.on{background:#fff}.cmc{position:relative}.cmcdot{position:absolute;top:16px;right:16px;width:11px;height:11px;border-radius:50%;background:#d33a4c;box-shadow:0 0 0 3px #fff}
 .rsec0{margin-top:24px;padding-top:0}
+.pguia{margin:10px 0 0 18px;font-size:13.5px;line-height:1.6}.pguia li{margin-top:4px}
+.pban{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:#fff;border:1.5px solid #e3c6d7}.pban b{display:block;font-size:14px}.pban small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}@media(max-width:640px){.pban{flex-direction:column;align-items:stretch}.pban .row .btn{flex:1}}
 </style>
 </head>
 <body>
@@ -1815,10 +1817,11 @@ function vRetosPage(){
   hero2.insertAdjacentHTML('afterend','<div class="rtabs" id="rtabs"></div><div id="rpane"></div>');
   const P=V.querySelector('#rpane'),t=UI.rtab;
   if(t==='mis'){
+    P.insertAdjacentHTML('beforeend',pushBannerHTML());
     const ca=cuentaAtrasHTML(u.profile);if(ca)P.insertAdjacentHTML('beforeend',ca);
     if(conPareja||(JT.loaded&&juntasInv(u).length))P.appendChild(jfrag);
     P.insertAdjacentHTML('beforeend','<div id="cmsec"></div>');
-    bindCuentaAtras(()=>vRetosPage());
+    bindCuentaAtras(()=>vRetosPage());bindPushBanner(()=>vRetosPage());
     const el=P.querySelector('#cmsec');cmSeccion(el,'mis');if(COM.loaded&&SERVER)cmSyncPasos().then(n=>{if(n&&document.body.contains(el))cmSeccion(el,'mis')}).catch(()=>{});
   }else if(t==='com'){
     P.insertAdjacentHTML('beforeend','<div id="cmsec"></div>');cmSeccion(P.querySelector('#cmsec'),'com');
@@ -1857,7 +1860,7 @@ async function fpLoad(force){
     const falta=out.filter(f=>!FP.urls[f.path]);
     if(falta.length){const {data:su}=await SB.storage.from('fotos').createSignedUrls(falta.map(f=>f.path),60*60*6);(su||[]).forEach(x=>{if(x.signedUrl)FP.urls[x.path]=x.signedUrl})}
     FP.list=out.filter(f=>FP.urls[f.path]).sort((a,b)=>b.fecha.localeCompare(a.fecha));
-    const u=me(),ult=FP.list[0]&&FP.list[0].fecha||null;if(u&&u.profile.fotoUlt!==ult){u.profile.fotoUlt=ult;save()}
+    const u=me(),ult=FP.list[0]&&FP.list[0].fecha||null;if(u&&u.profile.fotoUlt!==ult){u.profile.fotoUlt=ult;save()}pushPrefsSync();
     FP.loaded=true}catch(e){console.warn(e)}finally{FP.loading=null}return FP.list})();
   return FP.loading;
 }
@@ -1884,8 +1887,8 @@ function fpCard(el){
   </div>`;
   el.querySelector('#fpadd').onclick=()=>fpSubirModal(()=>fpCard(el));
   el.querySelector('#fpcal').onclick=()=>{if(!u.profile.fotoUlt&&!FP.list.length)toast('Primero haz tus primeras fotos y luego añadimos los avisos');else fpICS()};
-  el.querySelector('#fpavon').onchange=e=>{u.profile.fotoAvisos=e.target.checked;save();renderNavDot();toast(e.target.checked?'Avisos activados ✓':'Avisos desactivados')};
-  el.querySelectorAll('[data-fq]').forEach(b=>b.onclick=()=>{u.profile.fotoFrec=+b.dataset.fq;save();fpCard(el);renderNavDot()});
+  el.querySelector('#fpavon').onchange=e=>{u.profile.fotoAvisos=e.target.checked;save();renderNavDot();pushPrefsSync();toast(e.target.checked?'Avisos activados ✓':'Avisos desactivados')};
+  el.querySelectorAll('[data-fq]').forEach(b=>b.onclick=()=>{u.profile.fotoFrec=+b.dataset.fq;save();fpCard(el);renderNavDot();pushPrefsSync()});
   if(el.querySelector('#fpcmp'))el.querySelector('#fpcmp').onclick=()=>fpComparar();
   el.querySelectorAll('[data-fv]').forEach(b=>b.onclick=()=>fpVer(b.dataset.fv,()=>fpCard(el)));
 }
@@ -2033,6 +2036,86 @@ function vEtapa(){
   etBind($('#view'),u,vEtapa);
 }
 
+/* ---------- Notificaciones en el móvil (Web Push) ---------- */
+const PUSH={key:null,reg:null,sub:null,estado:null};
+const PUSH_FN='https://vzzkzajzzehhxzwonpgv.supabase.co/functions/v1/push';
+const esIOS=()=>/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const esApp=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+const pushSoporta=()=>'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;
+function b64u(s){const p='='.repeat((4-s.length%4)%4),b=atob((s+p).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from([...b].map(c=>c.charCodeAt(0)))}
+async function pushInit(){
+  if(!SERVER||!('serviceWorker' in navigator))return;
+  try{PUSH.reg=await navigator.serviceWorker.register('sw.js',{scope:'./',updateViaCache:'none'});PUSH.reg.update().catch(()=>{});
+    if('PushManager' in window){PUSH.sub=await PUSH.reg.pushManager.getSubscription();if(PUSH.sub&&SBUID)pushGuardar(PUSH.sub).catch(()=>{})}}catch(e){console.warn('sw',e)}
+  pushPrefsSync();
+}
+async function pushGuardar(sub){const j=sub.toJSON();const {error}=await SB.from('push_subs').upsert({endpoint:j.endpoint,user_id:SBUID,p256dh:j.keys.p256dh,auth:j.keys.auth,actualizado:new Date().toISOString()});if(error)throw error}
+function pushEstado(){
+  if(!SERVER)return 'off-line';
+  if(esIOS()&&!esApp())return 'ios-instalar';
+  if(!pushSoporta())return 'no';
+  if(Notification.permission==='denied')return 'bloqueado';
+  return PUSH.sub&&Notification.permission==='granted'?'on':'off';
+}
+async function pushActivar(){
+  try{
+    if(!PUSH.reg)await pushInit();
+    const p=await Notification.requestPermission();if(p!=='granted'){toast(p==='denied'?'Has bloqueado los avisos. Puedes activarlos en los ajustes del móvil.':'No se han activado los avisos');return false}
+    if(!PUSH.key){const r=await fetch(PUSH_FN);PUSH.key=(await r.json()).publicKey}
+    PUSH.sub=await PUSH.reg.pushManager.getSubscription()||await PUSH.reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(PUSH.key)});
+    await pushGuardar(PUSH.sub);await pushPrefsSync(true);toast('Avisos activados en este móvil ✓');return true;
+  }catch(e){console.warn(e);toast('No se pudieron activar los avisos: '+sbErr(e));return false}
+}
+async function pushDesactivar(){try{if(PUSH.sub){const ep=PUSH.sub.endpoint;await PUSH.sub.unsubscribe().catch(()=>{});await SB.from('push_subs').delete().eq('endpoint',ep)}PUSH.sub=null;toast('Avisos desactivados en este móvil')}catch(e){toast(sbErr(e))}}
+async function pushPrefsSync(force){
+  const u=me();if(!SERVER||!SB||!SBUID||!u||!u.profile)return;
+  const pf=u.profile,row={user_id:SBUID,chat_on:pf.pushChat!==false,foto_on:pf.fotoAvisos!==false,foto_prox:pf.fotoUlt?fpProx(u):null,actualizado:new Date().toISOString()};
+  const k=JSON.stringify([row.chat_on,row.foto_on,row.foto_prox]);if(!force&&PUSH.ult===k)return;PUSH.ult=k;
+  try{await SB.from('push_prefs').upsert(row)}catch(e){}
+}
+function pushCardHTML(){
+  if(!SERVER)return '';const u=me(),e=pushEstado();
+  const guia=`<ol class="pguia"><li>Abre <b>${location.host}</b> en <b>Safari</b>.</li><li>Toca el botón <b>Compartir</b> (el cuadrado con la flecha hacia arriba).</li><li>Elige <b>«Añadir a pantalla de inicio»</b> y pulsa <b>Añadir</b>.</li><li>Abre Vuelve desde ese icono nuevo y vuelve aquí para activar los avisos.</li></ol>`;
+  const body={
+    'on':`<p class="small" style="margin-top:6px"><b style="color:#325958">Activados en este móvil.</b> Te avisaremos aunque tengas Vuelve cerrada.</p>
+      <label class="fpsw" style="margin-top:12px"><input type="checkbox" id="pchat" ${u.profile.pushChat!==false?'checked':''}> Mensajes de mis retos, invitaciones y toques</label>
+      <label class="fpsw" style="margin-top:8px"><input type="checkbox" id="pfoto" ${u.profile.fotoAvisos!==false?'checked':''}> Recordatorio de mis fotos de progreso</label>
+      <p class="tiny muted" style="margin-top:8px">Puedes silenciar un chat concreto desde el menú ⋯ de ese reto.</p>
+      <div class="row" style="gap:8px;margin-top:12px;flex-wrap:wrap"><button class="btn soft sm" id="ptest">Enviarme una prueba</button><button class="btn ghost sm" id="poff">Desactivar en este móvil</button></div>`,
+    'off':`<p class="small muted" style="margin-top:6px">Recibe un aviso cuando te escriban en un reto, te inviten, tu compañera te mande un toque o te toque tu foto de progreso, aunque no tengas Vuelve abierta.</p><button class="btn block" id="pon" style="margin-top:12px">Activar avisos en este móvil</button>`,
+    'ios-instalar':`<p class="small muted" style="margin-top:6px">En iPhone, Apple solo permite avisos si tienes Vuelve en tu pantalla de inicio. Son 30 segundos:</p>${guia}`,
+    'bloqueado':`<p class="small muted" style="margin-top:6px">Los avisos están bloqueados para Vuelve. Para activarlos, ve a los ajustes de tu móvil (o del navegador), busca Vuelve en Notificaciones y permítelas. Después vuelve aquí.</p>`,
+    'no':`<p class="small muted" style="margin-top:6px">Este navegador no permite avisos. Prueba con Chrome en Android o, en iPhone, añadiendo Vuelve a tu pantalla de inicio desde Safari.</p>`
+  }[e]||'';
+  return `<div class="card" id="pushcard"><p class="eyebrow">Avisos en el móvil</p>${body}</div>`;
+}
+function bindPushCard(redraw){
+  const c=$('#pushcard');if(!c)return;const u=me();
+  const on=c.querySelector('#pon');if(on)on.onclick=async()=>{on.disabled=true;await pushActivar();redraw()};
+  const off=c.querySelector('#poff');if(off)off.onclick=async()=>{await pushDesactivar();redraw()};
+  const pc=c.querySelector('#pchat');if(pc)pc.onchange=()=>{u.profile.pushChat=pc.checked;save();pushPrefsSync(true)};
+  const pfo=c.querySelector('#pfoto');if(pfo)pfo.onchange=()=>{u.profile.fotoAvisos=pfo.checked;save();pushPrefsSync(true);renderNavDot()};
+  const t=c.querySelector('#ptest');if(t)t.onclick=async()=>{try{await PUSH.reg.showNotification('Vuelve',{body:'¡Así te llegarán los avisos! 💜',icon:'icon-192.png?v=2',tag:'prueba'})}catch(e){toast('No se pudo mostrar la prueba')}};
+}
+function pushBannerHTML(){
+  if(!SERVER)return '';const e=pushEstado();let no=false;try{no=!!localStorage.getItem('vuelve_push_no')}catch(x){}
+  if(no||!(e==='off'||e==='ios-instalar'))return '';
+  return `<div class="card pban"><div style="flex:1;min-width:0"><b>¿Te avisamos de los mensajes?</b><small>${e==='ios-instalar'?'En iPhone, añade Vuelve a tu pantalla de inicio y activa los avisos en Mi Espacio.':'Recibe un aviso cuando te escriban en tus retos, aunque tengas Vuelve cerrada.'}</small></div>
+    <div class="row" style="gap:6px">${e==='off'?'<button class="btn sm" id="pbon">Activar</button>':'<button class="btn sm" id="pbver">Cómo</button>'}<button class="btn ghost sm" id="pbno">Ahora no</button></div></div>`;
+}
+function bindPushBanner(redraw){
+  const a=$('#pbon');if(a)a.onclick=async()=>{await pushActivar();redraw()};
+  const v=$('#pbver');if(v)v.onclick=()=>{UI.view='espacio';renderApp();setTimeout(()=>{const c=$('#pushcard');if(c)c.scrollIntoView({behavior:'smooth',block:'center'})},200)};
+  const n=$('#pbno');if(n)n.onclick=()=>{try{localStorage.setItem('vuelve_push_no','1')}catch(e){}redraw()};
+}
+function pushAbrirDesdeURL(){
+  try{const q=new URLSearchParams(location.search),v=q.get('v'),reto=q.get('reto');if(!v)return;
+    history.replaceState(null,'',location.pathname+location.hash);
+    if(['retos','progreso','ciclo','diario','movimiento','menu'].includes(v)){UI.view=v;if(v==='retos')UI.rtab='mis';renderApp();scrollTo(0,0)}
+    if(reto)cmLoad().then(()=>{if(COM.mios[reto])cmChat(reto,()=>{if(UI.view==='retos')vRetosPage()})});
+  }catch(e){}
+}
+
 /* ---------- Avisos en vivo (sin recargar) ---------- */
 const LIVE={on:false,ch:null,t:null,uid:null,busy:false};
 function liveStart(){
@@ -2080,7 +2163,7 @@ async function cmLoad(force){
       SB.from('perfiles_publicos').select('usuario').eq('user_id',SBUID).maybeSingle(),
       SB.from('comunidad_vetadas').select('user_id').eq('user_id',SBUID),
       SB.from('comunidad_retos').select('*').order('n_miembros',{ascending:false}).limit(200),
-      SB.from('comunidad_miembros').select('reto_id,user_id,unido').eq('user_id',SBUID),
+      SB.from('comunidad_miembros').select('*').eq('user_id',SBUID),
       SB.from('comunidad_bloqueos').select('bloqueada')]);
     if(rt.error)throw rt.error;
     COM.perfil=pf.data?pf.data.usuario:null;if(COM.perfil)COM.nombres[SBUID]=COM.perfil;
@@ -2329,7 +2412,7 @@ function cmChat(id,done){
     if(error)return;const L=(data||[]).slice().reverse();await cmNombres(L.map(x=>x.user_id));
     const cambio=L.length!==S.msgs.length||L.some((x,i)=>!S.msgs[i]||S.msgs[i].id!==x.id||S.msgs[i].borrado!==x.borrado);S.msgs=L;if(cambio&&S.tab==='chat')pinta()};
   m.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{S.tab=b.dataset.tab;m.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('on',x===b));m.querySelector('#cmin').style.display=S.tab==='chat'?'':'none';pinta()});
-  m.querySelector('#cmmas').onclick=()=>cmMenu([['Invitar a una amiga',()=>cmInvitarModal(id)],['Salir del reto',async()=>{if(!confirmar(`¿Salir de «${r.titulo}»? Se borrará tu progreso en este reto.`))return;
+  m.querySelector('#cmmas').onclick=()=>cmMenu([['Invitar a una amiga',()=>cmInvitarModal(id)],[COM.mios[id]&&COM.mios[id].silenciado?'Activar avisos de este chat':'Silenciar este chat',async()=>{const v=!(COM.mios[id]&&COM.mios[id].silenciado);const {error}=await SB.from('comunidad_miembros').update({silenciado:v}).eq('reto_id',id).eq('user_id',SBUID);if(error)return toast(sbErr(error));COM.mios[id].silenciado=v;toast(v?'Chat silenciado: no te llegarán avisos de este reto':'Avisos de este chat activados')}],['Salir del reto',async()=>{if(!confirmar(`¿Salir de «${r.titulo}»? Se borrará tu progreso en este reto.`))return;
     const {error}=await SB.from('comunidad_miembros').delete().eq('reto_id',id).eq('user_id',SBUID);if(error)return toast(sbErr(error));m.remove();await cmLoad(true);toast('Has salido del reto');done&&done()},'danger']]);
   const enviar=async t=>{t=(t||'').trim();if(!t)return;
     if(COM.vetada)return toast('Tu cuenta no puede escribir en la comunidad');
@@ -4106,6 +4189,7 @@ function vEspacio(){
       <tr><td>Días de entreno</td><td>${[1,2,3,4,5,6,0].filter(i=>pf.dias.includes(i)).map(i=>DOW[i]).join(' · ')||'—'}</td></tr>
     </table>
     <button class="btn block" style="margin-top:16px" id="ed">Editar mis datos</button></div>
+  ${pushCardHTML()}
   <div class="card"><p class="eyebrow">Estilo de color</p><p class="small muted" style="margin-top:6px">Elige cómo quieres ver Vuelve en este dispositivo.</p>
     <div class="grid2 temas" style="margin-top:12px">
       <button class="tema ${themeOn()?'on':''}" data-tema="ciruela"><span class="tsw"><i style="background:#6c2146"></i><i style="background:#915a92"></i><i style="background:#325958"></i><i style="background:#e9d3a7"></i></span><b>Jardín</b><small>Vino, lila y verde azulado</small></button>
@@ -4126,7 +4210,7 @@ function vEspacio(){
     <div class="grid2" style="margin-top:14px">${SERVER?'':'<button class="btn ghost" id="lo">Cerrar sesión</button><button class="btn ghost" style="color:var(--warn)" id="dl">Borrar esta cuenta</button>'}</div>
   </div>
   <p class="foot">Vuelve por encima de perfección. Cada registro cuenta.</p>`;
-  $('#ed').onclick=()=>startOnboarding(true);{const em=$('#espmetas');if(em)em.onclick=()=>metasModal(()=>vEspacio())}
+  $('#ed').onclick=()=>startOnboarding(true);bindPushCard(()=>vEspacio());{const em=$('#espmetas');if(em)em.onclick=()=>metasModal(()=>vEspacio())}
   {const uc=$('#espuc');if(uc)uc.onclick=()=>cmElegirUsuario(()=>vEspacio());if(SERVER&&!COM.loaded)cmLoad().then(()=>{if(UI.view==='espacio'&&!SCREEN.busy&&$('#espuser'))vEspacio()})}
   $('#lo').onclick=logout;
   $$('[data-sw]').forEach(b=>b.onclick=()=>{d.session=null;save();renderAuth('login',b.dataset.sw)});
@@ -4855,6 +4939,8 @@ function route(){
   if(!u)return renderAuth();
   if(!u.profile)return startOnboarding(false);
   renderApp();
+  if(SERVER&&!PUSH.inited){PUSH.inited=true;pushInit()}
+  pushAbrirDesdeURL();
   if(!maybeCheckin())pedirUsuarioInicio(()=>{if(SERVER&&!FOTOS.loaded)Promise.race([fotosLoad(),new Promise(r=>setTimeout(r,2500))]).catch(()=>{}).then(()=>{if(me()?.profile&&!document.querySelector('.modal'))maybeWelcome()});else if(!document.querySelector('.modal'))maybeWelcome()});
   maybeCelebrarAyer();
   programarPromoFotos();
