@@ -281,7 +281,7 @@ details.how[open] summary::before{content:'▾ '}
 .rcard b{font-size:13px;font-weight:700;display:block}
 .rcard .k{font-size:12px;color:var(--ink)}
 .rcard small{display:block;font-size:10px;color:var(--muted)}
-.star{font-size:16px;color:#d9cfd7;width:28px;height:28px}
+.star{font-size:22px;color:#d9cfd7;width:36px;height:36px;line-height:1;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;cursor:pointer}.star:hover{background:#f6f1ee}
 .star.on{color:var(--gold)}
 .notfound{font-size:11px;color:var(--muted);margin-top:12px;font-weight:500}
 .notfound a{color:var(--plum);font-weight:600;text-decoration:none}
@@ -644,16 +644,20 @@ nav.tabs button.on{color:var(--plum);font-weight:700}
 @media(max-width:520px){.mpfase.big{flex-wrap:wrap}.mpfase.big .btn{width:100%}}
 .cmfase{margin-top:12px}.cmfase small{display:flex;align-items:center;gap:6px;font-weight:700;color:#6b4462;font-size:12.5px}.cmfase small .mi{width:18px;height:18px}.cmfase div{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.cmfase button{border:1.5px solid #e6d3e1;background:#fff;border-radius:99px;padding:6px 12px;font:600 12.5px Montserrat,sans-serif;color:#6b4462;cursor:pointer}
 .temas .tema{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:14px;border-radius:16px;border:1.5px solid var(--line);background:#fff;cursor:pointer;text-align:left;font:inherit;color:inherit}.temas .tema.on{border-color:var(--plum);box-shadow:0 0 0 2px var(--plum) inset}.temas .tsw{display:flex;gap:4px}.temas .tsw i{width:24px;height:24px;border-radius:50%}.temas b{font-size:14px}.temas small{color:var(--muted);font-size:12px}
-html[data-tema=ciruela] .h1 span,html[data-tema=ciruela] .h2 span,html[data-tema=ciruela] .auth .art blockquote span{color:#7a4a57}
+html[data-tema=ciruela] .h1 span,html[data-tema=ciruela] .h2 span,html[data-tema=ciruela] .auth .art blockquote span{color:#8c6a8f}
+html[data-tema=ciruela] .btn.soft,html[data-tema=ciruela] .seg button.on:not(.x),html[data-tema=ciruela] .pick button.on,html[data-tema=ciruela] .mpick button.on{border-color:#b9a0bd}
+html[data-tema=ciruela] .tile,html[data-tema=ciruela] .strip,html[data-tema=ciruela] .bday .bd{background:#efe6f0}
+html[data-tema=ciruela] .cchip,html[data-tema=ciruela] .mpill{background:#f1e9f2;border-color:#ddcde0}
 html[data-tema=ciruela] .hero .eyebrow,html[data-tema=ciruela] .cj,html[data-tema=ciruela] .card>.eyebrow,html[data-tema=ciruela] .msub{color:#24402f}
 html[data-tema=ciruela] nav.tabs button.on{background:#e3ebe4;color:#24402f}html[data-tema=ciruela] nav.tabs button.on svg path{fill:#24402f}
-html[data-tema=ciruela] .btn.soft{background:#efe9e4;color:#412229}
+html[data-tema=ciruela] .btn.soft{background:#e6dbe8;color:#412229}
 html[data-tema=ciruela] .pill.ok,html[data-tema=ciruela] .bst.ok{background:#e3ebe4;color:#24402f}
 html[data-tema=ciruela] .bday.hoy .bd{background:#24402f}
 html[data-tema=ciruela] .chigh,html[data-tema=ciruela] .jhero{background:linear-gradient(135deg,#2c161c,#412229 55%,#5c2f3c)}
 html[data-tema=ciruela] .cfases i,html[data-tema=ciruela] .ctop{filter:none}
 html[data-tema=ciruela] .cd div:nth-child(1){background:#412229;color:#f7efe1}html[data-tema=ciruela] .cd div:nth-child(2){background:#f1e8e3;color:#412229}html[data-tema=ciruela] .cd div:nth-child(3){background:#f1e8e3;color:#5c2f3c}html[data-tema=ciruela] .cd div:nth-child(4){background:#24402f;color:#f3efe6}
 html[data-tema=ciruela] .cd div:nth-child(1) small,html[data-tema=ciruela] .cd div:nth-child(4) small{color:inherit;opacity:.8}
+.qhead{position:relative;padding-right:56px}.star.big{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:28px;width:44px;height:44px}
 </style>
 </head>
 <body>
@@ -667,8 +671,8 @@ const THEME_MAP={
  '#7d6c7a':'#6a5a5d','#5d4a59':'#5e4f52','#94738b':'#7a5d63','#a17998':'#7a5d63','#9a7c93':'#7a5d63','#9c8b98':'#8a7d7f',
  '#fbf8fb':'#fcfaf7','#f5eff4':'#fcfaf7','#f4f0f7':'#f6f2ee','#f1e8f1':'#f6f2ee','#f4eef2':'#f5f0ec','#faf4f8':'#f8f4f0','#faf6f9':'#f8f4f0','#fbf6f9':'#f8f4f0',
  '#ede7ee':'#efe9e4','#e9e1e8':'#ece4de','#e2d4de':'#ece4de','#ead9e5':'#e8ddd6','#e6d3e1':'#e6dad2','#e6d6e3':'#e6dad2','#f1e7ef':'#f0e9e4','#f0e4ec':'#efe7e1','#efe9ee':'#efe9e4',
- '#eae3f3':'#f1ebe6','#ebe1f3':'#f1ebe6','#ece3f4':'#f1ebe6','#efe6f3':'#f1ebe6','#ecdcf0':'#efe5df','#ece2f3':'#f1ebe6','#f4e6ef':'#f5ede8',
- '#dfd2e5':'#e5dcd5','#ddd0ea':'#e5dcd5','#d9cbe8':'#e2d8d0','#e4d4ea':'#e5dcd5','#efe4ec':'#f2ebe6','#f3e9f0':'#f4eee9','#f6edf3':'#f6f0ec','#f3e2ea':'#f5ece8','#f4e9f1':'#f4eee9','#f6eef4':'#f5efea',
+ '#eae3f3':'#e9dfea','#ebe1f3':'#e9dfea','#ece3f4':'#ece4ec','#efe6f3':'#e9dfea','#ecdcf0':'#efe5df','#ece2f3':'#f1ebe6','#f4e6ef':'#f5ede8',
+ '#dfd2e5':'#d3c1d6','#ddd0ea':'#d3c1d6','#d9cbe8':'#cdb9d1','#e4d4ea':'#d8c8db','#efe4ec':'#f2ebe6','#f3e9f0':'#f4eee9','#f6edf3':'#f6f0ec','#f3e2ea':'#f5ece8','#f4e9f1':'#f4eee9','#f6eef4':'#f5efea',
  '#f4e1e8':'#f5e9e8','#fdfafc':'#fffdfa','#fdf9fc':'#fffdfa','#fbf3ee':'#fbf6f1',
  '#2f6f5d':'#24402f','#547969':'#3d5a48','#7aa898':'#6b8a74','#3f7a62':'#24402f',
  '#e3efe9':'#e3ebe4','#e5f1ea':'#e3ebe4','#e3f4ea':'#e3ebe4','#d9e7de':'#d6e2d8','#e4f1ea':'#e3ebe4','#dcece6':'#dde7df'
@@ -2464,7 +2468,7 @@ function recToFood(r){const t=recTot(r),G=t.q||1,po=Math.max(1,Number(r.porc)||1
   return {id:'r_'+r.id,rid:r.id,rec:true,n:r.n,k:t.k/G*100,p:t.p/G*100,c:t.c/G*100,g:t.g/G*100,ug:G/po,un:'porción',unp:'porciones',porc:po,kp:t.k/po,pp:t.p/po,cp:t.c/po,gp:t.g/po}}
 const misRecetas=u=>(u.recetas||[]).filter(r=>!r.borrada&&(r.items||[]).length);
 function openAdd(meal0){
-  let offT;const u=me();let propioN='',meal=meal0||defaultMeal(),mode='menu',q='',qRaw='',sub='todos',offRes=null,offErr='',offLoading=false,scanCtl=null;const added=[];let rec=null,rq='',roff=null,roffLoading=false;
+  let offT,qPrev=null;const u=me();let propioN='',meal=meal0||defaultMeal(),mode='menu',q='',qRaw='',sub='todos',offRes=null,offErr='',offLoading=false,scanCtl=null;const added=[];let rec=null,rq='',roff=null,roffLoading=false;
   const stopScan=()=>{try{scanCtl&&scanCtl.stop()}catch(e){}scanCtl=null};
   const m=modal(`<div class="top"><b id="mtitle"></b><button class="close">✕</button></div><div id="mb"></div>`);
   const _rm=m.remove.bind(m);m.remove=()=>{stopScan();_rm()};
@@ -2635,14 +2639,14 @@ function openAdd(meal0){
     }
   };
   const qty=f=>{
-    stopScan();
+    stopScan();clearTimeout(offT);qPrev=mode;mode='qty';
     const mb=m.querySelector('#mb');
     let modo=f.ug?'u':'g';
     const pl=n=>Math.abs(n-1)<1e-9?f.un:f.unp;
     const render=()=>{
       const def=modo==='u'?'1':'100';
       mb.innerHTML=`<button class="back" id="qb">← Volver</button>
-      <div class="pv" style="background:#fff;border:1px solid var(--line)"><b>${esc(f.n)}</b><p class="small muted">${f.rec?`Mi receta · ${fmt(f.kp)} kcal por porción · ${f.porc} ${f.porc===1?'porción':'porciones'}`:`${fmt(f.k)} kcal por 100 g${f.ug?` · 1 ${esc(f.un)} ≈ ${fmt1(f.ug)} g`:''}`}</p></div>
+      <div class="pv qhead" style="background:#fff;border:1px solid var(--line)"><button class="star big ${u.favs.includes(f.id)?'on':''}" id="qstar" aria-label="Favorito" title="${u.favs.includes(f.id)?'Quitar de favoritos':'Añadir a favoritos'}">★</button><b>${esc(f.n)}</b><p class="small muted">${f.rec?`Mi receta · ${fmt(f.kp)} kcal por porción · ${f.porc} ${f.porc===1?'porción':'porciones'}`:`${fmt(f.k)} kcal por 100 g${f.ug?` · 1 ${esc(f.un)} ≈ ${fmt1(f.ug)} g`:''}`}</p></div>
       ${pickHTML()}
       ${f.ug?`<div class="subseg" style="margin-top:14px"><button data-mo="u" class="${modo==='u'?'on':''}">Unidades (${esc(f.unp)})</button><button data-mo="g" class="${modo==='g'?'on':''}">Gramos</button></div>`:''}
       <label class="f"><span>${modo==='u'?'¿Cuántos? ('+esc(f.unp)+')':'Cantidad (g)'}</span><input class="in dec" id="qg" type="text" inputmode="decimal" value="${def}"></label>
@@ -2653,8 +2657,9 @@ function openAdd(meal0){
       mb.querySelectorAll('[data-mo]').forEach(b=>b.onclick=()=>{modo=b.dataset.mo;render()});
       mb.querySelector('#qg').oninput=upd;
       mb.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{mb.querySelector('#qg').value=dec(+b.dataset.g);upd()});
+      {const qs=mb.querySelector('#qstar');if(qs)qs.onclick=()=>{const id=f.id;if(String(id).startsWith('o')&&typeof rememberOff==='function')rememberOff(u,f);const on=!u.favs.includes(id);u.favs=on?[...u.favs,id]:u.favs.filter(x=>x!==id);save();qs.classList.toggle('on',on);qs.title=on?'Quitar de favoritos':'Añadir a favoritos';toast(on?'Añadido a favoritos ★':'Quitado de favoritos')}}
       mb.querySelector('#qa').onclick=()=>{const c=calc();if(!(c.q>0)){toast('Indica una cantidad');return}add(c)};
-      mb.querySelector('#qb').onclick=draw;
+      mb.querySelector('#qb').onclick=()=>{mode=qPrev||'buscar';draw()};
       upd();
     };
     const calc=()=>{const v=num(mb.querySelector('#qg').value)||0,g=modo==='u'?v*f.ug:v,x=g/100;
@@ -2664,7 +2669,7 @@ function openAdd(meal0){
     render();
   };
   const add=item=>{dayLog(u,UI.date).foods.push({...item,meal});save();added.push({n:item.n,k:item.k||0,meal});toast('Añadido a '+meal+' ✓');UI.showMeals=true;if(UI.view==='diario'){UI.range='dia';vDiario()}
-    clearTimeout(offT);q='';qRaw='';offRes=null;offErr='';offLoading=false;if(mode==='menu'||mode==='receta'){mode='buscar';rec=null}draw();const qi=m.querySelector('#q');if(qi&&!matchMedia('(pointer:coarse)').matches)qi.focus();m.querySelector('.sheet').scrollTop=0};
+    clearTimeout(offT);q='';qRaw='';offRes=null;offErr='';offLoading=false;if(mode==='qty')mode=qPrev==='codigo'?'codigo':'buscar';if(mode==='menu'||mode==='receta'){mode='buscar';rec=null}draw();const qi=m.querySelector('#q');if(qi&&!matchMedia('(pointer:coarse)').matches)qi.focus();m.querySelector('.sheet').scrollTop=0};
   draw();
 }
 
