@@ -1910,7 +1910,7 @@ function fpCard(el){
   if(!FP.loaded){el.innerHTML=`<div class="card"><p class="eyebrow">Fotos de progreso</p><p class="small muted" style="margin-top:6px">Cargando tus fotos…</p></div>`;fpLoad().then(()=>{if(document.body.contains(el))fpCard(el)});return}
   const S=fpSesiones(),prox=fpProx(u),due=today()>=prox,falta=Math.round((parse(prox)-parse(today()))/864e5);
   el.innerHTML=`<div class="card fpc"><p class="eyebrow">Fotos de progreso</p>
-    <p class="fplock">${ico('privado','mi')} Solo las ves tú. Ni tu compañera ni la comunidad pueden verlas.</p>
+    <p class="fplock">${ico('privado','mi')} Solo las ves tú.</p>
     <div class="fpnext ${due?'due':''}"><div style="flex:1;min-width:0"><b>${!S.length?'Haz tus primeras fotos':due?'Hoy te toca tu foto de progreso':`Próxima foto el ${DOWL[parse(prox).getDay()]} ${parse(prox).getDate()} de ${MONL[parse(prox).getMonth()]}`}</b>
       <small>${!S.length?'Serán tu punto de partida. Dentro de unas semanas te alegrarás de tenerlas.':due?'Frente, perfil y espalda. Tardas 2 minutos.':`Dentro de ${falta} día${falta>1?'s':''} · ${FP_FREC.find(f=>f[0]===fpFrec(u))?.[1].toLowerCase()||'cada '+fpFrec(u)+' días'}`}</small></div>
       <button class="btn ${due?'':'soft'}" id="fpadd">${ico('fotos','mi')} ${due?'Hacer mis fotos':'Añadir fotos'}</button></div>
