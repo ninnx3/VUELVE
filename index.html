@@ -186,12 +186,12 @@ nav.tabs button:not(.on){color:var(--muted)}
 /* Summary */
 .who{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px}
 .who .av{width:30px;height:30px;border-radius:50%;background:var(--lilac);color:var(--plum);display:grid;place-items:center;font-size:12px;font-weight:700}
-.sum{display:grid;grid-template-columns:140px 1fr;gap:20px;align-items:center;margin-top:14px}
-.ring{position:relative;width:132px;height:132px}
+.sum{display:grid;grid-template-columns:184px 1fr;gap:24px;align-items:center;margin-top:14px}
+.ring{position:relative;width:184px;height:184px;flex-shrink:0}
 .ring svg{transform:rotate(-90deg)}
 .ring .ctr{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
-.ring .ctr b{font-size:34px;font-weight:700;letter-spacing:-1.3px;line-height:1;display:block}
-.ring .ctr small{font-size:10px;color:var(--muted)}
+.ring .ctr b{font-size:46px;font-weight:700;letter-spacing:-1.3px;line-height:1;display:block}
+.ring .ctr small{font-size:12px;color:var(--muted)}
 .mac3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
 .mac3>div{background:var(--tile);border-radius:12px;padding:12px 6px 10px}
 .mac3 b{font-size:21px;font-weight:800;letter-spacing:-.8px}
@@ -544,7 +544,7 @@ nav.tabs button.on{color:var(--plum);font-weight:700}
 .phero .pp{background:rgba(253,249,252,.9);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:24px;padding:24px 22px;max-width:520px}
 .phero .h1{font-size:clamp(30px,8.5vw,50px);margin-top:10px}
 .phero .pdesc{margin-top:10px;font-size:14px;line-height:1.6;color:var(--muted)}
-.phero.fhero{background:linear-gradient(135deg,#fbf3ee 0%,#f4e6ef 55%,#ece2f3 100%);border:1.5px solid #ead9e5;padding:212px 18px 18px}.fhero .macroart:not(.mob){display:none}.fhero .macroart.mob{position:absolute;left:0;right:0;top:14px;width:100%;height:188px}.machips{position:absolute;left:12px;right:12px;top:270px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap}.machips span{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.92);border-radius:99px;padding:8px 14px;font-size:15px;font-weight:600;color:#7d6c7a}.machips b{color:#3a2f38;font-weight:800}.machips i{width:10px;height:10px;border-radius:50%}.fhero .pp{position:relative;max-width:470px;box-shadow:0 10px 30px -18px rgba(107,68,98,.35)}.fhero .fc-t{font-size:clamp(26px,6vw,36px)}@media(min-width:760px){.phero.fhero{padding:56px 48px;min-height:380px;display:flex;align-items:center}.fhero .macroart:not(.mob){display:block;position:absolute;top:0;left:auto;right:0;width:62%;height:100%}.fhero .macroart.mob,.machips{display:none}}.phero .psub{margin-top:8px;font-weight:600;font-size:16px;color:var(--ink)}
+.phero.fhero{background:linear-gradient(135deg,#fbf3ee 0%,#f4e6ef 55%,#ece2f3 100%);border:1.5px solid #ead9e5;padding:318px 18px 18px}.fhero .macroart:not(.mob){display:none}.fhero .macroart.mob{position:absolute;left:0;right:0;top:8px;width:100%;height:300px}.machips{position:absolute;left:12px;right:12px;top:270px;display:flex;justify-content:center;gap:8px;flex-wrap:wrap}.machips span{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.92);border-radius:99px;padding:8px 14px;font-size:15px;font-weight:600;color:#7d6c7a}.machips b{color:#3a2f38;font-weight:800}.machips i{width:10px;height:10px;border-radius:50%}.fhero .pp{position:relative;max-width:470px;box-shadow:0 10px 30px -18px rgba(107,68,98,.35)}.fhero .fc-t{font-size:clamp(26px,6vw,36px)}@media(min-width:760px){.phero.fhero{padding:56px 48px;min-height:470px;display:flex;align-items:center}.fhero .macroart:not(.mob){display:block;position:absolute;top:0;left:auto;right:-10px;width:66%;height:100%}.fhero .macroart.mob,.machips{display:none}}.phero .psub{margin-top:8px;font-weight:600;font-size:16px;color:var(--ink)}
 .btn.pbtn{margin-top:16px;background:#fff;color:var(--ink);border:1.5px solid #d9c8e3;border-radius:999px;padding:13px 22px;font-weight:700}
 .cj{font-size:11px;letter-spacing:2.6px;color:#8a5a7c;font-weight:800;text-transform:uppercase}.ct{font-size:22px;letter-spacing:-.5px;color:var(--ink);font-weight:800;line-height:1.2;margin:6px 0 0}
 .fcard{margin-top:22px;border-radius:28px;padding:24px 22px;background:linear-gradient(135deg,#f4f1ea 0%,#eef3ee 60%,#e8f1ec 100%);border:1.5px solid #d9e7de}
@@ -1525,7 +1525,7 @@ function macroArt(m,etq){
         defs+=`<linearGradient id="${uid}${k}" gradientUnits="userSpaceOnUse" x1="${gx0.toFixed(1)}" y1="${gy0.toFixed(1)}" x2="${gx1.toFixed(1)}" y2="${gy1.toFixed(1)}"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient>`;
         segs+=`<path d="M${x0.toFixed(1)} ${y0.toFixed(1)}A${ro} ${ro} 0 ${lg} 1 ${x1.toFixed(1)} ${y1.toFixed(1)}L${x2.toFixed(1)} ${y2.toFixed(1)}A${ri} ${ri} 0 ${lg} 0 ${x3.toFixed(1)} ${y3.toFixed(1)}Z" fill="url(#${uid}${k})" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/>`}
       const am=ang+fr*Math.PI,bw=big?172:134,bh=big?62:50,[mx,my]=pt(am,r+(big?18:14));
-      let bx=Math.cos(am)>=0?mx-bw*.28:mx-bw*.72,by=my-bh/2;bx=Math.max(4,Math.min(W-bw-4,bx));by=Math.max(4,Math.min(H-bh-4,by));
+      let bx=Math.cos(am)>=0?mx-bw*.28:mx-bw*.72,by=my-bh/2;bx=Math.max(big?cx-r-w/2-24:4,Math.min(W-bw-4,bx));by=Math.max(4,Math.min(H-bh-4,by));
       const pct=Math.round(fr*100),ir=big?17:14,ix=bx+(big?30:24),iy=by+bh/2,tx=ix+ir+(big?12:9);
       badges+=`<g filter="url(#${uid}sh)"><rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${bw}" height="${bh}" rx="${bh/2}" fill="#fffdfd" stroke="${col}" stroke-width="2"/></g>
         <circle cx="${ix.toFixed(1)}" cy="${iy.toFixed(1)}" r="${ir}" fill="${c1}" opacity=".18"/><g transform="translate(${ix.toFixed(1)} ${iy.toFixed(1)}) scale(${big?1.15:.95})" style="color:${col}">${MA_ICO[k]}</g>
@@ -1544,8 +1544,8 @@ function macroArt(m,etq){
       <text x="${cx}" y="${cy+fz*.72+(big?24:20)}" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="${big?12:10.5}" font-weight="700" letter-spacing="2.4" fill="#7a6e73">KCAL / DÍA</text>
       <g transform="translate(${cx} ${cy+fz*.72+(big?44:36)})" stroke="#c9a7b6" stroke-width="1.2" fill="none" stroke-linecap="round"><path d="M-36 0H-12M12 0H36"/><path d="M-1 4c-5-1-6-6-4-9 4 1 5 5 4 9zM1 4c5-1 6-6 4-9-4 1-5 5-4 9z"/></g>
       ${badges}`};
-  return `<svg class="macroart" viewBox="0 0 640 400" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${donut(640,400,320,200,132,48,true)}</svg>
-  <svg class="macroart mob" viewBox="0 0 400 330" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${donut(400,330,200,165,104,38,false)}</svg>`;
+  return `<svg class="macroart" viewBox="0 0 640 420" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${donut(640,420,320,210,146,52,true)}</svg>
+  <svg class="macroart mob" viewBox="0 0 400 320" preserveAspectRatio="xMidYMid meet" aria-hidden="true">${donut(400,320,200,160,112,42,false)}</svg>`;
 }
 
 /* ---------- Micronutrientes ---------- */
@@ -2850,7 +2850,7 @@ function ringColor(f){
 }
 function ring(val,max){
   const r=58,C=2*Math.PI*r,p=Math.min(val/max,1),col=ringColor(max>0?val/max:0);
-  return `<svg width="132" height="132"><circle cx="66" cy="66" r="${r}" fill="none" stroke="#efe9ee" stroke-width="7"/>
+  return `<svg viewBox="0 0 132 132" width="100%" height="100%"><circle cx="66" cy="66" r="${r}" fill="none" stroke="#efe9ee" stroke-width="7"/>
   <circle cx="66" cy="66" r="${r}" fill="none" stroke="${col}" stroke-width="7" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-p)}" style="transition:stroke-dashoffset .5s"/></svg>`;
 }
 function vDiario(){
