@@ -2320,7 +2320,7 @@ function vDiario(){
   ${cd}
   <p class="foot">Vuelve por encima de perfección. Cada registro cuenta.</p>`;
   {const mv=$('#microvm');if(mv)mv.onclick=()=>openMicros(u,peekLog(u,UI.date))}
-  {const dp=$('#dplan');if(dp){const tmp=document.createElement('div');vPlan(tmp);const ph=tmp.querySelector('.phero.fhero');if(ph){dp.replaceWith(ph);ph.querySelector('#ajb').onclick=openAjuste;const eg=ph.querySelector('#enfgo');eg.textContent='Ver mi plan completo';eg.onclick=openPlan}else dp.remove()}}
+  {const dp=$('#dplan');if(dp){const T=targetFor(u,today()),E=ENFOQUES[u.profile.enfoque];dp.outerHTML=`<button class="card planbtn" id="openplan2"><span class="ic enf enf${u.profile.enfoque}">${E.ic}</span><div><p class="cj">Tu plan</p><b>Tus calorías y macros</b><small>${fmt(T.kcal)} kcal · P ${fmt(T.p)} g · C ${fmt(T.c)} g · G ${fmt(T.g)} g</small></div><span class="cgo">›</span></button>`;$('#openplan2').onclick=openPlan}}
   bindCiclo(u);bindJuntas(u);if(SERVER&&!JT.loaded&&!JT.loading)jLoad().then(()=>{if(UI.view==='diario')vDiario()});
   bindRange();
   bindArrows(()=>UI.date=addDays(UI.date,-1),()=>UI.date=addDays(UI.date,1),vDiario);
