@@ -688,6 +688,15 @@ html .ct,html .csec h3,html .csec0 h3,html .cpt,html .mtit,html .h3{color:var(--
 .hlist{margin-top:10px;display:flex;flex-direction:column;gap:6px}.hlist div{display:flex;gap:8px;align-items:flex-start}.hlist i{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:7px}.hlist p{margin:0!important;font-size:13.5px}
 @media(max-width:640px){.chigh{grid-template-columns:repeat(2,minmax(0,1fr))}.hhorm,.hent2{grid-column:span 2}}
 html[data-tema=ciruela] .chigh .hleg{color:#3c383a}html[data-tema=ciruela] .chigh .hent2 b{color:#6c2146}
+/* Estilo clásico: el resumen del ciclo en rosa claro, como en Jardín, con la paleta lila y rosa */
+html[data-tema=clasico] .chigh{background:linear-gradient(135deg,#f8e8ee 0%,#f2e2ef 50%,#e9ddf3 100%);color:#744a69;border:1px solid #ecdbe8}
+html[data-tema=clasico] .chigh .hbox{background:rgba(255,255,255,.62);border-color:rgba(255,255,255,.9)}
+html[data-tema=clasico] .chigh .hbox small{color:#94738b;opacity:1}html[data-tema=clasico] .chigh .hbox b{color:#744a69}html[data-tema=clasico] .chigh .hbox i{color:#9c8b98;opacity:1}
+html[data-tema=clasico] .chigh .cener{color:#8a5a7c}html[data-tema=clasico] .chigh .cener i{background:#e6d6ea}html[data-tema=clasico] .chigh .cener i.on{background:#8a5a7c}
+html[data-tema=clasico] .chigh .hcara .mi,html[data-tema=clasico] .chigh .hcara svg path,html[data-tema=clasico] .chigh .hmov svg path{fill:#8a5a7c;color:#8a5a7c}html[data-tema=clasico] .chigh .hcara.on{background:#fff}
+html[data-tema=clasico] .chigh .hent span{background:#fff;color:#744a69}
+html[data-tema=clasico] .chigh .hleg{color:#372333}html[data-tema=clasico] .chigh .hent2 b{color:#744a69}
+html[data-tema=clasico] .chigh .cfuer i{background:#e6d6ea}html[data-tema=clasico] .chigh .cfuer i.on{background:#744a69}
 html .jhero .cj.jbut,html[data-tema=ciruela] .jhero .cj.jbut{color:#f3e2a9!important;opacity:1}
 .cmg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.cmg .card{margin:0}
 .cmc{display:flex;flex-direction:column}.cmh{display:flex;gap:12px;align-items:center}
@@ -807,13 +816,38 @@ const THEME_RE=new RegExp(Object.keys(THEME_MAP).join('|'),'gi');
 const themeMapStr=t=>t.replace(THEME_RE,m=>THEME_MAP[m.toLowerCase()]||m);
 let THEME_ORIG=null,THEME_OBS=null;
 const themeOn=()=>{try{return localStorage.getItem('vuelve_tema')!=='clasico'}catch(e){return true}};
+const GRAFITO_VISIBLE=false; // se activa cuando se apruebe el estilo Grafito
+const themeGris=()=>{try{return localStorage.getItem('vuelve_tema')==='grafito'}catch(e){return false}};
+/* Estilo grafito: mismo tema que Jardín, pero los rosas y lilas pasan a grises azulados.
+   Se conservan el vino, el verde azulado, el oliva, la mantequilla y la mostaza. */
+const _GC={};
+function grafitoHex(h){
+  h=h.toLowerCase();if(_GC[h])return _GC[h];
+  const r=parseInt(h.slice(1,3),16)/255,g=parseInt(h.slice(3,5),16)/255,b=parseInt(h.slice(5,7),16)/255;
+  const mx=Math.max(r,g,b),mn=Math.min(r,g,b),L=(mx+mn)/2,d=mx-mn;let H=0,S=0;
+  if(d>0){S=d/(1-Math.abs(2*L-1));H=mx===r?((g-b)/d)%6:mx===g?(b-r)/d+2:(r-g)/d+4;H=(H*60+360)%360}
+  const rosa=S>.04&&(H>=250||H<=14);
+  const vino=H>=318&&H<=348&&S>.35&&L<.5;      // vino y ciruela intensos: se quedan
+  const alerta=(H>=340||H<=12)&&S>.5&&L>=.4&&L<=.6; // rojos de aviso
+  let out=h;
+  if(rosa&&!vino&&!alerta){
+    const lv=L>=.8?.92:L>=.62?.85:1;                    // los tintes claros se aplanan un poco
+    const Lg=L>=.8?Math.min(.97,L*.99):L*.9;           // gris con la misma luminosidad
+    const Sg=L>=.8?.07:.09,Hg=215;
+    const f=n=>{const k=(n+Hg/30)%12,a=Sg*Math.min(Lg,1-Lg);const c=Lg-a*Math.max(-1,Math.min(k-3,9-k,1));return Math.round(c*255).toString(16).padStart(2,'0')};
+    out='#'+f(0)+f(8)+f(4);
+  }
+  return _GC[h]=out;
+}
+const grafStr=t=>t.replace(/#[0-9a-fA-F]{6}\b/g,m=>grafitoHex(m));
+const themeStr=t=>{t=themeMapStr(t);return themeGris()?grafStr(t):t};
 function themeFix(root){const els=root.nodeType===1?[root,...root.querySelectorAll('[style],[fill],[stroke],[stop-color]')]:[];
-  for(const el of els){if(!el.getAttribute)continue;for(const a of ['style','fill','stroke','stop-color']){const v=el.getAttribute(a);if(v&&THEME_RE.test(v)){THEME_RE.lastIndex=0;el.setAttribute(a,themeMapStr(v))}THEME_RE.lastIndex=0}}}
+  for(const el of els){if(!el.getAttribute)continue;for(const a of ['style','fill','stroke','stop-color']){const v=el.getAttribute(a);if(v&&/#[0-9a-fA-F]{6}/.test(v)){const n=themeStr(v);if(n!==v)el.setAttribute(a,n)}}}}
 function applyTheme(){
   const st=document.querySelector('head style')||document.querySelector('style');if(!st)return;
   if(THEME_ORIG==null)THEME_ORIG=st.textContent;
-  const on=themeOn();document.documentElement.dataset.tema=on?'ciruela':'clasico';
-  st.textContent=on?themeMapStr(THEME_ORIG):THEME_ORIG;
+  const on=themeOn();document.documentElement.dataset.tema=on?'ciruela':'clasico';document.documentElement.dataset.gris=on&&themeGris()?'1':'';
+  st.textContent=on?themeStr(THEME_ORIG):THEME_ORIG;
   if(on&&!THEME_OBS){THEME_OBS=new MutationObserver(ms=>{for(const m of ms)for(const n of m.addedNodes)if(n.nodeType===1)themeFix(n)});THEME_OBS.observe(document.body,{childList:true,subtree:true});themeFix(document.body)}
   if(!on&&THEME_OBS){THEME_OBS.disconnect();THEME_OBS=null}
 }
@@ -1756,7 +1790,7 @@ function cicloCardHTML(u,date){
 function bindCiclo(u){
   const r=()=>{if(UI.view==='diario')vDiario()};
   const s=$('#cset');if(s)s.onclick=e=>{e.preventDefault();openCicloAjustes(r)};
-  const n=$('#cno');if(n)n.onclick=()=>{u.profile.ciclo={...(u.profile.ciclo||{}),activo:false,oculto:true};save();r();toast('Puedes activarlo cuando quieras desde tu avatar → Tu ciclo')};
+  const n=$('#cno');if(n)n.onclick=()=>{u.profile.ciclo={...(u.profile.ciclo||{}),activo:false,oculto:true};save();r();toast('Puedes activarlo cuando quieras desde la pestaña Ciclo')};
   const o=$('#copen');if(o)o.onclick=()=>{UI.view='ciclo';renderApp();scrollTo(0,0)};
 }
 function cicloPatrones(u){
@@ -3089,7 +3123,6 @@ function toggleDD(){
   const dd=document.createElement('div');dd.className='dd';
   dd.innerHTML=`<div class="me"><div class="avatar" style="box-shadow:none">${esc((u.nombre[0]||'?').toUpperCase())}</div><div><b>${esc(u.nombre)}</b><small>${esc(u.email)}</small></div></div>
     <button class="it" data-go="espacio"><span class="ic" style="background:var(--lilac)">${ico('menu-espacio')}</span><div>Mi Espacio<small>Tus datos, compromiso y copias</small></div></button>
-    ${u.profile.sexo==='Mujer'?`<button class="it" data-go="ciclo"><span class="ic" style="background:#fbe9ee">${ico('corazon')}</span><div>Tu ciclo<small>Fase, energía y alimentos para ti</small></div></button>`:''}
     <button class="it" data-go="invitar"><span class="ic" style="background:var(--pink)">${ico('menu-invitar')}</span><div>Añadir amigo a Vuelve<small>Invítale a un reto en conjunto</small></div></button>
     <button class="it" data-go="tienda"><span class="ic" style="background:var(--pink)">${ico('menu-tienda')}</span><div>Tienda<small>Recetas, rutinas y merch</small></div></button>
     <button class="it" data-go="descargas"><span class="ic" style="background:var(--mint,#e3f4ea)">${ico('menu-descargas')}</span><div>Mis descargas<small>Lo que has comprado</small></div></button>
@@ -4499,7 +4532,8 @@ function vEspacio(){
   <div class="card"><div class="row between" style="gap:10px;flex-wrap:wrap;align-items:center"><div><p class="eyebrow">Cómo funciona Vuelve</p><p class="small muted" style="margin-top:4px">Vuelve a ver dónde está cada cosa.</p></div><button class="btn soft sm" id="vtour">Ver el tour</button></div></div>
   <div class="card"><p class="eyebrow">Estilo de color</p><p class="small muted" style="margin-top:6px">Elige cómo quieres ver Vuelve en este dispositivo.</p>
     <div class="grid2 temas" style="margin-top:12px">
-      <button class="tema ${themeOn()?'on':''}" data-tema="ciruela"><span class="tsw"><i style="background:#6c2146"></i><i style="background:#915a92"></i><i style="background:#325958"></i><i style="background:#e9d3a7"></i></span><b>Jardín</b><small>Vino, lila y verde azulado</small></button>
+      <button class="tema ${themeOn()&&!themeGris()?'on':''}" data-tema="ciruela"><span class="tsw"><i style="background:#6c2146"></i><i style="background:#915a92"></i><i style="background:#325958"></i><i style="background:#e9d3a7"></i></span><b>Jardín</b><small>Vino, lila y verde azulado</small></button>
+      ${GRAFITO_VISIBLE?`<button class="tema ${themeGris()?'on':''}" data-tema="grafito"><span class="tsw"><i style="background:#6c2146"></i><i style="background:#6b7480"></i><i style="background:#325958"></i><i style="background:#e4e7ea"></i></span><b>Grafito</b><small>Vino y grises</small></button>`:''}
       <button class="tema ${themeOn()?'':'on'}" data-tema="clasico"><span class="tsw"><i style="background:#744a69"></i><i style="background:#c45c72"></i><i style="background:#f5eff4;border:1px solid #e2d4de"></i></span><b>Clásico</b><small>Lila y rosa</small></button>
     </div></div>
   <div class="card"><p class="eyebrow">Tu semana</p><p class="small muted" style="margin-top:6px">¿Qué día cierras tu semana? Por ejemplo, el día que te pesas y te mides. Las semanas de tu progreso, tus notas y Movimiento irán hasta ese día.</p>
@@ -4531,7 +4565,7 @@ function vEspacio(){
   $('#im').onclick=()=>{const m=modal(`<div class="top"><b>Importar copia</b><button class="close">✕</button></div><p class="small muted" style="margin-top:8px">Pega aquí una copia. Sustituirá los registros de esta cuenta.</p><textarea class="in" id="it" style="margin-top:12px"></textarea><button class="btn block" style="margin-top:12px" id="ia">Importar</button>`);
     m.querySelector('#ia').onclick=()=>{try{const x=JSON.parse(m.querySelector('#it').value);if(!x.profile)throw 0;
       Object.assign(u,{profile:x.profile,logs:x.logs||{},weights:x.weights||[],favs:x.favs||[],custom:x.custom||[],off:x.off||[]});save();m.remove();toast('Copia importada ✓');renderApp()}catch(e){toast('La copia no es válida')}}};
-  $$('button.tema[data-tema]').forEach(b=>b.onclick=()=>{setTheme(b.dataset.tema);toast(b.dataset.tema==='ciruela'?'Estilo jardín ✓':'Estilo clásico ✓')});
+  $$('button.tema[data-tema]').forEach(b=>b.onclick=()=>{setTheme(b.dataset.tema);toast(b.dataset.tema==='ciruela'?'Estilo jardín ✓':b.dataset.tema==='grafito'?'Estilo grafito ✓':'Estilo clásico ✓')});
   $$('[data-semfin]').forEach(b=>b.onclick=()=>{const fin=+b.dataset.semfin;u.profile.semIni=(fin+1)%7;BAL_WS=null;save();toast('Tu semana ahora termina el '+DOWL[fin]+' ✓');vEspacio()});
 }
 
