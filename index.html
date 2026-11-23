@@ -608,6 +608,20 @@ nav.tabs button.on{color:var(--plum);font-weight:700}
 .msub{font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--soft)}.mtit{display:flex;align-items:center;gap:10px;margin:0}.mtit .mi{width:32px;height:32px}
 .mlist .bday{align-items:center}.mpills{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}@media(min-width:520px){.mpills{grid-template-columns:repeat(4,minmax(0,1fr))}}.mpill{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;padding:6px 10px;border-radius:12px;background:#faf4f8;border:1px solid #f0e4ec}.mpill small{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#9a7c93}.mpill b{font-size:15px;font-weight:800;line-height:1.2}.mpill b i{font-style:normal;font-size:11px;font-weight:600;color:var(--muted)}.mpill em{font-style:normal;font-size:10.5px;font-weight:700}.mpill em.dn{color:var(--green)}.mpill em.up{color:#a86a2d}
 .mdel{border:0;background:none;cursor:pointer;font-size:16px;color:#9a7c93;align-self:center}.mdel:hover{background:#faf4f8}
+@media(min-width:900px){
+.modal .sheet.wide{max-width:min(1180px,94vw)}
+.bcal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;margin-top:16px}
+.bcal .bday{flex-direction:column;align-items:stretch;gap:10px;padding:10px 10px 8px;border:1.5px solid var(--line);border-top:4px solid #e9dfe7;border-radius:16px;background:#fff;min-height:210px;text-align:center}
+.bcal .bday.s-ok{border-top-color:#2f6f5d}.bcal .bday.s-up{border-top-color:#c9879f}.bcal .bday.s-down{border-top-color:#d9b26a}.bcal .bday.fut{background:#fbf8fa}
+.bcal .bd{width:auto;height:auto;flex-direction:row;gap:6px;padding:7px 8px;border-radius:10px}
+.bcal .bd b{font-size:13px}.bcal .bd small{font-size:13px}
+.bcal .bc{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1}
+.bcal .brow{flex-direction:column;justify-content:center;gap:6px}.bcal .bk{display:flex;flex-direction:column;align-items:center;line-height:1.15}.bcal .bk b{font-size:20px}.bcal .bk .muted{font-size:11.5px}
+.bcal .bmeta{flex-direction:column;justify-content:center;gap:5px;margin-top:0}.bcal .bm{font-size:11.5px}
+.bcal .apill.sm{font-size:11px}
+.bcal .bnote{font-size:12px;line-height:1.45;text-align:left;margin-top:2px;width:100%}
+.bcal .bed{align-self:center;margin-top:auto}
+}
 </style>
 </head>
 <body>
@@ -2704,7 +2718,7 @@ function balanceHTML(u,ws,compact){
     const stc=st==='ok'?['ok','En objetivo']:tt>tg?['up','Por encima']:['down','Por debajo'];
     const kc=st==='none'?'<span class="small muted">Sin registro</span>':`<span class="bk"><b>${fmt(tt)}</b><span class="muted"> / ${fmt(tg)} kcal</span></span><span class="bst ${stc[0]}">${stc[1]}</span>`;
     const meta=[a?`<span class="apill sm" style="background:${a[3]};color:${a[4]}">${a[1]} ${a[2]}</span>`:'',mov?`<span class="bm">${ico('act-fuerza','mi')}${mov} ${mov===1?'actividad':'actividades'}</span>`:'',l.pasos?`<span class="bm">${ico('act-pasos','mi')}${fmt(l.pasos)} pasos</span>`:''].filter(Boolean).join('');
-    return `<div class="bday ${d>today()?'fut':''} ${d===today()?'hoy':''}"><div class="bd"><b>${cap(DOWL[pd.getDay()]).slice(0,3)}</b><small>${pd.getDate()}</small></div>
+    return `<div class="bday ${d>today()?'fut':''} ${d===today()?'hoy':''} ${st==='none'?'s-none':'s-'+stc[0]}"><div class="bd"><b>${cap(DOWL[pd.getDay()]).slice(0,3)}</b><small>${pd.getDate()}</small></div>
       <div class="bc"><div class="brow">${kc}</div>${meta?`<div class="bmeta">${meta}</div>`:''}
       ${l.nota?`<p class="bnote">${esc(l.nota)}</p>`:''}</div>
       ${d<=today()?`<button class="bed" data-anday="${d}" title="${a||l.nota?'Editar':'Añadir'} nota">${ico('editar','mi')}</button>`:''}</div>`}).join('');
@@ -2714,7 +2728,7 @@ function balanceHTML(u,ws,compact){
   const resumen=`<div class="bsum">${ANIMOS.filter(a=>cnt(a[0])).map(a=>`<span class="apill sm" style="background:${a[3]};color:${a[4]}">${a[1]} ${cnt(a[0])}</span>`).join('')}<span class="apill sm" style="background:var(--mint);color:var(--base)">${ico('celebrar-trofeo','mi')} ${ok} ${ok===1?'día en objetivo':'días en objetivo'}</span></div>${malos.length?`<p class="tiny muted" style="margin-top:6px">De los días malos, ${malOk} en objetivo</p>`:''}${reg.length?'':'<p class="tiny muted" style="margin-top:6px">Aún no has valorado ningún día de esta semana.</p>'}`;
   const wsD=parse(ws),weD=parse(addDays(ws,6));
   return `${compact?'':`<div class="row between" style="margin-top:4px"><button class="ar" id="bwp">←</button><b class="small">${wsD.getDate()} ${MON[wsD.getMonth()]} – ${weD.getDate()} ${MON[weD.getMonth()]}</b><button class="ar" id="bwn" ${ws>=weekStart(today())?'disabled style="opacity:.3"':''}>→</button></div>`}
-    <div style="margin-top:12px">${resumen}</div><div class="blist">${rows}</div>`;
+    <div style="margin-top:12px">${resumen}</div><div class="blist bcal">${rows}</div>`;
 }
 function bindBalance(root,u,rerender){
   root.querySelectorAll('[data-anday]').forEach(b=>b.onclick=()=>preguntarDia(b.dataset.anday));
