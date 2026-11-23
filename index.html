@@ -1455,27 +1455,23 @@ function upsertWeight(u,date,kg){
 }
 
 function macroArt(m,etq){
-  const C=2*Math.PI*118,tot=m.p*4+m.c*4+m.g*9||1,gap=50;let off=0;
-  const segs=[['--p',m.p*4,'#c45c72'],['--c',m.c*4,'#7b5ea7'],['--g',m.g*9,'#d4a72c']].map(([k,v,col])=>{const len=Math.max(0,v/tot*C-gap);const el=`<circle cx="0" cy="0" r="118" fill="none" stroke="${col}" stroke-width="40" stroke-linecap="round" stroke-dasharray="${len.toFixed(1)} ${C.toFixed(1)}" stroke-dashoffset="${(-off-gap/2).toFixed(1)}"/>`;off+=v/tot*C;return el}).join('');
-  const ic=(n,x,y,sz,bg)=>`<g transform="translate(${x} ${y})"><circle r="${sz*0.78}" fill="${bg}"/><g transform="translate(${-sz/2} ${-sz/2}) scale(${sz/432}) translate(-40 -40)"><path fill="#6b4462" fill-rule="evenodd" d="${ICO[n]||''}"/></g></g>`;
-  const chip=(x,y,col,t,v)=>`<g transform="translate(${x} ${y})"><rect x="0" y="-17" width="112" height="34" rx="17" fill="#fff" fill-opacity=".92"/><circle cx="18" cy="0" r="6" fill="${col}"/><text x="32" y="5" font-family="Montserrat,sans-serif" font-size="14" font-weight="700" fill="#3a2f38">${t} <tspan font-weight="500" fill="#7d6c7a">${v}</tspan></text></g>`;
+  const tot=m.p*4+m.c*4+m.g*9||1,parts=[['P','Proteína',m.p*4,'#c45c72'],['C','Carbos',m.c*4,'#7b5ea7'],['G','Grasas',m.g*9,'#d4a72c']];
+  const donut=(cx,cy,r,w,big)=>{const C=2*Math.PI*r,gap=3;let off=0,segs='',badges='';
+    parts.forEach(([k,lab,v,col])=>{const fr=v/tot,len=Math.max(0,fr*C-gap);
+      segs+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${col}" stroke-width="${w}" stroke-dasharray="${len.toFixed(1)} ${C.toFixed(1)}" stroke-dashoffset="${(-off).toFixed(1)}" transform="rotate(-90 ${cx} ${cy})"/>`;
+      const a=-Math.PI/2+(off+fr*C/2)/r,bx=cx+r*Math.cos(a),by=cy+r*Math.sin(a),br=big?30:26;
+      badges+=`<g><circle cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" r="${br}" fill="#fff" stroke="${col}" stroke-width="3"/><text x="${bx.toFixed(1)}" y="${(by-2).toFixed(1)}" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="${big?17:15}" font-weight="800" fill="${col}">${k}</text><text x="${bx.toFixed(1)}" y="${(by+(big?15:13)).toFixed(1)}" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="${big?11:10}" font-weight="700" fill="#7d6c7a">${Math.round(fr*100)}%</text></g>`;
+      off+=fr*C});
+    return `<circle cx="${cx}" cy="${cy}" r="${r+w/2+6}" fill="#fff" opacity=".55"/>${segs}<circle cx="${cx}" cy="${cy}" r="${r-w/2-4}" fill="#fdf9fc"/>
+      <text x="${cx}" y="${cy-(big?26:22)}" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="${big?15:14}" font-weight="600" fill="#7d6c7a">${etq?esc(etq.replace('KCAL · ','').toLowerCase()).replace(/^./,x=>x.toUpperCase()):'Calorías'}</text>
+      <text x="${cx}" y="${cy+(big?20:16)}" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="${big?50:44}" font-weight="800" letter-spacing="-1.5" fill="#6b4462">${fmt(m.kcal)}</text>
+      <text x="${cx}" y="${cy+(big?44:38)}" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="12" font-weight="700" letter-spacing="2" fill="#9a7c93">KCAL / DÍA</text>${badges}`};
   return `<svg class="macroart" viewBox="0 0 640 380" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-    <circle cx="560" cy="60" r="120" fill="#ecdcf0" opacity=".7"/><circle cx="300" cy="350" r="90" fill="#f6e7d4" opacity=".8"/><circle cx="90" cy="80" r="46" fill="#f3dfe6" opacity=".7"/>
-    <g transform="translate(360 190) rotate(-90)"><circle r="118" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="54"/>${segs}</g>
-    <circle cx="360" cy="190" r="86" fill="#fdf9fc"/>
-    <text x="360" y="192" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="40" font-weight="800" letter-spacing="-1.5" fill="#6b4462">${fmt(m.kcal)}</text>
-    <text x="360" y="218" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="13" font-weight="600" letter-spacing="2" fill="#9a7c93">${etq||'KCAL / DÍA'}</text>
-    ${ic('peso',150,92,52,'#fff')}${ic('medidas',210,320,46,'#fff')}${ic('corazon',560,330,44,'#f4e9f1')}
-  </svg>
+    <circle cx="560" cy="60" r="120" fill="#ecdcf0" opacity=".5"/><circle cx="250" cy="350" r="80" fill="#f6e7d4" opacity=".6"/>
+    ${donut(380,190,122,34,true)}</svg>
   <svg class="macroart mob" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-    <circle cx="350" cy="40" r="90" fill="#ecdcf0" opacity=".7"/><circle cx="60" cy="270" r="70" fill="#f6e7d4" opacity=".8"/>
-    <g transform="translate(200 150) rotate(-90)"><circle r="118" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="54"/>${segs}</g>
-    <circle cx="200" cy="150" r="86" fill="#fdf9fc"/>
-    <text x="200" y="154" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="46" font-weight="800" letter-spacing="-1.5" fill="#6b4462">${fmt(m.kcal)}</text>
-    <text x="200" y="182" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="14" font-weight="700" letter-spacing="2" fill="#9a7c93">${etq||'KCAL / DÍA'}</text>
-    ${ic('peso',40,50,34,'#fff')}${ic('corazon',362,250,32,'#f4e9f1')}
-  </svg>
-`;
+    <circle cx="350" cy="40" r="90" fill="#ecdcf0" opacity=".5"/>
+    ${donut(200,150,108,30,false)}</svg>`;
 }
 
 /* ---------- Micronutrientes ---------- */
