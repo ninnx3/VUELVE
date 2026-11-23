@@ -678,6 +678,8 @@ html[data-tema=ciruela] .cerrar{background:#325958;color:#f3efe6}html[data-tema=
 html[data-tema=ciruela] .fc-btn{background:#6c2146}html[data-tema=ciruela] .fc-btn:hover{background:#521834}
 html[data-tema=ciruela] .fc-t{color:#3c383a}
 html .eyebrow,html .cj,html .msub,html .welcome .eyebrow{text-transform:uppercase;font-weight:700;letter-spacing:2.2px}
+html .card>p.eyebrow:first-child,html .card>.row.between>p.eyebrow:first-child,html #balcard>p.eyebrow:first-child{font-size:22px!important;letter-spacing:-.5px!important;text-transform:none!important;color:var(--ink)!important;font-weight:800!important;line-height:1.2}
+html .ct,html .csec h3,html .csec0 h3,html .cpt,html .mtit,html .h3{color:var(--ink)!important}
 </style>
 </head>
 <body>
@@ -3008,7 +3010,7 @@ function maybeWelcome(){
   const pf=u.profile,f=fotoBienvenida(u);
   const [ey,ti,tx]=FRASES[Math.floor(Math.random()*FRASES.length)];
   const m=modal(`<div class="l ${f?'foto':''}" style="padding:0">${f?`<img src="${esc(f)}" alt="" onerror="this.parentNode.classList.remove('foto');this.outerHTML=ILLU">`:ILLU}</div><div class="r"><button class="close wclose">✕</button>
-    <p class="eyebrow" style="text-transform:none;letter-spacing:.5px;font-size:11px">${ey}</p>
+    <p class="eyebrow" style="font-size:11px">${ey}</p>
     <h3 class="h2" style="font-size:28px;margin-top:10px;line-height:1.15">${ti}</h3>
     <p class="muted" style="margin-top:12px;font-size:14px;line-height:1.6">${tx}</p>
     ${pf.meta&&pf.meta>=today()?`<p class="eyebrow" style="margin-top:22px">Hasta el ${parse(pf.meta).getDate()} de ${MONL[parse(pf.meta).getMonth()]}</p><div class="cd sm">${cdHTML(pf.meta)}</div>`:''}
