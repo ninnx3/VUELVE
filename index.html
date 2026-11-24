@@ -3881,7 +3881,9 @@ function editFood(date,idx){
   const ug=hasQ&&e.uq>0?e.q/e.uq:null,un=e.un,unp=e.unp||e.un;
   let modo=ug?'u':'g';
   const rac0=e.rac||1,uBase=e.base||{k:e.k/rac0,p:e.p/rac0,c:e.c/rac0,g:e.g/rac0};
-  const m=modal(`<div class="top"><b>Editar alimento</b><button class="close">✕</button></div><div id="eb"></div>`);
+  const favOk=!!e.fid&&!String(e.fid).startsWith('mp_')&&(!String(e.fid).startsWith('o')||(u.off||[]).some(x=>x.id===e.fid));
+  const m=modal(`<div class="top"><b>Editar alimento</b><span style="display:flex;align-items:center;gap:6px">${favOk?`<button class="star ${u.favs.includes(e.fid)?'on':''}" id="efav" aria-label="Favorito" title="${u.favs.includes(e.fid)?'Quitar de favoritos':'Añadir a favoritos'}">★</button>`:''}<button class="close">✕</button></span></div><div id="eb"></div>`);
+  const efv=m.querySelector('#efav');if(efv)efv.onclick=()=>{const on=!u.favs.includes(e.fid);u.favs=on?[...u.favs,e.fid]:u.favs.filter(x=>x!==e.fid);save();efv.classList.toggle('on',on);efv.title=on?'Quitar de favoritos':'Añadir a favoritos';toast(on?'Añadido a favoritos ★':'Quitado de favoritos')};
   const eb=()=>m.querySelector('#eb');
   const pick=()=>`<div class="mealpick" style="margin-top:12px">${MEALS.map(([n,i])=>`<button data-em="${n}" class="${meal===n?'on':''}"><span>${i}</span>${n}</button>`).join('')}</div>`;
   const draw=()=>{
