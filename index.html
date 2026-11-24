@@ -4742,6 +4742,38 @@ function dietaToggle(sel,k){
   if(!sel.includes(k)&&DIETA_GRUPO.includes(k))r=r.filter(x=>x===k||!DIETA_GRUPO.includes(x));
   return r;
 }
+
+/* ---------- Ingredientes que NO quiere (chips y texto libre) ---------- */
+const EV_RE={
+  'lactosa':/\b(leche|yogur|skyr|queso|nata|mantequilla|mozzarella|parmesano|cheddar|requeson|kefir|brioche)/,
+  'gluten':/\b(trigo|pasta|pan|cuscus|avena|cebada|centeno|masa|galleta|seitan|brioche|tortilla de trigo|fideos)/,
+  'frutos secos':/\b(almendra|nuez|nueces|avellana|anacardo|pistacho|cacahuete|frutos secos|piñon|pinon)/,
+  'marisco':/\b(gamba|langostino|marisco|mejillon|calamar|pulpo|almeja|cigala|sepia)/,
+  'pescado':/\b(merluza|salmon|atun|pescado|bacalao|sardina|anchoa|lubina|dorada|trucha|caballa|gamba|langostino|marisco|mejillon|calamar|pulpo)/,
+  'cerdo':/\b(cerdo|jamon|chorizo|bacon|beicon|lomo|panceta|salchicha|fiambre de cerdo)/,
+  'carne roja':/\b(ternera|vacuno|cordero|buey|cerdo|hamburguesa|solomillo de ternera|carne picada|carne de)/,
+  'huevo':/\b(huevo|clara|yema|brioche|mayonesa)/,
+  'picante':/\b(picante|guindilla|chile|cayena|tabasco|jalapeño|jalapeno|chipotle|sriracha)/,
+  'champiñones':/\b(champi|seta|hongo|portobello|shiitake|boletus)/,
+  'cebolla cruda':/\b(cebolla|cebolleta|chalota)/
+};
+const EV_SIN={pollo:/\b(pollo|pechuga|muslo|contramuslo|alitas)/,pavo:/\b(pavo|pechuga de pavo)/,champinon:EV_RE['champiñones'],seta:EV_RE['champiñones'],cerdo:EV_RE.cerdo,jamon:/\b(jamon|fiambre)/,atun:/\b(atun)/,salmon:/\b(salmon)/,pescado:EV_RE.pescado,marisco:EV_RE.marisco,huevo:EV_RE.huevo,queso:/\b(queso|mozzarella|parmesano|cheddar|requeson)/,leche:/\b(leche|bebida)/,lacteo:EV_RE.lactosa,ternera:/\b(ternera|vacuno|carne picada)/,carne:/\b(pollo|pavo|ternera|cerdo|jamon|carne|cordero|chorizo|bacon|hamburguesa|pechuga|muslo)/,cebolla:EV_RE['cebolla cruda'],tomate:/\b(tomate)/,pimiento:/\b(pimiento)/,berenjena:/\b(berenjena)/,calabacin:/\b(calabacin)/,espinaca:/\b(espinaca)/,brocoli:/\b(brocoli)/,coliflor:/\b(coliflor)/,lenteja:/\b(lenteja)/,garbanzo:/\b(garbanzo)/,legumbre:/\b(lenteja|garbanzo|alubia|judia|guisante|soja|edamame|hummus)/,aguacate:/\b(aguacate)/,coco:/\b(coco)/,platano:/\b(platano|banana)/,arroz:/\b(arroz)/,pasta:/\b(pasta|macarron|espagueti|fideos)/,pan:/\b(pan |pan$|tostada|bocadillo)/,tofu:/\b(tofu|tempeh|seitan)/};
+const evNorm=x=>String(x||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zñ0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+const evStem=w=>w.replace(/ones$/,'on').replace(/(es|s)$/,'').replace(/ñ/g,'n');
+function evitarRegex(w){
+  const n=evNorm(w);if(!n)return null;
+  if(EV_RE[w.toLowerCase()])return EV_RE[w.toLowerCase()];
+  const st=evStem(n.replace(/^(el|la|los|las|nada de|sin) /,''));
+  for(const k in EV_SIN){if(st===k||st.startsWith(k)||k.startsWith(st)&&st.length>=4)return EV_SIN[k]}
+  if(st.length<3)return null;
+  return new RegExp('\\b'+st.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));
+}
+function evitaReceta(r,chips,txt){
+  const hay=evNorm((r.nombre||'')+' | '+(r.ingredientes||[]).map(i=>i.item).join(' | '));
+  for(const c of chips||[]){const re=EV_RE[String(c).toLowerCase()];if(re&&re.test(hay))return true}
+  for(const w of txt||[]){const re=evitarRegex(w);if(re&&re.test(hay))return true}
+  return false;
+}
 const MP={screen:'home',step:0,prefs:null,ctl:null,err:'',progress:''};
 const DIAS7=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
 const GUSTOS=['Mediterránea','Casera española','Italiana','Asiática','Mexicana','Árabe / Libanesa','Vegetariana','Vegana','Alta en proteína','Rápida (<20 min)','Sin horno','Bowls y ensaladas','Cuchara y guisos','Dulce para desayunar'];
@@ -5083,10 +5115,10 @@ const CHEAT_MAP={Pizza:['pizza'],Hamburguesa:['hamburguesa'],'Tortitas con sirop
 function faseActual(u){if(!u||u.profile.sexo!=='Mujer')return null;const c=u.profile.ciclo;if(!c||!c.activo||c.anti)return null;const cd=cicloDia(u,today());return cd&&!cd.tarde?cd:null}
 const faseKw=f=>(CICLO_FASES[f]?.come||[]).map(n=>n.replace(/ \(.*\)$/,'').split(/[ ,]/)[0].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/s$/,''));
 function mpFromLibrary(u,pr,lib){
-  const T=mpTargets(u),evit=new Set(pr.evitar),txtEv=(pr.evitarTxt||'').toLowerCase().split(/[,;\n]| y /).map(s=>s.trim()).filter(s=>s.length>2);
+  const T=mpTargets(u),evit=new Set(pr.evitar),txtEv=(pr.evitarTxt||'').split(/[,;\n]| y |\bni\b|\bno me gusta(n)?\b/i).map(s=>s.trim()).filter(s=>s.length>2);
   const incl=[...pr.incluir,...(pr.incluirTxt||'').split(/[,;\n]/)].map(s=>s.trim().toLowerCase()).filter(Boolean);
   const dz=(u.profile&&u.profile.dieta)||[];
-  const okR=r=>r.publicada!==false&&dietaOk(r,dz)&&!(r.alergenos||[]).some(a=>evit.has(a))&&!txtEv.some(w=>(r.nombre+' '+(r.ingredientes||[]).map(i=>i.item).join(' ')).toLowerCase().includes(w))
+  const okR=r=>r.publicada!==false&&dietaOk(r,dz)&&!(r.alergenos||[]).some(a=>evit.has(a))&&!evitaReceta(r,pr.evitar,txtEv)
     &&(!(r.enfoques||[]).length||r.enfoques.includes(+u.profile.enfoque));
   const pool=lib.filter(okR);
   const avgP=T.reduce((a,t)=>a+t.p*4/t.kcal,0)/7;
