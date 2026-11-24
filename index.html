@@ -246,7 +246,7 @@ details.how[open] summary::before{content:'▾ '}
 /* Meals */
 .meal{padding:14px 0;border-top:1px solid var(--line)}
 .meal:first-child{border-top:0;padding-top:4px}
-.meal .h{display:flex;justify-content:space-between;align-items:center;font-weight:700}
+.meal .h{display:flex;justify-content:space-between;align-items:center;font-weight:700;cursor:pointer;user-select:none}.meal .mhl{display:flex;align-items:center;gap:8px}.meal .mchev{flex-shrink:0;color:var(--muted);transition:transform .2s}.meal.open .mchev{transform:rotate(180deg)}.meal .mitems{display:none}.meal.open .mitems{display:block}
 .item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;font-size:13px;gap:10px}
 .item .n{flex:1;min-width:0}
 .item.editable{cursor:pointer;border-radius:10px}.item.editable:active{background:var(--tile)}
@@ -3514,11 +3514,10 @@ function vDiario(){
     ${pf.enfoque==6?`<div class="daytype"><button data-t="entreno" class="${isTrainDay(u,UI.date)?'on':''}">${ico('act-fuerza','mi')} Día de entreno</button><button data-t="descanso" class="${!isTrainDay(u,UI.date)?'on':''}">${ico('act-descanso','mi')} Día de descanso</button></div>`:''}
     <button class="btn block" style="margin-top:20px" id="add">+ Añadir alimento</button>
     ${log.foods.length&&UI.date<=today()&&UI.date>=addDays(today(),-1)?`<button class="btn block cerrar ${log.cerrado?'done':''}" id="cerrar">${log.cerrado?'✓ Día cerrado · ver resultado':ico('cerrar-dia','mi')+' Cerrar mi día'}</button>`:''}
-    <button class="btn soft block" style="margin-top:8px" id="tm">${UI.showMeals?'Ocultar mis comidas':'Ver y editar mis comidas'}${log.foods.length?' ('+log.foods.length+')':''}</button>
-    <div id="meals" class="${UI.showMeals?'':'hidden'}" style="margin-top:14px">
+    <div id="meals" style="margin-top:14px">
       ${MEAL_NAMES.map(m=>{const it=log.foods.map((f,i)=>({...f,i})).filter(f=>f.meal===m||(m==='Snack'&&!MEAL_NAMES.includes(f.meal))),mt=totals(it);
-        return `<div class="meal"><div class="h"><span>${MEALS.find(x=>x[0]===m)[1]} ${m} <span class="small muted" style="font-weight:500">${it.length?fmt(mt.k)+' kcal':''}</span></span><button class="plus" data-meal="${m}">+</button></div>
-        ${it.map(f=>`<div class="item editable" data-ed="${f.i}"><div class="n">${esc(f.n)}<small>${f.uq?dec(f.uq)+' '+esc(Math.abs(f.uq-1)<1e-9?f.un:f.unp)+' ('+fmt1(f.q)+' g) · ':f.q?fmt1(f.q)+' g · ':''}P ${fmt1(f.p)} · C ${fmt1(f.c)} · G ${fmt1(f.g)}</small></div><span class="k">${fmt(f.k)} kcal</span><button class="x" data-edb="${f.i}" title="Editar" aria-label="Editar">✎</button><button class="x" data-del="${f.i}" title="Eliminar" aria-label="Eliminar">✕</button></div>`).join('')}</div>`}).join('')}
+        const op=!!(UI.om&&UI.om[m]);return `<div class="meal ${op?'open':''}"><div class="h" data-mt="${m}" role="button" tabindex="0" aria-expanded="${op}"><span class="mhl"><svg class="mchev" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>${MEALS.find(x=>x[0]===m)[1]} ${m} <span class="small muted" style="font-weight:500">${it.length?fmt(mt.k)+' kcal':''}</span></span><button class="plus" data-meal="${m}">+</button></div>
+        <div class="mitems">${it.map(f=>`<div class="item editable" data-ed="${f.i}"><div class="n">${esc(f.n)}<small>${f.uq?dec(f.uq)+' '+esc(Math.abs(f.uq-1)<1e-9?f.un:f.unp)+' ('+fmt1(f.q)+' g) · ':f.q?fmt1(f.q)+' g · ':''}P ${fmt1(f.p)} · C ${fmt1(f.c)} · G ${fmt1(f.g)}</small></div><span class="k">${fmt(f.k)} kcal</span><button class="x" data-edb="${f.i}" title="Editar" aria-label="Editar">✎</button><button class="x" data-del="${f.i}" title="Eliminar" aria-label="Eliminar">✕</button></div>`).join('')}</div></div>`}).join('')}
     </div>
     </div><div class="dcol dr">
     <div class="grid2" style="margin-top:16px">
@@ -3551,7 +3550,7 @@ function vDiario(){
   bindRange();
   bindArrows(()=>UI.date=addDays(UI.date,-1),()=>UI.date=addDays(UI.date,1),vDiario);
   $('#add').onclick=()=>openAdd(null);
-  $('#tm').onclick=()=>{UI.showMeals=!UI.showMeals;vDiario()};
+  $$('#meals .meal .h').forEach(h=>{const tg=()=>{const m=h.dataset.mt;UI.om=UI.om||{};UI.om[m]=!UI.om[m];const el=h.closest('.meal');el.classList.toggle('open',UI.om[m]);h.setAttribute('aria-expanded',UI.om[m])};h.onclick=e=>{if(e.target.closest('.plus'))return;tg()};h.onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&!e.target.closest('.plus')){e.preventDefault();tg()}}});
   if($('#aned'))$('#aned').onclick=()=>preguntarDia(UI.date);
   if($('#cerrar'))$('#cerrar').onclick=()=>{const lg=dayLog(u,UI.date),st=dayStatus(u,UI.date),t=totals(lg.foods).k,tg2=targetFor(u,UI.date).kcal;
     lg.cerrado=true;if(UI.date===addDays(today(),-1))u.celebrado=UI.date;save();vDiario();
@@ -3856,7 +3855,7 @@ function openAdd(meal0){
       const tg=mb.querySelector('#tog');if(tg)tg.onclick=()=>{const v=mb.querySelector('#qg').value;modo='g';render();mb.querySelector('#qg').value=v;upd()}};
     render();
   };
-  const add=item=>{dayLog(u,UI.date).foods.push({...item,meal});save();embAlertaAlAnadir(item.n);added.push({n:item.n,k:item.k||0,meal});toast('Añadido a '+meal+' ✓');UI.showMeals=true;if(UI.view==='diario'){UI.range='dia';vDiario()}
+  const add=item=>{dayLog(u,UI.date).foods.push({...item,meal});save();embAlertaAlAnadir(item.n);added.push({n:item.n,k:item.k||0,meal});toast('Añadido a '+meal+' ✓');UI.showMeals=true;UI.om=UI.om||{};UI.om[meal]=true;if(UI.view==='diario'){UI.range='dia';vDiario()}
     clearTimeout(offT);q='';qRaw='';offRes=null;offErr='';offLoading=false;if(mode==='qty')mode=qPrev==='codigo'?'codigo':'buscar';if(mode==='menu'||mode==='receta'){mode='buscar';rec=null}draw();const qi=m.querySelector('#q');if(qi&&!matchMedia('(pointer:coarse)').matches)qi.focus();m.querySelector('.sheet').scrollTop=0};
   draw();
 }
