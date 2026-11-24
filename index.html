@@ -3927,7 +3927,7 @@ function openAdd(meal0){
     }
     if(mode==='buscar'){
       const RF=misRecetas(u).map(recToFood),all=[...RF,...libFoods(),...u.custom,...(u.off||[]),...FOODS];
-      const recentIds=[...new Set(Object.keys(u.logs).sort().reverse().flatMap(d=>(u.logs[d].foods||[]).map(f=>f.fid)).filter(Boolean))];
+      const recentIds=[...new Set(Object.keys(u.logs).sort().reverse().flatMap(d=>(u.logs[d].foods||[]).slice().reverse().map(f=>f.fid)).filter(Boolean))];
       let list=sub==='mis'?RF:sub==='fav'?all.filter(f=>u.favs.includes(f.id)):sub==='rec'?recentIds.map(id=>all.find(f=>f.id===id)).filter(Boolean):all;
       if(q){const qt=toks(q);list=list.filter(f=>{const nt=toks(norm(f.n)+' '+norm(f.un||'')+' '+norm(f.unp||''));return qt.every(t=>nt.some(w=>w.startsWith(t)))})}
       mb.innerHTML=`${back}${pickHTML()}
