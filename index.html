@@ -14,16 +14,16 @@
 <title>Vuelve · Contador de calorías y macros a tu ritmo | Recomposición corporal</title>
 <meta name="description" content="Vuelve es tu diario de calorías y macros para ponerte en forma junto a un amigo o amiga: tu día, el de tu compi y una meta semanal en común. Recomposición corporal, recetas con macros, mealprep y tu ciclo.">
 <meta name="robots" content="index,follow">
-<link rel="canonical" href="https://ninnx3.github.io/VUELVE/">
+<link rel="canonical" href="https://vuelvehaciati.com/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Vuelve">
 <meta property="og:locale" content="es_ES">
 <meta property="og:title" content="Vuelve · A tu ritmo, hacia ti">
 <meta property="og:description" content="Calorías y macros a tu ritmo: recomposición corporal, recetas con macros y retos con amigos y amigas.">
-<meta property="og:url" content="https://ninnx3.github.io/VUELVE/">
-<meta property="og:image" content="https://ninnx3.github.io/VUELVE/img/og-unete.jpg">
+<meta property="og:url" content="https://vuelvehaciati.com/">
+<meta property="og:image" content="https://vuelvehaciati.com/img/og-unete.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Vuelve","url":"https://ninnx3.github.io/VUELVE/","applicationCategory":"HealthApplication","operatingSystem":"Web, iOS, Android","inLanguage":["es","en"],"description":"Diario de calorías y macros a tu ritmo: recomposición corporal, recetas con macros, mealprep y retos con amigos y amigas.","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Vuelve","url":"https://vuelvehaciati.com/","applicationCategory":"HealthApplication","operatingSystem":"Web, iOS, Android","inLanguage":["es","en"],"description":"Diario de calorías y macros a tu ritmo: recomposición corporal, recetas con macros, mealprep y retos con amigos y amigas.","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"}}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -1437,7 +1437,7 @@ function offMap(p){
     ...(sq>0&&sq<2000?{ug:Math.round(sq*10)/10,un:'ración',unp:'raciones'}:{})};
 }
 const IN_PREVIEW=!!(window.claude&&window.claude.use)||/claude\.ai|claudeusercontent/.test(location.hostname)||location.protocol==='file:';
-const OFF_OFFLINE=IN_PREVIEW?'No se puede conectar con Open Food Facts desde esta vista previa. Úsalo en tu web: https://ninnx3.github.io/VUELVE/':'No hemos podido conectar con Open Food Facts. Revisa tu conexión y vuelve a intentarlo en unos segundos.';
+const OFF_OFFLINE=IN_PREVIEW?'No se puede conectar con Open Food Facts desde esta vista previa. Úsalo en tu web: https://vuelvehaciati.com/':'No hemos podido conectar con Open Food Facts. Revisa tu conexión y vuelve a intentarlo en unos segundos.';
 // Open Food Facts permite 10 búsquedas por minuto por persona: llevamos la cuenta para no pasarnos
 const OFF_HITS=[];const offRecent=()=>{const t=Date.now();while(OFF_HITS.length&&t-OFF_HITS[0]>60000)OFF_HITS.shift();return OFF_HITS.length};
 const OFF_LIMIT_MSG=s=>'Open Food Facts solo deja hacer 10 búsquedas por minuto y ya has llegado. Prueba de nuevo en '+s+' s; mientras, tienes la lista de arriba.';
@@ -3238,7 +3238,7 @@ function openUsuarias(){
    RETOS CON AMIGOS
    ========================================================= */
 // Enlace de la web que se incluye en las invitaciones. Cambiadlo por vuestro dominio.
-const APP_URL='https://ninnx3.github.io/VUELVE/';
+const APP_URL='https://vuelvehaciati.com/';
 const RETO_TIPOS={
   kcal:{t:'Días cumpliendo calorías',s:'Suma un punto cada día dentro de ±10% de tu objetivo',ic:ico('comida-almuerzo','mi')},
   mov:{t:'Días de movimiento',s:'Suma un punto cada día que registres actividad',ic:ico('act-ligera','mi')},
@@ -5045,7 +5045,7 @@ function mpFromLibrary(u,pr,lib){
 }
 
 // ===== Tienda: Mis descargas (todas) y Productos (administradoras) =====
-const TIENDA_URL='https://ninnx3.github.io/VUELVE/tienda/';
+const TIENDA_URL='https://vuelvehaciati.com/tienda/';
 const eurC=c=>new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',minimumFractionDigits:c%100?2:0}).format((c||0)/100);
 const slugify=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,50)||'producto';
 async function tiendaFn(body){
@@ -5153,7 +5153,7 @@ async function packBuilder(){
 }
 function packPDF(recs,title,sub){
   const w=window.open('','_blank');if(!w)return toast('Permite las ventanas emergentes para abrir el PDF');
-  const BASE='https://ninnx3.github.io/VUELVE/',n1=x=>x==null?'':new Intl.NumberFormat('es-ES',{maximumFractionDigits:1}).format(x);
+  const BASE='https://vuelvehaciati.com/',n1=x=>x==null?'':new Intl.NumberFormat('es-ES',{maximumFractionDigits:1}).format(x);
   const ing=i=>i.cantidad!=null?`<b>${n1(i.cantidad)}${i.unidad&&i.unidad!=='ud'?' '+esc(i.unidad):''}</b> ${esc(i.item)}`:`${esc(i.item)}${i.unidad?` <span style="color:#8a7a86">(${esc(i.unidad)})</span>`:''}`;
   const shop={};recs.forEach(r=>(r.ingredientes||[]).forEach(i=>{const s=i.sec||'Despensa',k=(i.item||'').toLowerCase().trim()+'|'+(i.unidad||'');if(!k.trim())return;shop[s]=shop[s]||{};const o=shop[s][k]=shop[s][k]||{item:i.item,unidad:i.unidad,cantidad:0,sin:false};if(i.cantidad==null)o.sin=true;else o.cantidad+=Number(i.cantidad)||0}));
   const html=`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>${esc(title)} · Vuelve</title><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet"><style>
@@ -5191,7 +5191,7 @@ function packPDF(recs,title,sub){
 }
 
 // Lista de espera de la página pública /unete/ (solo administradoras)
-const UNETE_URL='https://ninnx3.github.io/VUELVE/unete/';
+const UNETE_URL='https://vuelvehaciati.com/unete/';
 const LISTA_INT={recetas:'🥗 Recetas',rutinas:'🏋️ Rutinas',merch:'👕 Merch',app:'📱 App'};
 async function vLista(){
   const H=r=>heroHTML('Administración','Lista de','espera.',r);

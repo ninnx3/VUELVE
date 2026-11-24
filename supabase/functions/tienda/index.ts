@@ -5,10 +5,10 @@
 //   POST {accion:'descarga', compra_id} + sesión    → enlaces de descarga para usuarias con cuenta
 //   POST /tienda/webhook                            → avisos firmados de Stripe (checkout.session.completed)
 // Secretos (Supabase → Edge Functions → Secrets): STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET
-// Opcionales: TIENDA_SITE (por defecto https://ninnx3.github.io/VUELVE), STRIPE_MANAGED_PAYMENTS=1
+// Opcionales: TIENDA_SITE (por defecto https://vuelvehaciati.com), STRIPE_MANAGED_PAYMENTS=1
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-const SITE = (Deno.env.get("TIENDA_SITE") ?? "https://ninnx3.github.io/VUELVE").replace(/\/$/, "");
+const SITE = (Deno.env.get("TIENDA_SITE") ?? "https://vuelvehaciati.com").replace(/\/$/, "");
 const SK = Deno.env.get("STRIPE_SECRET_KEY") ?? "";
 const WHS = Deno.env.get("STRIPE_WEBHOOK_SECRET") ?? "";
 const MANAGED = Deno.env.get("STRIPE_MANAGED_PAYMENTS") === "1";
