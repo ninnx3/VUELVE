@@ -105,6 +105,17 @@ Deno.serve(async (req) => {
       }
       return json({ ok: true, n });
     }
+    if (b.tabla === "nuevas") {
+      // Nueva usuaria: aviso solo a las administradoras
+      const [{ data: ad }, { data: u }] = await Promise.all([
+        sb.from("admins").select("user_id"),
+        sb.auth.admin.getUserById(b.user_id)]);
+      const { data: lista } = await sb.auth.admin.listUsers({ page: 1, perPage: 1 });
+      const nom = (u?.user?.user_metadata?.nombre || u?.user?.email?.split("@")[0] || "Alguien") as string;
+      const total = (lista as any)?.total;
+      const n = await enviar(c, (ad || []).map((x: any) => x.user_id).filter((id: string) => id !== b.user_id), { title: "Vuelve", body: `Nueva usuaria: ${corta(nom, 40)} 🎉${total ? ` Ya sois ${total}.` : ""}`, tag: "nueva-" + b.user_id, url: "./?v=diario" });
+      return json({ ok: true, n });
+    }
     return json({ ok: true, n: 0 });
   } catch (e) {
     console.error(e);
