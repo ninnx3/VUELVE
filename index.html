@@ -8,8 +8,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Vuelve">
-<link rel="apple-touch-icon" href="icon-180.png?v=2">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=2"><link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=2"><link rel="shortcut icon" href="favicon.ico?v=2">
+<link rel="apple-touch-icon" href="icon-180.png?v=3">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=3"><link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=3"><link rel="shortcut icon" href="favicon.ico?v=3">
 <link rel="manifest" href="manifest.webmanifest">
 <title>Vuelve · Contador de calorías y macros a tu ritmo | Recomposición corporal</title>
 <meta name="description" content="Vuelve es tu diario de calorías y macros para ponerte en forma junto a un amigo o amiga: tu día, el de tu compi y una meta semanal en común. Recomposición corporal, recetas con macros, mealprep y tu ciclo.">
@@ -2653,7 +2653,7 @@ function bindPushCard(redraw){
   const pcs=c.querySelector('#pcons');if(pcs)pcs.onchange=()=>{u.profile.pushConsejos=pcs.checked;save();pushPrefsSync(true)};
   const pc=c.querySelector('#pchat');if(pc)pc.onchange=()=>{u.profile.pushChat=pc.checked;save();pushPrefsSync(true)};
   const pfo=c.querySelector('#pfoto');if(pfo)pfo.onchange=()=>{u.profile.fotoAvisos=pfo.checked;save();pushPrefsSync(true);renderNavDot()};
-  const t=c.querySelector('#ptest');if(t)t.onclick=async()=>{try{await PUSH.reg.showNotification('Vuelve',{body:'¡Así te llegarán los avisos! 💜',icon:'icon-192.png?v=2',tag:'prueba'})}catch(e){toast('No se pudo mostrar la prueba')}};
+  const t=c.querySelector('#ptest');if(t)t.onclick=async()=>{try{await PUSH.reg.showNotification('Vuelve',{body:'¡Así te llegarán los avisos! 💜',icon:'icon-192.png?v=3',tag:'prueba'})}catch(e){toast('No se pudo mostrar la prueba')}};
 }
 function pushBannerHTML(){
   if(!SERVER)return '';const e=pushEstado();let no=false;try{no=!!localStorage.getItem('vuelve_push_no')}catch(x){}
