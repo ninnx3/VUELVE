@@ -919,6 +919,9 @@ header.app .in2{height:84px}
 /* macros paleta corporativa */
 html[data-tema=ciruela]:not([data-oscuro="1"]){--p:#6c2146;--c:#eba05e;--g:#c29cc2}
 .ay-more[hidden]{display:none}.ay-tog{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:14px;padding:9px;border:0;background:none;font:inherit;font-size:13px;font-weight:700;color:var(--plum);cursor:pointer;border-top:1px solid var(--line)}.ay-tog svg{transition:transform .25s}.ay-tog[aria-expanded=true] svg{transform:rotate(180deg)}
+.intro .introc{padding-bottom:8px}.ifoot{position:sticky;bottom:0;z-index:5;width:100%;max-width:440px;background:linear-gradient(to bottom,rgba(255,255,255,0),#fff 14px);padding:14px 4px calc(14px + env(safe-area-inset-bottom));margin-top:auto}.ifoot .idots{margin:0 0 14px}
+@media(min-width:900px){.intro{justify-content:flex-start}.intro .introc{flex:0 0 auto;min-height:480px;margin-top:max(0px,calc((100dvh - 780px)/2))}.ifoot{position:static;margin-top:0}}
+.ifoot .ibtns{min-height:100px;align-content:flex-start;justify-content:flex-start}.ifoot .ibtns:has(#inext){align-items:flex-start}
 </style>
 </head>
 <body>
@@ -2684,8 +2687,8 @@ function renderIntro(i=0,dest){
   const N=INTRO.length,x=INTRO[i],ult=i===N-1;
   $('#root').innerHTML=`<div class="intro"><div class="ihead"><div class="row between" style="align-items:center"><div class="logo">${LOGO}<div><b>VUELVE</b><small>A tu ritmo, hacia ti</small></div></div><button class="ilink" id="iskip">${ult?'':'Saltar'}</button></div></div><div class="introc">
     <div class="iart"><span class="iic">${ico(x.ic,'mi')}</span></div>
-    <p class="eyebrow">${x.ey}</p><h1 class="h1" style="margin-top:8px">${x.t} <span>${x.s}</span></h1><p class="ilead">${x.d}</p>
-    <div class="idots">${INTRO.map((_,k)=>`<i class="${k===i?'on':''}" data-ig="${k}"></i>`).join('')}</div>
+    <p class="eyebrow">${x.ey}</p><h1 class="h1" style="margin-top:8px">${x.t} <span>${x.s}</span></h1><p class="ilead">${x.d}</p></div>
+    <div class="ifoot"><div class="idots">${INTRO.map((_,k)=>`<i class="${k===i?'on':''}" data-ig="${k}"></i>`).join('')}</div>
     <div class="ibtns">${ult?`<button class="btn block" id="ireg">Crear mi cuenta</button><button class="btn ghost block" id="ilog">Ya tengo cuenta</button>`
       :`${i?'<button class="btn ghost" id="iprev">Atrás</button>':''}<button class="btn" id="inext" style="flex:1">Siguiente</button>`}</div></div></div>`;
   const fin=m=>{try{localStorage.setItem('vuelve_intro','1')}catch(e){}renderAuth(m)};
