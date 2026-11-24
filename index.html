@@ -937,6 +937,7 @@ html[data-tema=ciruela]:not([data-oscuro="1"]){--p:#6c2146;--c:#eba05e;--g:#c29c
 .intro .ifoot{position:static;flex:0 0 auto;margin-top:0;padding-bottom:calc(18px + env(safe-area-inset-bottom))}
 @media(min-width:900px){.intro{height:auto;min-height:100dvh;overflow:visible}.intro .introc{overflow:visible;--k:1!important}.intro .introc .h1{font-size:40px}}
 html[data-oscuro="1"][data-tema=ciruela] .h1 span,html[data-oscuro="1"][data-tema=ciruela] .h2 span,html[data-oscuro="1"][data-tema=ciruela] .auth .art blockquote span{color:#8fc9ae}
+.intro .introc{justify-content:center}
 </style>
 </head>
 <body>
@@ -2721,7 +2722,6 @@ function introVisto(){try{return localStorage.getItem('vuelve_intro')==='1'}catc
 function renderIntro(i=0,dest){
   const N=INTRO.length,x=INTRO[i],ult=i===N-1;
   $('#root').innerHTML=`<div class="intro"><div class="ihead"><div class="row between" style="align-items:center"><div class="logo">${LOGO}<div><b>VUELVE</b><small>A tu ritmo, hacia ti</small></div></div><button class="ilink" id="iskip">${ult?'':'Saltar'}</button></div></div><div class="introc">
-    <div class="ishot"><img src="img/intro/s${i}.webp" alt="" width="300" height="435" decoding="async"></div>
     <p class="eyebrow">${x.ey}</p><h1 class="h1" style="margin-top:8px">${x.t} <span>${x.s}</span></h1><p class="ilead">${x.d}</p></div>
     <div class="ifoot"><div class="idots">${INTRO.map((_,k)=>`<i class="${k===i?'on':''}" data-ig="${k}"></i>`).join('')}</div>
     <div class="ibtns">${ult?`<button class="btn block" id="ireg">Crear mi cuenta</button><button class="btn ghost block" id="ilog">Ya tengo cuenta</button>`
