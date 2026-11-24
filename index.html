@@ -3741,7 +3741,7 @@ function libFoods(){
   return out}
 function openAdd(meal0){
   if(!LIB.recetas)libLoad().catch(()=>{});
-  let offT,qPrev=null;const u=me();let propioN='',meal=meal0||defaultMeal(),mode='menu',q='',qRaw='',sub='todos',offRes=null,offErr='',offLoading=false,scanCtl=null;const added=[];let rec=null,rq='',roff=null,roffLoading=false;
+  let offT,drawT,qPrev=null;const u=me();let propioN='',meal=meal0||defaultMeal(),mode='menu',q='',qRaw='',sub='todos',offRes=null,offErr='',offLoading=false,scanCtl=null;const added=[];let rec=null,rq='',roff=null,roffLoading=false;
   const stopScan=()=>{try{scanCtl&&scanCtl.stop()}catch(e){}scanCtl=null};
   const m=modal(`<div class="top"><b id="mtitle"></b><button class="close">✕</button></div><div id="mb"></div>`);
   const _rm=m.remove.bind(m);m.remove=()=>{stopScan();_rm()};
@@ -3790,10 +3790,12 @@ function openAdd(meal0){
       const drawK=()=>{const had=document.activeElement&&document.activeElement.id==='q';draw();const n=m.querySelector('#q');if(had&&n){n.focus();n.setSelectionRange(n.value.length,n.value.length)}};
       const runOff=async()=>{if(qRaw.trim().length<2){toast('Escribe al menos 2 letras');return}const qq=qRaw.trim();sub='todos';offLoading=true;offErr='';drawK();try{const res=await offSearch(qq);if(qq!==qRaw.trim())return;offRes=res}catch(e){if(qq!==qRaw.trim())return;offErr=e.message}offLoading=false;if(m.isConnected&&mode==='buscar')drawK()};
       const qi=mb.querySelector('#q');
-      qi.oninput=()=>{qRaw=qi.value;q=norm(qi.value);offRes=null;offErr='';draw();const n=m.querySelector('#q');n.focus();n.setSelectionRange(n.value.length,n.value.length);
-        clearTimeout(offT);if(qRaw.trim().length>=3&&!IN_PREVIEW)offT=setTimeout(()=>{if(m.isConnected&&mode==='buscar'&&qRaw.trim().length>=2)runOff()},1000)};
-      qi.onkeydown=e=>{if(e.key==='Enter')runOff()};
-      mb.querySelector('#offgo2').onclick=runOff;
+      qi.oninput=()=>{qRaw=qi.value;q=norm(qi.value);clearTimeout(drawT);clearTimeout(offT);
+        /* Esperamos a que termine de escribir antes de redibujar y de buscar */
+        drawT=setTimeout(()=>{if(!m.isConnected||mode!=='buscar')return;const ae=document.activeElement,had=ae&&ae.id==='q',pos=had?ae.selectionStart:null;offRes=null;offErr='';draw();const n=m.querySelector('#q');if(had&&n){n.focus();try{n.setSelectionRange(pos,pos)}catch(e){}}},600);
+        if(qRaw.trim().length>=3&&!IN_PREVIEW)offT=setTimeout(()=>{if(m.isConnected&&mode==='buscar'&&qRaw.trim().length>=2)runOff()},1500)};
+      qi.onkeydown=e=>{if(e.key==='Enter'){clearTimeout(drawT);clearTimeout(offT);runOff()}};
+      mb.querySelector('#offgo2').onclick=()=>{clearTimeout(drawT);clearTimeout(offT);runOff()};
       mb.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{sub=b.dataset.sub;draw()});
       mb.querySelectorAll('[data-star]').forEach(b=>b.onclick=e=>{e.stopPropagation();const id=b.dataset.star;const of=(offRes||[]).find(x=>x.id===id);if(of)rememberOff(u,of);u.favs=u.favs.includes(id)?u.favs.filter(x=>x!==id):[...u.favs,id];save();draw()});
       mb.querySelectorAll('[data-f]').forEach(r=>r.onclick=()=>{const f=pool().find(f=>f.id===r.dataset.f);if(f.src==='off')rememberOff(u,f);qty(f)});
