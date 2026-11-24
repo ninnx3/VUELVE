@@ -928,6 +928,14 @@ html[data-tema=ciruela]:not([data-oscuro="1"]){--p:#6c2146;--c:#eba05e;--g:#c29c
 @keyframes ishin{from{opacity:0}to{opacity:1}}
 .intro .ilead{margin-top:20px}
 @media(min-width:900px){.ishot{width:320px;height:230px}}
+/* Intro: pantalla de alto fijo; el texto nunca queda tapado por los botones (se ajusta el tamaño) */
+.intro{height:100vh;height:100dvh;min-height:0;overflow:hidden}
+.intro .introc{--k:1;flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;justify-content:flex-start;-webkit-overflow-scrolling:touch}
+.intro .introc .ishot{height:calc(clamp(150px,26dvh,250px)*var(--k));margin-bottom:calc(22px*var(--k))}
+.intro .introc .h1{font-size:calc(34px*var(--k));letter-spacing:calc(-1.6px*var(--k))}
+.intro .introc .ilead{font-size:calc(15px*var(--k));line-height:1.55;margin-top:calc(20px*var(--k))}
+.intro .ifoot{position:static;flex:0 0 auto;margin-top:0;padding-bottom:calc(18px + env(safe-area-inset-bottom))}
+@media(min-width:900px){.intro{height:auto;min-height:100dvh;overflow:visible}.intro .introc{overflow:visible;--k:1!important}.intro .introc .h1{font-size:40px}}
 </style>
 </head>
 <body>
@@ -2717,6 +2725,10 @@ function renderIntro(i=0,dest){
     <div class="ifoot"><div class="idots">${INTRO.map((_,k)=>`<i class="${k===i?'on':''}" data-ig="${k}"></i>`).join('')}</div>
     <div class="ibtns">${ult?`<button class="btn block" id="ireg">Crear mi cuenta</button><button class="btn ghost block" id="ilog">Ya tengo cuenta</button>`
       :`${i?'<button class="btn ghost" id="iprev">Atrás</button>':''}<button class="btn" id="inext" style="flex:1">Siguiente</button>`}</div></div></div>`;
+  const introFit=()=>{const c=document.querySelector('.introc');if(!c||innerWidth>=900)return;let k=1;c.style.setProperty('--k',1);
+    while(c.scrollHeight>c.clientHeight+1&&k>0.62){k=Math.round((k-0.04)*100)/100;c.style.setProperty('--k',k)}};
+  introFit();requestAnimationFrame(introFit);try{document.fonts&&document.fonts.ready.then(introFit)}catch(e){}
+  if(!window.__introFitBound){window.__introFitBound=1;addEventListener('resize',()=>{try{introFit()}catch(e){}})}
   const fin=m=>{try{localStorage.setItem('vuelve_intro','1')}catch(e){}renderAuth(m)};
   const go=k=>renderIntro(Math.max(0,Math.min(N-1,k)),dest);
   const sk=$('#iskip');if(sk&&!ult)sk.onclick=()=>fin(dest||'registro');
