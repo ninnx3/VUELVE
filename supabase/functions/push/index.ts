@@ -113,7 +113,8 @@ Deno.serve(async (req) => {
       const { data: lista } = await sb.auth.admin.listUsers({ page: 1, perPage: 1 });
       const nom = (u?.user?.user_metadata?.nombre || u?.user?.email?.split("@")[0] || "Alguien") as string;
       const total = (lista as any)?.total;
-      const n = await enviar(c, (ad || []).map((x: any) => x.user_id).filter((id: string) => id !== b.user_id), { title: "Vuelve", body: `Nueva usuaria: ${corta(nom, 40)} 🎉${total ? ` Ya sois ${total}.` : ""}`, tag: "nueva-" + b.user_id, url: "./?v=diario" });
+      const cuando = new Intl.DateTimeFormat("es-ES", { timeZone: "Europe/Madrid", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(u?.user?.created_at || Date.now()));
+      const n = await enviar(c, (ad || []).map((x: any) => x.user_id).filter((id: string) => id !== b.user_id), { title: "Vuelve", body: `Nueva usuaria: ${corta(nom, 40)} 🎉${total ? ` Ya sois ${total}.` : ""} · ${cuando}`, tag: "nueva-" + b.user_id, url: "./?v=diario" });
       return json({ ok: true, n });
     }
     return json({ ok: true, n: 0 });

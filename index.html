@@ -3629,9 +3629,8 @@ function vAvisos(){
   const u=me();avisosSync(u);
   const L=(u.inbox||[]).map(x=>({x,a:AVISOS.find(a=>a.id===x.id)})).filter(o=>o.a&&!o.x.b).sort((p,q)=>q.a.d-p.a.d);
   const H=heroHTML('Notificaciones','Tus','avisos.');
-  const fd=f=>parse(f).toLocaleDateString(LANG==='en'?'en-GB':'es-ES',{day:'numeric',month:'long'});
   $('#view').innerHTML=H+(L.length?L.map(({x,a})=>{const c=LANG==='en'?a.en:a.es,open=UI.avOpen===x.id;
-    return `<div class="avwrap" data-avw="${x.id}">${open?'':`<button class="avdel" data-avdel="${x.id}"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg><span>${LANG==='en'?'Delete':'Eliminar'}</span></button>`}<div class="card avi${open?' open':''}${x.l?'':' nuevo'}">${open?`<img class="avimg" src="img/avisos/${x.id}.jpg" alt="">`:''}<button class="avih" data-av="${x.id}">${open?'':`<span class="avth"><img src="img/avisos/${x.id}.jpg" alt="" loading="lazy"><i class="avpt"></i></span>`}<div style="flex:1;min-width:0"><b>${c.t}</b><small>${x.l?'':`<em class="avnew">${LANG==='en'?'NEW':'NUEVO'} · </em>`}${fd(x.f)}</small></div><i class="avpm">${open?'−':'+'}</i></button>
+    return `<div class="avwrap" data-avw="${x.id}">${open?'':`<button class="avdel" data-avdel="${x.id}"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg><span>${LANG==='en'?'Delete':'Eliminar'}</span></button>`}<div class="card avi${open?' open':''}${x.l?'':' nuevo'}">${open?`<img class="avimg" src="img/avisos/${x.id}.jpg" alt="">`:''}<button class="avih" data-av="${x.id}">${open?'':`<span class="avth"><img src="img/avisos/${x.id}.jpg" alt="" loading="lazy"><i class="avpt"></i></span>`}<div style="flex:1;min-width:0"><b>${c.t}</b>${x.l?'':`<small><em class="avnew">${LANG==='en'?'NEW':'NUEVO'}</em></small>`}</div><i class="avpm">${open?'−':'+'}</i></button>
       ${open?`<div class="avib"><p>${c.i}</p>${c.w?`<p class="avw"><b>${LANG==='en'?'Why?':'¿Por qué?'}</b> ${c.w}</p>`:''}${c.s.length?`<ol>${c.s.map(z=>`<li>${z}</li>`).join('')}</ol>`:''}<div class="avact"><button class="btn sm" data-avgo="${a.v}">${c.b}</button><button class="btn ghost sm" data-avdel="${x.id}">${LANG==='en'?'Delete':'Eliminar'}</button></div></div>`:''}</div></div>`}).join('')
     :`<div class="card" style="text-align:center;padding:30px 20px"><p class="muted">Aún no tienes avisos.</p></div>`);
   $$('.avwrap').forEach(w=>{const c=w.querySelector('.card'),del=w.querySelector('.avdel');if(!del)return;
@@ -3680,6 +3679,7 @@ function toggleDD(){
 function openUsuarias(){
   const st={q:'',L:null,err:''};
   const m=modal(`<div class="top"><b>${ico('compartido','mi')} Usuarias de Vuelve</b><button class="close">✕</button></div><div id="usb"><p class="small muted" style="margin-top:12px">Cargando…</p></div>`,'wide');
+  const fdt=t=>t?new Date(t).toLocaleString('es-ES',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
   const fd=t=>t?`${parse(t.slice(0,10)).getDate()} ${MON[parse(t.slice(0,10)).getMonth()]} ${t.slice(0,4)}`:'—';
   const pinta=()=>{const B=m.querySelector('#usb');if(st.err){B.innerHTML=`<p class="err" style="margin-top:12px">${esc(st.err)}</p>`;return}
     const L=st.L||[],q=st.q.toLowerCase(),F=L.filter(x=>!q||[x.email,x.usuario,x.nombre].some(v=>(v||'').toLowerCase().includes(q)));
@@ -3688,7 +3688,7 @@ function openUsuarias(){
       <div class="searchrow" style="margin-top:14px"><input class="in" id="usq" placeholder="Buscar por email, @usuario o nombre" value="${esc(st.q)}" autocomplete="off"><button class="btn soft sm" id="uscsv">Descargar CSV</button></div>
       <div class="usl">${F.map(x=>`<div class="usr"><span class="av" style="background:${cmCol(x.user_id)};color:#fff">${esc(((x.usuario||x.nombre||x.email||'?')[0]||'?').toUpperCase())}</span>
         <div style="flex:1;min-width:0"><b>${x.usuario?'@'+esc(x.usuario):'<span class="muted">sin @usuario</span>'}${x.nombre?` <span class="tiny muted">· ${esc(x.nombre)}</span>`:''}</b><a class="usem" href="mailto:${esc(x.email)}">${esc(x.email)}</a>
-          <small>Alta ${fd(x.alta)} · último acceso ${fd(x.ultimo_acceso)}${x.retos?` · ${x.retos} reto${x.retos>1?'s':''}`:''}</small></div>
+          <small>Alta ${fdt(x.alta)} · último acceso ${fd(x.ultimo_acceso)}${x.retos?` · ${x.retos} reto${x.retos>1?'s':''}`:''}</small></div>
         <div class="ustags">${x.vetada?'<span class="pill warn">vetada</span>':''}${!x.confirmada?'<span class="pill">sin confirmar</span>':''}${x.avisos?'<span class="pill ok">avisos</span>':''}</div></div>`).join('')||'<p class="small muted" style="margin-top:12px">Nadie coincide con la búsqueda.</p>'}</div>
       <p class="tiny muted" style="margin-top:12px">Solo lo ven las administradoras. Usa estos datos solo para gestionar Vuelve y para lo que cada usuaria haya aceptado al registrarse.</p>`;
     const qi=B.querySelector('#usq');qi.oninput=()=>{st.q=qi.value;const p=qi.selectionStart;pinta();const n=m.querySelector('#usq');n.focus();n.setSelectionRange(p,p)};
