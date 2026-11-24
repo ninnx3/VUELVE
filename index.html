@@ -473,6 +473,7 @@ textarea.in{min-height:90px;resize:vertical;font-size:11px;font-family:ui-monosp
 .dish.empty:hover{transform:none;box-shadow:none}
 .ph0{background:linear-gradient(140deg,#fbe9ef,#efe6f8)}.ph1{background:linear-gradient(140deg,#f6efe2,#fbe7dc)}.ph2{background:linear-gradient(140deg,#e5f1ea,#eef6e3)}.ph3{background:linear-gradient(140deg,#ece6f6,#e3ecf6)}.ph4{background:linear-gradient(140deg,#fdf0d9,#fbe2e2)}
 .recipe .hero-ph{height:200px;border-radius:16px;display:grid;place-items:center;font-size:96px;margin-top:12px}
+@media(min-width:900px){.modal .sheet.rcp{max-width:min(1040px,94vw)}.rcp .rcols{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:30px;align-items:start}.rcp .rl{position:sticky;top:0}.rcp .recipe .hero-ph{height:min(600px,calc(100vh - 150px));margin-top:12px;font-size:140px}.rcp .rr .h2{margin-top:12px!important}}
 .chips2{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
 .chips2 span{background:var(--tile);border-radius:999px;padding:6px 11px;font-size:11px;font-weight:700}
 .recipe ol,.recipe ul{padding-left:20px;margin-top:8px}
@@ -4897,7 +4898,7 @@ function openRecipe(r){
   if(!r)return;
   const u=me(),k=me().mealprep.plan.recetas.indexOf(r)%5;
   const m=modal(`<div class="recipe"><div class="top"><b>${esc(r.tipo||'Receta')}${r.cheat?' · 🍫 capricho':''}</b><button class="close">✕</button></div>
-    ${recPh(r,'hero-ph ph'+k)}
+    <div class="rcols"><div class="rl">${recPh(r,'hero-ph ph'+k)}</div><div class="rr">
     <h3 class="h2" style="font-size:24px;margin-top:16px">${esc(r.nombre)}</h3>
     ${r.descripcion?`<p class="muted small" style="margin-top:6px">${esc(r.descripcion)}</p>`:''}
     <div class="plan" style="margin-top:14px"><div class="kc" style="font-size:32px">${r.kcal}<small> kcal / ración</small></div>
@@ -4911,7 +4912,7 @@ function openRecipe(r){
     ${r.consejo?`<div class="tip" style="background:var(--lilac);color:var(--plum)">💡 ${esc(r.consejo)}</div>`:''}
     <p class="eyebrow" style="margin-top:20px">Añadir a mi diario de hoy</p>
     <div class="mealpick">${MEALS.map(([n,i])=>`<button data-am="${n}" class="${(r.tipo===n||(r.tipo==='Capricho'&&n==='Snack'))?'on':''}"><span>${i}</span>${n}</button>`).join('')}</div>
-    <button class="btn block" style="margin-top:12px" id="addr">+ Añadir 1 ración al diario</button></div>`);
+    <button class="btn block" style="margin-top:12px" id="addr">+ Añadir 1 ración al diario</button></div></div></div>`,'rcp');
   let meal=MEAL_NAMES.includes(r.tipo)?r.tipo:'Snack';
   m.querySelectorAll('[data-am]').forEach(b=>b.onclick=()=>{meal=b.dataset.am;m.querySelectorAll('[data-am]').forEach(x=>x.classList.toggle('on',x===b))});
   m.querySelector('#addr').onclick=()=>{dayLog(u,today()).foods.push({fid:'mp_'+r.id,n:r.emoji+' '+r.nombre,k:r.kcal,p:r.p,c:r.c,g:r.g,meal});save();m.remove();toast('Añadido a '+meal+' de hoy ✓')};
