@@ -84,6 +84,27 @@ Deno.serve(async (req) => {
       const n2 = await enviar(c, hoyU, { title: "Hoy te toca tu foto de progreso", body: "Por la mañana y en ayunas, mismo sitio y misma luz. Solo la ves tú.", tag: "fotos", url: "./?v=progreso" });
       return json({ ok: true, n: n1 + n2 });
     }
+    if (b.tabla === "consejos") {
+      // Mensajes de bienvenida: se envían cuando la usuaria llega a ese día (con 2 días de margen por si activó los avisos más tarde).
+      const PLAN = [
+        { id: "peso1", d: 0, body: "Casi todas calculamos de menos «a ojo». Te cuento cómo acertar en 1 minuto." },
+        { id: "rapido3", d: 3, body: "Apuntar lo que comes en 10 segundos: tus favoritos y recientes." },
+        { id: "semana1", d: 7, body: "Una semana contigo 💜 Mira todo lo que aún no has probado." },
+        { id: "tend14", d: 14, body: "Tu peso de hoy dice poco. Tu tendencia lo dice todo." },
+        { id: "volver21", d: 21, body: "¿Un día sin registrar? No pasa nada. Lo importante es volver." },
+        { id: "mes1", d: 30, body: "Ya llevas un mes. ¿Recalculamos tu plan con tus datos de hoy?" },
+      ];
+      const { data: cola, error } = await sb.rpc("push_consejos_cola");
+      if (error) throw error;
+      let n = 0;
+      for (const u of (cola || []) as any[]) {
+        const t = PLAN.find((x) => u.edad >= x.d && u.edad <= x.d + 2 && !(u.enviados || []).includes(x.id));
+        if (!t) continue;
+        const ok = await enviar(c, [u.user_id], { title: "Vuelve", body: t.body, tag: "consejo", url: "./?v=avisos" });
+        if (ok > 0) { await sb.from("push_consejos").insert({ user_id: u.user_id, aviso: t.id }); n += ok; }
+      }
+      return json({ ok: true, n });
+    }
     return json({ ok: true, n: 0 });
   } catch (e) {
     console.error(e);
