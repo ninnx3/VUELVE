@@ -889,6 +889,20 @@ input[type=checkbox]:not(.nosoft):focus-visible{outline:3px solid rgba(161,121,1
 .pill{padding:4px 12px}
 .ay-feel button,.ay-plans button{border-radius:999px}.ay-plans button{border-radius:22px}
 .cmlist button:last-child{border-bottom:0}
+
+/* ===== Sombras de olivo en el fondo + logo más grande ===== */
+body::before,body::after{content:'';position:fixed;pointer-events:none;z-index:15;width:min(430px,92vw);aspect-ratio:400/260;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 260'%3E%3Cdefs%3E%3Cfilter id='b' x='-20%' y='-20%' width='140%' height='140%'%3E%3CfeGaussianBlur stdDeviation='2.6'/%3E%3C/filter%3E%3C/defs%3E%3Cg filter='url(%23b)' fill='%2342303c' fill-opacity='.5'%3E%3Cpath d='M400 -10 C330 40 250 60 120 175' fill='none' stroke='%2342303c' stroke-opacity='.5' stroke-width='2.6'/%3E%3Cellipse cx='31.9' cy='0' rx='31.9' ry='8.6' transform='translate(374.3 6.9) rotate(99.4)'/%3E%3Cellipse cx='31.4' cy='0' rx='31.4' ry='8.5' transform='translate(374.3 6.9) rotate(203.0)'/%3E%3Cellipse cx='31.6' cy='0' rx='31.6' ry='8.5' transform='translate(350.5 20.8) rotate(98.2)'/%3E%3Cellipse cx='32.4' cy='0' rx='32.4' ry='8.8' transform='translate(350.5 20.8) rotate(195.7)'/%3E%3Cellipse cx='30.4' cy='0' rx='30.4' ry='8.2' transform='translate(325.4 34.5) rotate(107.0)'/%3E%3Cellipse cx='28.3' cy='0' rx='28.3' ry='7.7' transform='translate(325.4 34.5) rotate(196.7)'/%3E%3Cellipse cx='31.2' cy='0' rx='31.2' ry='8.4' transform='translate(298.7 49.0) rotate(100.3)'/%3E%3Cellipse cx='27.5' cy='0' rx='27.5' ry='7.4' transform='translate(298.7 49.0) rotate(197.1)'/%3E%3Cellipse cx='30.3' cy='0' rx='30.3' ry='8.2' transform='translate(270.2 65.3) rotate(95.6)'/%3E%3Cellipse cx='27.0' cy='0' rx='27.0' ry='7.3' transform='translate(270.2 65.3) rotate(202.8)'/%3E%3Cellipse cx='23.3' cy='0' rx='23.3' ry='6.3' transform='translate(239.5 84.0) rotate(87.8)'/%3E%3Cellipse cx='24.7' cy='0' rx='24.7' ry='6.7' transform='translate(239.5 84.0) rotate(205.1)'/%3E%3Cellipse cx='22.1' cy='0' rx='22.1' ry='6.0' transform='translate(206.3 106.3) rotate(98.5)'/%3E%3Cellipse cx='26.3' cy='0' rx='26.3' ry='7.1' transform='translate(206.3 106.3) rotate(193.7)'/%3E%3Cellipse cx='23.3' cy='0' rx='23.3' ry='6.3' transform='translate(170.5 133.0) rotate(95.1)'/%3E%3Cellipse cx='22.0' cy='0' rx='22.0' ry='5.9' transform='translate(170.5 133.0) rotate(196.2)'/%3E%3Cellipse cx='18.6' cy='0' rx='18.6' ry='5.0' transform='translate(131.6 164.9) rotate(86.5)'/%3E%3Cellipse cx='19.4' cy='0' rx='19.4' ry='5.2' transform='translate(131.6 164.9) rotate(184.2)'/%3E%3Cellipse cx='22' cy='0' rx='22' ry='6' transform='translate(120.0 175.0) rotate(138.5)'/%3E%3C/g%3E%3C/svg%3E") center/contain no-repeat;opacity:.12}
+body::before{top:72px;right:0}
+body::after{bottom:64px;left:0;transform:rotate(180deg);opacity:.10}
+@media(min-width:1100px){body::before{top:72px;right:0;width:520px}body::after{bottom:0;left:232px;width:520px}}
+@media print{body::before,body::after{display:none}}
+@media(prefers-reduced-motion:no-preference){body::before,body::after{animation:oliva 16s ease-in-out infinite alternate}body::after{animation-name:oliva2}}
+@keyframes oliva{from{transform:translate(0,0) rotate(0deg)}to{transform:translate(-6px,4px) rotate(1.2deg)}}
+@keyframes oliva2{from{transform:rotate(180deg) translate(0,0)}to{transform:rotate(181.2deg) translate(-6px,4px)}}
+header.app .in2{height:84px}
+.logo .wm{height:54px}
+@media(max-width:400px){.logo .wm{height:42px}header.app .in2{height:76px}}
+@media(min-width:1100px){nav.tabs{top:84px}}
 </style>
 </head>
 <body>
@@ -1030,7 +1044,7 @@ function toDocs(){
     if(mealprep)docs['mp~'+ekey(em)]={email:em,json:JSON.stringify(mealprep)};
     const byM={};
     for(const [date,l] of Object.entries(logs||{})){
-      if(!(l.foods||[]).length&&!(l.mov||[]).length&&!l.tipo&&!l.pasos&&!l.animo&&!l.nota)continue;
+      if(!(l.foods||[]).length&&!(l.mov||[]).length&&!l.tipo&&!l.pasos&&!l.animo&&!l.nota&&!l.ayuno&&!l.sups)continue;
       (byM[date.slice(0,7)]=byM[date.slice(0,7)]||{})[date]=l;
     }
     for(const [m,days] of Object.entries(byM))docs['log~'+ekey(em)+'~'+m]={email:em,month:m,json:JSON.stringify(days)};
@@ -1064,7 +1078,7 @@ async function flush(){
             if(!loc){u.logs[day]=l;merged=true;continue}
             // Lo que este dispositivo tiene vacío se completa con lo del servidor (nunca se pisa algo apuntado en otro dispositivo)
             for(const k of ['foods','mov'])if(!(loc[k]||[]).length&&(l[k]||[]).length){loc[k]=l[k];merged=true}
-            for(const k of ['tipo','pasos','animo','nota','cerrado'])if(loc[k]==null&&l[k]!=null){loc[k]=l[k];merged=true}}}
+            for(const k of ['tipo','pasos','animo','nota','cerrado','ayuno','sups'])if(loc[k]==null&&l[k]!=null){loc[k]=l[k];merged=true}}}
           else{const su=Object.values(srv.users||{})[0]||{};
             for(const w of su.weights||[])if(!u.weights.some(x=>x.date===w.date)){u.weights.push(w);merged=true}
             u.weights.sort((a,b)=>a.date.localeCompare(b.date));
@@ -2748,26 +2762,32 @@ function tourRun(P,i,onEnd){
   ov.querySelector('#tnext').onclick=()=>tourRun(P,i+1,onEnd);
   ov.querySelector('#tskip').onclick=()=>{ov.remove();onEnd&&onEnd()};
 }
+const tourLK=()=>{const u=me();return 'vuelve_tour_'+(u?u.email:'')};
+function tourLoc(){try{return JSON.parse(localStorage.getItem(tourLK())||'{}')||{}}catch(e){return {}}}
+function tourLocSet(f){try{const o=tourLoc();f(o);localStorage.setItem(tourLK(),JSON.stringify(o))}catch(e){}}
+const TOUR_SEEN=new Set();
+const tourVisto=v=>{const u=me();return TOUR_SEEN.has(v)||!!((u&&u.profile&&(u.profile.tourPag||{})[v])||(tourLoc().pag||{})[v])};
+function tourMarcar(v){TOUR_SEEN.add(v);const u=me();if(u&&u.profile)u.profile.tourPag=Object.assign({},u.profile.tourPag,{[v]:true});tourLocSet(o=>{(o.pag=o.pag||{})[v]=true})}
 function tourVistaCheck(k){
   const u=me(),v=UI.view,P0=TOUR_V[v];
-  if(!u||!u.profile||!u.profile.tourHecho||!P0||(u.profile.tourPag||{})[v])return;
+  if(!u||!u.profile||!(u.profile.tourHecho||tourLoc().hecho)||!P0||tourVisto(v))return;
   clearTimeout(TOUR_T);k=k||0;
   TOUR_T=setTimeout(()=>{
-    const uu=me();if(!uu||UI.view!==v||(uu.profile.tourPag||{})[v])return;
+    const uu=me();if(!uu||UI.view!==v||tourVisto(v))return;
     if(document.querySelector('.modal,.tourov,.intro,.welcome,.onb'))return k<40?tourVistaCheck(k+1):0;
     // pasos que existen (los que tienen texto alternativo se muestran siempre)
     const P=P0.filter(p=>{const e=$(p[0]);return (e&&e.getClientRects().length)||p[3]});
-    uu.profile.tourPag=Object.assign({},uu.profile.tourPag,{[v]:true});save();
+    tourMarcar(v);save();
     if(P.length)tourRun(P,0);
   },k?900:700);
 }
 function tourInicio(next){
-  next=next||(()=>{});const u=me();if(!u||!u.profile||u.profile.tourHecho)return next();
+  next=next||(()=>{});const u=me();if(!u||!u.profile||u.profile.tourHecho||tourLoc().hecho)return next();
   const go=(k=0)=>{if(document.querySelector('.modal')&&k<60)return setTimeout(()=>go(k+1),500);if(!$('nav.tabs'))return next();tourMostrar(0,next)};go();
 }
 function tourMostrar(i,next){
   const P=tourPasos();document.querySelectorAll('.tourov').forEach(x=>x.remove());
-  const fin=(hecho)=>{document.querySelectorAll('.tourov').forEach(x=>x.remove());const u=me();if(u&&u.profile){u.profile.tourHecho=true;save()}next&&next();if(hecho===true)setTimeout(()=>tourVistaCheck(),500)};
+  const fin=(hecho)=>{document.querySelectorAll('.tourov').forEach(x=>x.remove());const u=me();if(u&&u.profile){u.profile.tourHecho=true;tourLocSet(o=>{o.hecho=true});if(hecho!==true)Object.keys(TOUR_V).forEach(tourMarcar);save()}next&&next();if(hecho===true)setTimeout(()=>tourVistaCheck(),500)};
   if(i>=P.length)return fin(true);
   const [sel,t,d]=P[i],el=sel[0]==='#'?$(sel):document.querySelector(`nav.tabs [data-v="${sel}"]`);
   if(!el||!el.getClientRects().length)return tourMostrar(i+1,next);
@@ -5086,7 +5106,7 @@ function vEspacio(){
     <div class="grid2" style="margin-top:14px">${SERVER?'':'<button class="btn ghost" id="lo">Cerrar sesión</button><button class="btn ghost" style="color:var(--warn)" id="dl">Borrar esta cuenta</button>'}</div>
   </div>
   <p class="foot">Vuelve por encima de perfección. Cada registro cuenta.</p>`;
-  $('#ed').onclick=()=>startOnboarding(true);{const b=$('#ayesp');if(b)b.onclick=()=>openAyunoSetup(()=>vEspacio())}bindPushCard(()=>vEspacio());{const vt=$('#vtour');if(vt)vt.onclick=()=>{u.profile.tourHecho=false;u.profile.tourPag={};save();UI.view='diario';renderApp();scrollTo(0,0);setTimeout(()=>tourInicio(),300)}}{const em=$('#espmetas');if(em)em.onclick=()=>metasModal(()=>vEspacio())}
+  $('#ed').onclick=()=>startOnboarding(true);{const b=$('#ayesp');if(b)b.onclick=()=>openAyunoSetup(()=>vEspacio())}bindPushCard(()=>vEspacio());{const vt=$('#vtour');if(vt)vt.onclick=()=>{u.profile.tourHecho=false;u.profile.tourPag={};TOUR_SEEN.clear();try{localStorage.removeItem(tourLK())}catch(e){};save();UI.view='diario';renderApp();scrollTo(0,0);setTimeout(()=>tourInicio(),300)}}{const em=$('#espmetas');if(em)em.onclick=()=>metasModal(()=>vEspacio())}
   {const uc=$('#espuc');if(uc)uc.onclick=()=>cmElegirUsuario(()=>vEspacio());if(SERVER&&!COM.loaded)cmLoad().then(()=>{if(UI.view==='espacio'&&!SCREEN.busy&&$('#espuser'))vEspacio()})}
   $('#lo').onclick=logout;
   $$('[data-sw]').forEach(b=>b.onclick=()=>{d.session=null;save();renderAuth('login',b.dataset.sw)});
