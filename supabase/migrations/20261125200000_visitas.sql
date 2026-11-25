@@ -35,3 +35,6 @@ begin
 end $$;
 revoke all on function public.admin_visitas(int) from public, anon;
 grant execute on function public.admin_visitas(int) to authenticated;
+
+grant insert on public.visitas to anon, authenticated;
+grant usage, select on sequence public.visitas_id_seq to anon, authenticated;
