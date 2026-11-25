@@ -593,8 +593,8 @@ nav.tabs button.on{color:var(--plum);font-weight:700}
 .mtabs button.on svg,.seg button.on svg{color:#fefdfc;fill:#fefdfc}.mtabs button.on svg path,.seg button.on svg path{fill:#fefdfc}
 .cmbars{gap:10px}.cmmac{background:color-mix(in srgb,var(--mc) 9%,#fefdfc);border:1.5px solid color-mix(in srgb,var(--mc) 22%,#fefdfc);border-radius:16px;padding:12px 14px}.cmmac .l{display:block;font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--mc)}.cmmac b{display:block;margin-top:4px;font-size:22px;font-weight:800;color:var(--mc);letter-spacing:-.5px}.cmmac b small{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:0}.cmb{height:8px;border-radius:99px;background:color-mix(in srgb,var(--mc) 15%,#fefdfc);margin-top:8px;overflow:hidden}.cmb i{display:block;height:100%;border-radius:99px;background:var(--mc)}
 .ccard{display:block;width:100%;text-align:left;margin-top:16px}.cinvrow{display:flex;gap:14px;align-items:center}.cic{width:52px;height:52px;border-radius:16px;background:#eadee9;color:#6a2e67;display:flex;align-items:center;justify-content:center;flex-shrink:0}.cic .mi{width:32px;height:32px}
-.cnow{display:flex;align-items:center;gap:16px;cursor:pointer;background:linear-gradient(135deg,var(--fb) 0%,#fefdfc 85%);border:1.5px solid color-mix(in srgb,var(--fc) 25%,#fefdfc);font:inherit;color:inherit}.cnow:hover{box-shadow:0 10px 30px -18px var(--fc)}.cmini{flex-shrink:0;display:flex}.ctx{flex:1;min-width:0}.ctl{font-size:19px;font-weight:800;letter-spacing:-.4px;margin-top:4px;color:var(--ink)}.cmeta{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;margin-top:6px;font-size:13px;color:var(--muted)}.cmeta>span{display:inline-flex;align-items:center;gap:6px}.cgo{font-size:28px;color:var(--fc);flex-shrink:0}
-.cener{display:inline-flex;gap:3px;vertical-align:middle}.cener i{width:7px;height:14px;border-radius:3px;background:#eadee9}.cener i.on{background:currentColor}.cnow .cener,.chead .cener{color:var(--fc)}
+.cnow{display:flex;align-items:center;gap:16px;cursor:pointer;background:linear-gradient(135deg,var(--fb) 0%,#fefdfc 85%);border:1.5px solid color-mix(in srgb,var(--fc) 25%,#fefdfc);font:inherit;color:inherit}.cnow:hover{box-shadow:0 10px 30px -18px var(--fc)}.cmini{flex-shrink:0;display:flex}.ctx{flex:1;min-width:0}.ctl{font-size:19px;font-weight:800;letter-spacing:-.4px;margin-top:4px;color:var(--ink)}.cmeta{display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px;margin-top:6px;font-size:13px;color:var(--muted)}.cmeta>span{display:inline-flex;align-items:center;gap:6px}.cgo{font-size:28px;color:#6a2e67;flex-shrink:0}
+.cener{display:inline-flex;gap:3px;vertical-align:middle}.cener i{width:7px;height:14px;border-radius:3px;background:#eadee9}.cener i.on{background:currentColor}.cnow .cener,.chead .cener{color:#6a2e67}
 .chead{display:flex;gap:18px;align-items:center;margin-top:14px;padding:16px;border-radius:20px;background:linear-gradient(135deg,var(--fb),#fefdfc)}.chead svg{display:block}
 .csec{margin-top:16px;padding-top:14px;border-top:1px solid #f1e7ef}.csec h3{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:800;color:#6a2e67}.csec h3 .mi{width:26px;height:26px}.csec p{margin-top:6px;font-size:14px;line-height:1.55}
 .cchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.cchip{background:#faf6ef;border:1px solid #eadee9;border-radius:99px;padding:6px 12px;font-size:13px;font-weight:600}
@@ -2142,7 +2142,7 @@ function microCardHTML(u,log){
 
 /* ---------- Tu ciclo ---------- */
 const CICLO_FASES={
-  menstrual:{n:'Menstrual',col:'#551332',bg:'#e3d1d9',e:2,lema:'Tiempo de bajar el ritmo',
+  menstrual:{n:'Menstrual',col:'#6a2e67',bg:'#e3d1d9',e:2,lema:'Tiempo de bajar el ritmo',
     hor:'Los estrógenos y la progesterona están en su punto más bajo.',
     energia:'Es normal tener menos energía, sobre todo los primeros días.',
     animo:'Puedes sentirte más introspectiva o sensible. Date permiso para ir más despacio y descansar más.',
@@ -2158,7 +2158,7 @@ const CICLO_FASES={
     come:['Yogur proteico (skyr)','Huevo entero','Pechuga de pollo','Quinoa (cocida)','Brócoli','Copos de avena','Fresas','Kiwi'],
     porque:'Proteína para construir músculo, carbohidratos de calidad (avena, quinoa) para entrenar con energía y fruta y verdura fresca.',
     mueve:'Ideal para fuerza y entrenos más exigentes: aprovecha para subir cargas.'},
-  ovulatoria:{n:'Ovulatoria',col:'#f2a15d',bg:'#fbddc1',e:5,lema:'Tu pico de energía',
+  ovulatoria:{n:'Ovulatoria',col:'#c69dc3',bg:'#fbddc1',e:5,lema:'Tu pico de energía',
     hor:'Los estrógenos llegan a su pico y la LH se dispara.',
     energia:'Suele ser el momento de más energía, más fuerza y más ganas de socializar.',
     animo:'Te puedes sentir más segura y comunicativa. ¡Aprovéchalo!',
@@ -2166,7 +2166,7 @@ const CICLO_FASES={
     come:['Brócoli','Coliflor','Frambuesas','Arándanos azules','Salmón','Garbanzos (cocidos)','Aguacate','Tomate'],
     porque:'Fibra y verduras crucíferas (brócoli, coliflor), frutos rojos antioxidantes y grasas buenas.',
     mueve:'Buen momento para tus mejores marcas, HIIT o entrenos en grupo. Calienta bien.'},
-  lutea:{n:'Lútea',col:'#8d4769',bg:'#eadee9',e:3,lema:'Cuídate un poco más',
+  lutea:{n:'Lútea',col:'#eadee9',bg:'#eadee9',e:3,lema:'Cuídate un poco más',
     hor:'Sube la progesterona; al final de la fase bajan las dos hormonas.',
     energia:'La energía se mantiene al principio y va bajando hacia el final.',
     animo:'Al final de la fase puede aparecer irritabilidad, ansiedad o más sensibilidad (síntomas premenstruales). No eres tú: son las hormonas.',
@@ -2189,8 +2189,8 @@ function cicloMedia(inicios){const s=[...new Set(inicios)].sort(),d=[];for(let i
 function cicloRueda(cd,size=120){
   const R0=size/2-3,sw=Math.max(4,size*0.0533),r=R0-sw/2,C=2*Math.PI*r,gp=Math.max(2,size/45),seg=(a,b,col)=>{const len=(b-a+1)/cd.dur*C;return `<circle r="${r.toFixed(2)}" fill="none" stroke="${col}" stroke-width="${sw.toFixed(2)}" stroke-dasharray="${Math.max(0,len-gp).toFixed(1)} ${C.toFixed(1)}" stroke-dashoffset="${(-(a-1)/cd.dur*C).toFixed(1)}"/>`};
   const ang=((Math.min(cd.dia,cd.dur)-0.5)/cd.dur)*2*Math.PI-Math.PI/2;
-  const dk=themeDark(),WC=dk?['rgb(236,150,190)','rgb(214,172,226)','rgb(250,206,228)','rgb(184,168,240)']:['#551332','#8d3d89','#f2a15d','#8d4769'];
-  const mk=dk?WC[['menstrual','folicular','ovulatoria','lutea'].indexOf(cd.f)]||WC[0]:cd.F.col;
+  const dk=themeDark(),WC=dk?['rgb(236,150,190)','rgb(214,172,226)','rgb(250,206,228)','rgb(184,168,240)']:['#6a2e67','#8d3d89','#c69dc3','#eadee9'];
+  const mk=dk?WC[['menstrual','folicular','ovulatoria','lutea'].indexOf(cd.f)]||WC[0]:'#6a2e67';
   return `<svg viewBox="${-size/2} ${-size/2} ${size} ${size}" width="${size}" height="${size}" aria-hidden="true"><g transform="rotate(-90)">${seg(1,cd.reg,WC[0])}${seg(cd.reg+1,cd.ov-2,WC[1])}${seg(cd.ov-1,cd.ov+1,WC[2])}${seg(cd.ov+2,cd.dur,WC[3])}</g>
     <circle cx="${(r*Math.cos(ang)).toFixed(1)}" cy="${(r*Math.sin(ang)).toFixed(1)}" r="${Math.max(7,sw*0.36).toFixed(1)}" fill="${dk?'rgb(255,255,255)':'#fefdfc'}" stroke="${mk}" stroke-width="3.5"/>
     <text y="2" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="${size/4.2}" font-weight="800" fill="#3a3538">${cd.dia}</text><text y="${size/6.5}" text-anchor="middle" font-family="Montserrat,sans-serif" font-size="${size/13}" font-weight="700" letter-spacing="1" fill="${dk?'rgb(206,203,199)':'#9a7c93'}">DÍA</text></svg>`;
@@ -2206,7 +2206,7 @@ function cicloCardHTML(u,date){
   if(c.anti)return `<div class="card ccard"><div class="cinvrow"><span class="cic">${ico('corazon','mi')}</span><div style="flex:1"><p class="cj">Tu ciclo</p><p class="small" style="margin-top:4px">Con anticoncepción hormonal no hay fases naturales, así que no mostramos predicciones. Puedes cambiarlo en <a href="#" id="cset">Ajustar mi ciclo</a>.</p></div></div></div>`;
   return `<button class="card ccard cnow" id="copen" style="--fc:${cd.F.col};--fb:${cd.F.bg}">
     <div class="cmini">${cicloRueda(cd,92)}</div>
-    <div class="ctx"><p class="cj" style="color:${cd.F.col}">Tu ciclo · ${cd.tarde?'Tu regla podría llegar ya':'Fase '+cd.F.n.toLowerCase()}</p>
+    <div class="ctx"><p class="cj" style="color:#6a2e67">Tu ciclo · ${cd.tarde?'Tu regla podría llegar ya':'Fase '+cd.F.n.toLowerCase()}</p>
       <div class="ctl">${cd.tarde?'¿Te ha bajado?':esc(cd.pre?'Días premenstruales':cd.F.lema)}</div>
       <div class="cmeta"><span>Energía ${cicloEnergia(cd.F.e)}</span><span>${cd.tarde?`Llevas ${cd.dia-cd.dur} día${cd.dia-cd.dur>1?'s':''} de retraso`:cd.faltan===0?'Tu regla podría llegar hoy':`Próxima regla en ${cd.faltan} día${cd.faltan>1?'s':''}`}</span></div></div>
     <span class="cgo">›</span></button>`;
@@ -2289,7 +2289,7 @@ function openCiclo(date){
   const F=cd.F,chip=n=>{const f=FOODS.find(x=>x.n===n);return f?`<span class="cchip">${esc(n.replace(/ \(.*\)$/,''))}</span>`:''};
   const fases=['menstrual','folicular','ovulatoria','lutea'];
   const m=modal(`<div class="top"><b>${ico('corazon','mi')} Tu ciclo</b><button class="close">✕</button></div>
-    <div class="chead" style="--fc:${F.col};--fb:${F.bg}"><div>${cicloRueda(cd,132)}</div><div style="min-width:0"><p class="cj" style="color:${F.col}">Fase ${F.n.toLowerCase()}${cd.pre?' · premenstrual':''}</p><h2 class="ct">${esc(cd.tarde?'Tu regla podría llegar ya':F.lema)}</h2>
+    <div class="chead" style="--fc:${F.col};--fb:${F.bg}"><div>${cicloRueda(cd,132)}</div><div style="min-width:0"><p class="cj" style="color:#6a2e67">Fase ${F.n.toLowerCase()}${cd.pre?' · premenstrual':''}</p><h2 class="ct">${esc(cd.tarde?'Tu regla podría llegar ya':F.lema)}</h2>
       <p class="small" style="margin-top:6px">Energía ${cicloEnergia(F.e)}</p>${cd.f==='lutea'&&cd.c.ajusta&&!cd.tarde?'<p class="small" style="margin-top:4px;font-weight:600;color:#285958">+100 kcal en tu objetivo de hoy</p>':''}<p class="small muted" style="margin-top:4px">${cd.tarde?`Esperábamos tu regla el ${fmtD(cd.prox)}.`:`Próxima regla hacia el ${fmtD(cd.prox)}`} · ciclo de ${cd.dur} días</p></div></div>
     <button class="btn block" id="cbaja" style="margin-top:14px">${ico('corazon','mi')} Me ha bajado la regla hoy</button>
     <div class="csec"><h3>${ico('consejo','mi')} Tus hormonas</h3><p>${F.hor}</p></div>
@@ -3528,7 +3528,7 @@ function vCiclo(){
   $('#view').innerHTML=H+`
   <div class="card ctop" style="--fc:${F.col};--fb:${F.bg}">
     <div class="ctopw">${cicloRueda(cd,190)}</div>
-    <div class="ctopt"><p class="cj" style="color:${F.col}">Fase ${F.n.toLowerCase()}${cd.pre?' · premenstrual':''}</p><h2 class="h2">${esc(cd.tarde?'Tu regla podría llegar ya':F.lema)}</h2>
+    <div class="ctopt"><p class="cj" style="color:#6a2e67">Fase ${F.n.toLowerCase()}${cd.pre?' · premenstrual':''}</p><h2 class="h2">${esc(cd.tarde?'Tu regla podría llegar ya':F.lema)}</h2>
       <p class="small muted" style="margin-top:6px">${cd.tarde?`Esperábamos tu regla el ${fmtD(cd.prox)}.`:cd.faltan===0?'Tu regla podría llegar hoy':`Próxima regla en <b>${cd.faltan} día${cd.faltan>1?'s':''}</b>, hacia el ${fmtD(cd.prox)}`} · ciclo de ${cd.dur} días${cd.f==='lutea'&&c.ajusta&&!cd.tarde?' · <b style="color:#285958">+100 kcal hoy</b>':''}</p>
       <div class="row" style="gap:8px;margin-top:14px;flex-wrap:wrap"><button class="btn" id="cbaja2">${ico('corazon','mi')} Me ha bajado hoy</button><button class="btn ghost" id="cadj2b">Ajustar mi ciclo</button></div></div>
   </div>
@@ -3559,7 +3559,7 @@ function maybeCicloAvisos(){
     const key=cd.L+'|'+cd.f;
     if(c.ultFase!==key&&!cd.tarde){c.ultFase=key;save();
       const m=modal(`<div class="top"><b>${ico('corazon','mi')} Tu ciclo</b><button class="close">✕</button></div>
-        <p class="cj" style="margin-top:14px;color:${cd.F.col}">Nueva fase</p><h2 class="h2" style="margin-top:4px">Ahora estás en tu <span>fase ${cd.F.n.toLowerCase()}</span></h2>
+        <p class="cj" style="margin-top:14px;color:#6a2e67">Nueva fase</p><h2 class="h2" style="margin-top:4px">Ahora estás en tu <span>fase ${cd.F.n.toLowerCase()}</span></h2>
         <p class="muted" style="margin-top:6px">${esc(cd.F.lema)}. ${cd.F.energia}</p>
         ${cicloHighlights(cd)}
         <button class="btn block" id="cver" style="margin-top:16px">Ver mi ciclo →</button>`,'wide');
