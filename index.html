@@ -2051,7 +2051,7 @@ const MA_ICO={
   C:'<path d="M-6 9L5-6M-1.5 3.5c-3-.5-4.5-3-4-6 3 .2 4.8 2.5 4 6zM1.5-.5c-3-.5-4.5-3-4-6 3 .2 4.8 2.5 4 6zM-1.5 3.5c.5-3 3-4.5 6-4-.2 3-2.5 4.8-6 4zM1.5-.5c.5-3 3-4.5 6-4-.2 3-2.5 4.8-6 4zM4.5-4.5c-1-2.5 0-5 2.5-6 1 2.5 0 5-2.5 6z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>',
   G:'<path d="M0-9C-3-4-6-.5-6 3a6 6 0 0012 0C6-.5 3-4 0-9z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M-2.5 3.5a2.5 2.5 0 002.5 2.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>'};
 function macroArt(m,etq){
-  const tot=m.p*4+m.c*4+m.g*9||1,parts=[['P','Proteína',m.p,m.p*4,'#711943','#8d4769','#551332'],['C','Carbos',m.c,m.c*4,'#8d3d89','#c69dc3','#6a2e67'],['G','Grasas',m.g,m.g*9,'#f2a15d','#edc488','#f2a15d']];
+  const tot=m.p*4+m.c*4+m.g*9||1,parts=[['P','Proteína',m.p,m.p*4,'#711943','#711943','#711943'],['C','Carbos',m.c,m.c*4,'#8d3d89','#8d3d89','#8d3d89'],['G','Grasas',m.g,m.g*9,'#f2a15d','#f2a15d','#f2a15d']];
   if(themeDark()){parts[0].splice(4,3,'rgb(216,213,209)','rgb(240,238,235)','rgb(184,180,175)');parts[1].splice(4,3,'rgb(143,201,174)','rgb(184,226,206)','rgb(104,170,139)');parts[2].splice(4,3,'rgb(243,226,169)','rgb(250,240,201)','rgb(226,205,134)')}
   const donut=(W,H,cx,cy,r,w,big)=>{const uid='ma'+Math.random().toString(36).slice(2,7);const gapA=.035;let ang=-Math.PI/2,segs='',defs='',badges='';
     const pt=(a,rr)=>[cx+rr*Math.cos(a),cy+rr*Math.sin(a)];
