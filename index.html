@@ -2347,6 +2347,7 @@ function rtabsHTML(){const n=rNotifs(),ord=RTABS.slice().sort((a,b)=>(n[b[0]]>0)
   return ord.map(([k,t,i])=>`<button class="rtab ${UI.rtab===k?'on':''} ${n[k]?'nt':''}" data-rt="${k}"><span>${t}</span>${n[k]?`<i class="rdot">${n[k]>9?'9+':n[k]}</i>`:''}</button>`).join('')}
 function rtabsRefresh(){const b=document.querySelector('#rtabs');if(!b)return;b.innerHTML=rtabsHTML();b.querySelectorAll('[data-rt]').forEach(x=>x.onclick=()=>{UI.rtab=x.dataset.rt;vRetosPage();scrollTo(0,0)})}
 function vRetosPage(){
+  visTrack('retos/'+(UI.rtab||'mis'));
   const u=me();
   if(!UI.rtab){const n=rNotifs();UI.rtab=n.mis?'mis':'mis'}
   vRetos();
@@ -3739,6 +3740,7 @@ function exKcal(u,mov){return (mov||[]).reduce((a,m)=>a+exKcalM(u,m),0)}
 
 function renderApp(){
   SCREEN.busy=false;
+  visTrack(UI.view==='retos'?'retos/'+(UI.rtab||'mis'):UI.view);
   const u=me();avisosSync(u);
   $('#root').innerHTML=`
   <header class="app"><div class="in2">
@@ -3824,7 +3826,7 @@ function toggleDD(){
     <button class="it" data-go="invitar"><span class="ic" style="background:var(--pink)">${ico('menu-invitar')}</span><div>Añadir amigo a Vuelve<small>Invítale a un reto en conjunto</small></div></button>
     <button class="it" data-go="tienda"><span class="ic" style="background:var(--pink)">${ico('menu-tienda')}</span><div>Tienda<small>Recetas, rutinas y merch</small></div></button>
     <button class="it" data-go="descargas"><span class="ic" style="background:var(--mint,#e3f4ea)">${ico('menu-descargas')}</span><div>Mis descargas<small>Lo que has comprado</small></div></button>
-    ${LIB.admin?`<button class="it" data-go="usuarias"><span class="ic" style="background:var(--lilac)">${ico('compartido')}</span><div>Usuarias<small>Solo administradoras</small></div></button><button class="it" data-go="biblio"><span class="ic" style="background:var(--mint,#e3f4ea)">${ico('menu-biblioteca')}</span><div>Biblioteca de recetas<small>Solo administradoras</small></div></button><button class="it" data-go="lista"><span class="ic" style="background:var(--lilac)">${ico('menu-lista-espera')}</span><div>Lista de espera<small>Solo administradoras</small></div></button><button class="it" data-go="productos"><span class="ic" style="background:var(--beige)">${ico('menu-productos')}</span><div>Productos de la tienda<small>Solo administradoras</small></div></button>`:''}
+    ${LIB.admin?`<button class="it" data-go="visitas"><span class="ic" style="background:var(--lilac)">${ico('peso')}</span><div>Visitas<small>Solo administradoras</small></div></button><button class="it" data-go="usuarias"><span class="ic" style="background:var(--lilac)">${ico('compartido')}</span><div>Usuarias<small>Solo administradoras</small></div></button><button class="it" data-go="biblio"><span class="ic" style="background:var(--mint,#e3f4ea)">${ico('menu-biblioteca')}</span><div>Biblioteca de recetas<small>Solo administradoras</small></div></button><button class="it" data-go="lista"><span class="ic" style="background:var(--lilac)">${ico('menu-lista-espera')}</span><div>Lista de espera<small>Solo administradoras</small></div></button><button class="it" data-go="productos"><span class="ic" style="background:var(--beige)">${ico('menu-productos')}</span><div>Productos de la tienda<small>Solo administradoras</small></div></button>`:''}
     <button class="it" data-lang="${LANG==='en'?'es':'en'}"><span class="ic" style="background:var(--tile)">${ico('menu-idioma')}</span><div><span data-notr>${LANG==='en'?'Español':'English'}</span><small data-notr>${LANG==='en'?'Cambiar a español':'Switch to English'}</small></div></button>
     <hr>
     ${Object.keys(d.users).length>1?`<button class="it" data-go="cambiar"><span class="ic" style="background:var(--tile)">${ico('menu-cambiar-cuenta')}</span><div>Cambiar de cuenta</div></button>`:''}
@@ -3838,12 +3840,38 @@ function toggleDD(){
     if(g==='tienda'){window.open(TIENDA_URL,'_blank','noopener')}
     else if(g==='avisos'||g==='espacio'||g==='retos'||g==='biblio'||g==='lista'||g==='descargas'||g==='productos'){UI.view=g;renderApp();scrollTo(0,0);if(g==='retos'&&SERVER)sbLoadRetos().then(()=>{if(UI.view==='retos')renderApp()})}
     else if(g==='ciclo'){UI.view='ciclo';renderApp();scrollTo(0,0)}
-    else if(g==='usuarias')openUsuarias();
+    else if(g==='usuarias')openUsuarias();else if(g==='visitas')openVisitas();
     else if(g==='invitar'){UI.rtab='inv';UI.view='retos';renderApp();scrollTo(0,0);if(SERVER)sbLoadRetos().then(()=>{if(UI.view==='retos')renderApp()})}
     else if(g==='cambiar'){d.session=null;save();renderAuth('login')}
     else if(g==='salir')logout()});
 }
 
+
+/* ---------- Visitas (analítica anónima: solo el nombre de la pantalla) ---------- */
+const VIS={sid:null,last:null};
+function visTrack(v){
+  try{if(!SERVER||!SB||LIB.admin||!v||VIS.last===v)return;VIS.last=v;
+    if(!VIS.sid){try{VIS.sid=sessionStorage.getItem('vsid')}catch(e){}if(!VIS.sid){VIS.sid=(crypto.randomUUID?crypto.randomUUID():String(Math.random()).slice(2)+Date.now()).replace(/-/g,'').slice(0,24);try{sessionStorage.setItem('vsid',VIS.sid)}catch(e){}}}
+    fetch(SUPABASE_URL+'/rest/v1/visitas',{method:'POST',keepalive:true,headers:{'Content-Type':'application/json',apikey:SUPABASE_KEY,Prefer:'return=minimal'},body:JSON.stringify({sid:VIS.sid,vista:String(v).slice(0,40)})}).catch(()=>{})}catch(e){}
+}
+const VIS_N={diario:'Diario',retos:'Retos',ciclo:'Ciclo',mov:'Movimiento',menu:'Menú',mealprep:'Mealprep',progreso:'Progreso',espacio:'Mi Espacio',mespacio:'Mi Espacio',ayuno:'Ayuno',pasos:'Pasos',avisos:'Avisos',tienda:'Tienda',compartido:'Juntas'};
+const visNom=v=>{const [a,b]=String(v).split('/');return (VIS_N[a]||a.charAt(0).toUpperCase()+a.slice(1))+(b?' · '+b:'')};
+function openVisitas(){
+  let dias=30;
+  const m=modal(`<div class="top"><b>${ico('peso','mi')} Visitas a Vuelve</b><button class="close">✕</button></div><div class="cmdias" style="margin-top:12px">${[7,30,90].map(d=>`<button class="cmchip ${d===30?'on':''}" data-vd="${d}">${d} días</button>`).join('')}</div><div id="vsb"><p class="small muted" style="margin-top:12px">Cargando…</p></div>`,'wide');
+  const load=async()=>{const B=m.querySelector('#vsb');B.innerHTML='<p class="small muted" style="margin-top:12px">Cargando…</p>';
+    const {data,error}=await SB.rpc('admin_visitas',{dias});if(error){B.innerHTML=`<p class="err" style="margin-top:12px">${esc(error.message)}</p>`;return}
+    const D=data||{},ses=D.sesiones||0,vis=D.visitas||0,bar=(L,tot,fx)=>(L||[]).length?(L||[]).map(x=>{const p=tot?Math.round(x.n/tot*100):0;return `<div style="margin:8px 0"><div class="row between" style="font-size:13px"><b>${esc(visNom(x.vista))}</b><span class="muted">${fx(x,p)}</span></div><div style="height:6px;border-radius:9px;background:#eadee9;margin-top:4px"><div style="height:100%;width:${Math.min(100,p)}%;border-radius:9px;background:#711943"></div></div></div>`}).join(''):'<p class="small muted">Aún no hay datos.</p>';
+    const mx=Math.max(1,...(D.dias||[]).map(x=>x.n));
+    B.innerHTML=`<div class="usst"><div><b>${ses}</b><small>visitas (sesiones)</small></div><div><b>${vis}</b><small>pantallas vistas</small></div><div><b>${ses?(vis/ses).toFixed(1).replace('.',','):'0'}</b><small>pantallas por visita</small></div></div>
+      <p class="fplab">Visitas por día</p><div style="display:flex;align-items:flex-end;gap:3px;height:70px">${(D.dias||[]).map(x=>`<div title="${x.d}: ${x.n}" style="flex:1;min-width:3px;background:#8d3d89;border-radius:3px 3px 0 0;height:${Math.max(4,Math.round(x.n/mx*70))}px"></div>`).join('')||'<p class="small muted">Aún no hay datos.</p>'}</div>
+      <p class="fplab">Pantallas más visitadas</p>${bar(D.vistas,vis,(x,p)=>`${x.n} · ${x.seg?x.seg+' s de media':'—'}`)}
+      <p class="fplab">Por dónde entran</p>${bar(D.entradas,ses,(x,p)=>`${x.n} · ${p}%`)}
+      <p class="fplab">Dónde acaba la visita (última pantalla)</p>${bar(D.salidas,ses,(x,p)=>`${x.n} · ${p}%`)}
+      <p class="tiny muted" style="margin-top:14px">Solo se guarda el nombre de la pantalla y la hora, con un código al azar por visita. Nada de lo que escribes ni tus datos de salud. Las visitas de administradoras no cuentan.</p>`};
+  m.querySelectorAll('[data-vd]').forEach(b=>b.onclick=()=>{dias=+b.dataset.vd;m.querySelectorAll('[data-vd]').forEach(x=>x.classList.toggle('on',x===b));load()});
+  load();
+}
 function openUsuarias(){
   const st={q:'',L:null,err:''};
   const m=modal(`<div class="top"><b>${ico('compartido','mi')} Usuarias de Vuelve</b><button class="close">✕</button></div><div id="usb"><p class="small muted" style="margin-top:12px">Cargando…</p></div>`,'wide');
