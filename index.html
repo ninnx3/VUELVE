@@ -2742,7 +2742,7 @@ function introVisto(){try{return localStorage.getItem('vuelve_intro')==='1'}catc
 function renderIntro(i=0,dest){
   const N=INTRO.length,x=INTRO[i],ult=i===N-1;
   $('#root').innerHTML=`<div class="intro${x.im==='progress'?' ip':''}"><div class="ihead"><div class="row between" style="align-items:center"><div class="logo">${LOGO}<div><b>VUELVE</b><small>A tu ritmo, hacia ti</small></div></div><div class="irt"><div class="ilang" role="group" aria-label="Idioma"><button data-il="es" class="${LANG==='en'?'':'on'}">ES</button><button data-il="en" class="${LANG==='en'?'on':''}">EN</button></div><button class="ilink" id="iskip">${ult?'':'Saltar'}</button></div></div></div><div class="introc${x.im?'':' noim'}">
-    <p class="eyebrow">${x.ey}</p><h1 class="h1" style="margin-top:8px">${x.t} <span>${x.s}</span></h1><p class="ilead">${x.d}</p>${x.im?`<img class="iimg" src="img/intro/${x.im}.webp?v=4" alt="">`:''}</div>
+    <p class="eyebrow">${x.ey}</p><h1 class="h1" style="margin-top:8px">${x.t} <span>${x.s}</span></h1><p class="ilead">${x.d}</p>${x.im?`<img class="iimg" src="img/intro/${x.im}.webp?v=5" alt="">`:''}</div>
     <div class="ifoot"><div class="idots">${INTRO.map((_,k)=>`<i class="${k===i?'on':''}" data-ig="${k}"></i>`).join('')}</div>
     <div class="ibtns">${ult?`<button class="btn block" id="ireg">Crear mi cuenta</button><button class="btn ghost block" id="ilog">Ya tengo cuenta</button>`
       :`${i?'<button class="btn ghost" id="iprev">Atrás</button>':''}<button class="btn" id="inext" style="flex:1">Siguiente</button>`}</div></div></div>`;
