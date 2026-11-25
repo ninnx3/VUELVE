@@ -4140,7 +4140,7 @@ function vDiario(){
   const right=`<button class="btn ghost" id="hoy">Ir a hoy</button>`;
   let head=heroHTML('Tus comidas','Hoy','cuenta.',right);
   const tg0=targetFor(u,UI.date);
-  head+=`<div class="strip" id="strip" style="cursor:pointer" title="Ajustar calorías"><span>${esc(u.nombre)} · ${fmt(tg0.kcal)} kcal / día <b style="color:var(--plum)">· Ajustar</b></span><small>${pf.meta?'Meta · '+parse(pf.meta).getDate()+' '+MON[parse(pf.meta).getMonth()]:ENFOQUES[pf.enfoque].t}</small></div>
+  head+=`<div class="strip" id="strip" style="cursor:pointer" title="Ajustar calorías"><span>${esc(u.nombre)} · ${fmt(tg0.kcal)} kcal / día${tg0.ciclo?` <small style="color:#2f6f5d;font-weight:600">(${fmt(tg0.kcal-100)} + 100 por tu ciclo)</small>`:''} <b style="color:var(--plum)">· Ajustar</b></span><small>${pf.meta?'Meta · '+parse(pf.meta).getDate()+' '+MON[parse(pf.meta).getMonth()]:ENFOQUES[pf.enfoque].t}</small></div>
   <div class="seg">${[['dia','Día'],['semana','Semana'],['mes','Mes']].map(([k,t])=>`<button data-r="${k}" class="${UI.range===k?'on':''}">${t}</button>`).join('')}</div>`;
   if(UI.range==='semana')return vSemana(head);
   if(UI.range==='mes')return vMes(head);
