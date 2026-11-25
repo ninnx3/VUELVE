@@ -706,6 +706,7 @@ html .ct,html .csec h3,html .csec0 h3,html .cpt,html .mtit,html .h3{color:var(--
 .hent2 b{font-size:13.5px}.cfuer{display:inline-flex;align-items:flex-end;gap:5px;height:34px;margin:6px 0 4px}.cfuer i{width:12px;border-radius:4px;background:#eadee9}.cfuer i.on{background:#711943}
 .hlist{margin-top:10px;display:flex;flex-direction:column;gap:6px}.hlist div{display:flex;gap:8px;align-items:flex-start}.hlist i{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:7px}.hlist p{margin:0!important;font-size:13.5px}
 @media(max-width:640px){.chigh{grid-template-columns:repeat(2,minmax(0,1fr))}.hhorm,.hent2{grid-column:span 2}}
+@media(min-width:900px){#view .chigh{grid-template-columns:1.9fr 1fr;grid-template-rows:repeat(3,auto);gap:12px}#view .chigh .hhorm{grid-column:1;grid-row:1/4;min-height:300px;justify-content:center}#view .chigh .hbox:not(.hhorm){grid-column:2}#view .chigh .hhorm svg{max-height:290px;align-self:center}}
 html[data-tema=ciruela] .chigh .hleg{color:#3a3538}html[data-tema=ciruela] .chigh .hent2 b{color:#711943}
 /* Estilo clásico: el resumen del ciclo en rosa claro, como en Jardín, con la paleta lila y rosa */
 html[data-tema=clasico] .chigh{background:linear-gradient(135deg,#f8e8ee 0%,#eadee9 50%,#eadee9 100%);color:#8d4769;border:1px solid #eadee9}
@@ -3499,10 +3500,10 @@ function cicloHighlights(cd){
   const X=CICLO_EXTRA[cd.f],F=cd.F;
   const caras=ANIMOS.map(a=>`<span class="hcara ${X.caras.includes(a[0])?'on':''}" title="${a[2]}">${a[1]}</span>`).join('');
   return `<div class="chigh">
+    <div class="hbox hhorm"><small>Nivel hormonal · hoy</small>${hormGraph(cd)}</div>
     <div class="hbox"><small>Energía</small>${cicloEnergia(F.e)}<b>${['','Muy baja','Baja','Media','Alta','Muy alta'][F.e]}</b></div>
     <div class="hbox"><small>Ánimo</small><div class="hcaras">${caras}</div><b>${X.caras.includes('muy_bien')?'Más alegre':'Más sensible'}</b></div>
-    <div class="hbox hhorm"><small>Nivel hormonal · hoy</small>${hormGraph(cd)}</div>
-    <div class="hbox hent2"><small>Entreno</small>${cicloFuerza(({Suave:1,Moderada:3,Alta:4,'Máxima':5})[X.mov]||3)}<b>Intensidad ${X.mov.toLowerCase()}</b><div class="hent">${X.entreno.map(t=>`<span>${t}</span>`).join('')}</div></div>
+        <div class="hbox hent2"><small>Entreno</small>${cicloFuerza(({Suave:1,Moderada:3,Alta:4,'Máxima':5})[X.mov]||3)}<b>Intensidad ${X.mov.toLowerCase()}</b><div class="hent">${X.entreno.map(t=>`<span>${t}</span>`).join('')}</div></div>
   </div>`;
 }
 function cicloICS(u){
