@@ -992,26 +992,12 @@ html[data-tema=ciruela] .intro .introc .h1 span{font-weight:800}
 html .card.jhero{background-image:linear-gradient(135deg,#6a2e67 0%,#8d4769 55%,#a47a9a 100%)}html[data-tema=ciruela] .card.jhero{background-image:linear-gradient(135deg,#711943,#8d3d89 55%,#8d3d89)}
 .irt{display:flex;align-items:center;gap:6px;flex:none}.ilang{display:inline-flex;border:1.5px solid #e3d1d9;border-radius:999px;padding:2px;background:#fefdfc}.ilang button{border:0;background:none;font:inherit;font-size:11px;font-weight:800;letter-spacing:.6px;color:#8f868a;padding:5px 9px;border-radius:999px;cursor:pointer}.ilang button.on{background:#711943;color:#f4e8dc}.ihead .logo small{font-size:9px;letter-spacing:1.3px;line-height:1.5}.ihead .logo{min-width:0;gap:8px}.ilang{padding:1.5px;border-width:1px}.ilang button{padding:3px 6px;font-size:10px;letter-spacing:.3px}.irt{gap:2px}.irt .ilink{padding:6px 6px}.ihead .logo small{font-size:8.5px;letter-spacing:1.1px}
 
-/* Escritorio: presentación y acceso a doble columna con la ilustración de bienvenida */
+/* Escritorio: el acceso a doble columna con la ilustración de bienvenida */
 .art .aimg{display:none}
 @media(min-width:900px){
-.auth .art .aimg,.intro .vart .aimg{display:block;position:absolute;left:6%;right:6%;top:6%;bottom:150px;width:88%;height:calc(94% - 150px);object-fit:contain;object-position:center}
+.auth .art .aimg{display:block;position:absolute;left:6%;right:6%;top:6%;bottom:150px;width:88%;height:calc(94% - 150px);object-fit:contain;object-position:center}
 .auth .art blockquote{z-index:1}
-.intro{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto minmax(0,1fr) auto;align-items:stretch;justify-items:center;padding:0;height:100vh;height:100dvh;min-height:0;overflow:hidden;column-gap:0;row-gap:0;gap:0}
-.intro .vart{grid-column:1;grid-row:1/4;align-self:stretch;height:100%;width:100%;position:relative;overflow:hidden;background:linear-gradient(160deg,#f6dddf,#e3d1d9 60%,#eadee9);display:flex;align-items:flex-end;padding:40px}
-.intro .vart .bubble{position:absolute;border-radius:50%;opacity:.55}
-.intro .vart blockquote{position:relative;z-index:1;font-size:30px;font-weight:800;letter-spacing:-1.3px;line-height:1.12;color:#551332;max-width:380px}
-.intro .vart blockquote span{font-weight:500;color:#711943}
-.intro .ihead,.intro .introc,.intro .ifoot{grid-column:2;width:100%;max-width:440px;padding-left:4px;padding-right:4px}
-.intro .ihead{grid-row:1;padding-top:calc(34px + env(safe-area-inset-top))}
-.intro .introc{grid-row:2;flex:none;min-height:0;margin-top:0;justify-content:center;align-self:center}
-.intro .ifoot{grid-row:3;align-self:end;padding-bottom:48px}
-.intro .iimg{display:none}
-.intro,.intro .ihead,.intro .ifoot{background:transparent}
-html[data-tema=ciruela] .intro,html[data-tema=ciruela] .intro .ihead,html[data-tema=ciruela] .intro .ifoot{background:#faf6ef}
-html[data-tema=ciruela] .intro .vart{background:linear-gradient(160deg,#f6dddf,#e3d1d9 60%,#eadee9)}
 }
-@media(max-width:899px){.intro .vart{display:none}}
 </style>
 </head>
 <body>
@@ -2802,7 +2788,7 @@ const INTRO=[
 function introVisto(){try{return localStorage.getItem('vuelve_intro')==='1'}catch(e){return false}}
 function renderIntro(i=0,dest){
   const N=INTRO.length,x=INTRO[i],ult=i===N-1;
-  $('#root').innerHTML=`<div class="intro${x.im==='progress'?' ip':''}"><div class="vart"><div class="bubble" style="width:340px;height:340px;background:#fefdfc;top:-80px;right:-60px"></div><div class="bubble" style="width:200px;height:200px;background:#f6dddf;top:180px;left:-50px"></div><div class="bubble" style="width:120px;height:120px;background:#d9cbee;top:90px;left:160px"></div><img class="aimg" src="img/intro/welcome-2.webp" alt=""><blockquote>Vuelve por encima de <span>perfección.</span><br><span style="font-size:16px;letter-spacing:0;font-weight:500;color:#3a3538">Cada registro cuenta.</span></blockquote></div><div class="ihead"><div class="row between" style="align-items:center"><div class="logo">${LOGO}<div><b>VUELVE</b><small>A tu ritmo, hacia ti</small></div></div><div class="irt"><div class="ilang" role="group" aria-label="Idioma"><button data-il="es" class="${LANG==='en'?'':'on'}">ES</button><button data-il="en" class="${LANG==='en'?'on':''}">EN</button></div><button class="ilink" id="iskip">${ult?'':'Saltar'}</button></div></div></div><div class="introc${x.im?'':' noim'}">
+  $('#root').innerHTML=`<div class="intro${x.im==='progress'?' ip':''}"><div class="ihead"><div class="row between" style="align-items:center"><div class="logo">${LOGO}<div><b>VUELVE</b><small>A tu ritmo, hacia ti</small></div></div><div class="irt"><div class="ilang" role="group" aria-label="Idioma"><button data-il="es" class="${LANG==='en'?'':'on'}">ES</button><button data-il="en" class="${LANG==='en'?'on':''}">EN</button></div><button class="ilink" id="iskip">${ult?'':'Saltar'}</button></div></div></div><div class="introc${x.im?'':' noim'}">
     <p class="eyebrow">${x.ey}</p><h1 class="h1" style="margin-top:8px">${x.t} <span>${x.s}</span></h1><p class="ilead">${x.d}</p>${x.im?`<img class="iimg" src="img/intro/${x.im}-2.webp" alt="">`:''}</div>
     <div class="ifoot"><div class="idots">${INTRO.map((_,k)=>`<i class="${k===i?'on':''}" data-ig="${k}"></i>`).join('')}</div>
     <div class="ibtns">${ult?`<button class="btn block" id="ireg">Crear mi cuenta</button><button class="btn ghost block" id="ilog">Ya tengo cuenta</button>`
