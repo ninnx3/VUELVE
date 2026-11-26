@@ -64,6 +64,7 @@ h2{font-weight:600;font-size:clamp(30px,4vw,48px);line-height:1.05;letter-spacin
 .duo{display:grid;gap:12px;grid-auto-rows:clamp(220px,32vw,460px)}
 .duo.a{grid-template-columns:minmax(0,1fr) minmax(0,2fr)}
 .duo.b{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.duo.d{grid-template-columns:minmax(0,1.3fr) minmax(0,1.8fr)}
 .duo.c{grid-template-columns:minmax(0,1.15fr) minmax(0,1.6fr)}
 .pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,4vw,56px)}
 .pair .shot{aspect-ratio:1.35;height:auto;margin-bottom:18px}
@@ -101,7 +102,7 @@ dialog::backdrop{background:rgba(0,0,0,.8)}
 .mosaic{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto auto}
 .mosaic .shot:first-child{grid-row:auto;grid-column:span 2;aspect-ratio:1.8}
 .mosaic .shot{aspect-ratio:1.1}
-.duo.a,.duo.b,.duo.c,.pair,.lists{grid-template-columns:minmax(0,1fr)}
+.duo.a,.duo.b,.duo.c,.duo.d,.pair,.lists{grid-template-columns:minmax(0,1fr)}
 .duo{grid-auto-rows:auto}.duo .shot{aspect-ratio:1.4;height:auto}.duo.a .shot:first-child{aspect-ratio:1}
 .logos{grid-template-columns:repeat(2,minmax(0,1fr))}
 .logos figcaption{left:10px;bottom:8px;font-size:12px}.logos figcaption b{display:block}
@@ -178,6 +179,21 @@ nav .wrap{flex-wrap:nowrap}nav ul{gap:14px;flex-wrap:nowrap}nav ul a{font-size:1
   <div class="duo b">
     <button class="shot" data-src="img/cv-set.jpg" data-cap="Código Verde, aplicaciones de marca"><img src="img/cv-set.jpg" alt="Vasos, tarjetas, bolsas y posavasos de Código Verde"></button>
     <button class="shot" data-src="img/cv-tote.jpg" data-cap="Código Verde, tote bag"><img src="img/cv-tote.jpg" alt="Tote bag con el símbolo de hojas"></button>
+  </div>
+</div></section>
+
+<section class="band project" aria-labelledby="p7"><div class="wrap">
+  <div class="phead">
+    <div><h2 id="p7">Vuelve</h2><p class="kind">Producto digital · Web app de bienestar</p></div>
+    <div>
+      <p class="desc">Diario de comida, movimiento y bienestar, ya publicado en vuelvehaciati.com. Proyecto propio: idea, identidad visual y diseño de la experiencia, desde la bienvenida paso a paso hasta la lista de espera y la tienda, en español e inglés. Desarrollado con ayuda de IA.</p>
+      <ul class="tags"><li>Producto digital</li><li>UX/UI</li><li>Identidad</li><li>Web responsive</li></ul>
+      <p style="margin:16px 0 0"><a class="btn" href="https://vuelvehaciati.com/">Ver la web en directo ↗</a></p>
+    </div>
+  </div>
+  <div class="duo d">
+    <button class="shot contain" style="background:#efe2ea" data-src="img/vuelve-phones.jpg" data-cap="Vuelve, pantallas en móvil"><img src="img/vuelve-phones.jpg" alt="Tres pantallas de Vuelve en móvil"></button>
+    <button class="shot" data-src="img/vuelve-desk.jpg" data-cap="Vuelve, página de lista de espera en ordenador"><img src="img/vuelve-desk.jpg" alt="Página de Vuelve en ordenador"></button>
   </div>
 </div></section>
 
