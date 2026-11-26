@@ -4910,30 +4910,34 @@ function animoCardHTML(u,date){
     ${l.nota?`<p style="margin-top:10px;line-height:1.6;white-space:pre-wrap">${esc(l.nota)}</p>`:''}</div>`;
 }
 // Balance de una semana (lunes a domingo)
-let BAL_WS=null;
+let BAL_OPEN=null;let BAL_WS=null;
 function balanceHTML(u,ws,compact){
   const days=[...Array(7)].map((_,i)=>addDays(ws,i));
-  const rows=days.map(d=>{const l=u.logs[d]||{},st=dayStatus(u,d),tt=totals(l.foods||[]).k,tg=targetFor(u,d).kcal,a=animoOf(l.animo),mov=(l.mov||[]).length,pd=parse(d);
-    const stc=st==='ok'?['ok','En objetivo']:tt>tg?['up','Por encima']:['down','Por debajo'];
-    const kc=st==='none'?'<span class="small muted">Sin registro</span>':`<span class="bk"><b>${fmt(tt)}</b><span class="muted"> / ${fmt(tg)} kcal</span></span><span class="bst ${stc[0]}">${stc[1]}</span>`;
-    const meta=[a?`<span class="apill sm" style="background:${a[3]};color:${a[4]}">${a[1]} ${a[2]}</span>`:'',mov?`<span class="bm">${ico('act-fuerza','mi')}${mov} ${mov===1?'actividad':'actividades'}</span>`:'',l.pasos?`<span class="bm">${ico('act-pasos','mi')}${fmt(l.pasos)} pasos</span>`:''].filter(Boolean).join('');
-    return `<div class="bday ${d>today()?'fut':''} ${d===today()?'hoy':''} ${st==='none'?'s-none':'s-'+stc[0]}"><div class="bd"><b>${cap(DOWL[pd.getDay()]).slice(0,3)}</b><small>${pd.getDate()}</small></div>
-      <div class="bc"><div class="brow">${kc}</div>${meta?`<div class="bmeta">${meta}</div>`:''}
-      ${l.nota?`<p class="bnote">${esc(l.nota)}</p>`:''}</div>
-      ${d<=today()?`<button class="bed" data-anday="${d}" title="${a||l.nota?'Editar':'Añadir'} nota">${ico('editar','mi')}</button>`:''}</div>`}).join('');
+  const rows=days.map((d,i)=>{const l=u.logs[d]||{},st=dayStatus(u,d),tt=totals(l.foods||[]).k,tg=targetFor(u,d).kcal,a=animoOf(l.animo),mov=(l.mov||[]).length,pd=parse(d),ay=l.ayuno||{},fut=d>today(),open=d===BAL_OPEN;
+    const body=`${a?`<div class="wksec"><p class="wklbl">Cómo te fue</p><span class="apill" style="background:${a[3]};color:${a[4]}">${a[1]} ${a[2]}</span>${l.nota?`<p class="small" style="margin-top:8px;line-height:1.55;white-space:pre-wrap">${esc(l.nota)}</p>`:''}</div>`:(l.nota?`<div class="wksec"><p class="wklbl">Tu nota</p><p class="small" style="line-height:1.55;white-space:pre-wrap">${esc(l.nota)}</p></div>`:'')}
+      ${mov||l.pasos?`<div class="wksec"><p class="wklbl">Movimiento</p><p class="small">${[mov?`${mov} ${mov===1?'actividad':'actividades'}`:'',l.pasos?`${fmt(l.pasos)} pasos`:''].filter(Boolean).join(' · ')}</p></div>`:''}
+      ${st!=='none'?`<div class="wksec"><p class="wklbl">Comida</p><p class="small"><b>${fmt(tt)}</b> / ${fmt(tg)} kcal</p></div>`:''}
+      ${!a&&!l.nota&&!mov&&!l.pasos&&st==='none'?'<p class="small muted" style="margin-top:12px">Aún no hay nada registrado este día.</p>':''}
+      ${fut?'':`<div class="grid2" style="margin-top:16px"><button class="btn soft sm" data-anday="${d}">${a||l.nota?'Editar nota':'Añadir nota'}</button><span></span></div>`}`;
+    return `<section class="wkday ${open?'open':''} ${d===today()?'hoy':''}" data-balwk="${d}" style="--k:${i}">
+      <button class="wkhd" aria-expanded="${open}"><div class="wkn"><b>${cap(DOWL[pd.getDay()])}</b><small>${pd.getDate()} ${MON[pd.getMonth()]}${d===today()?' · hoy':''}</small></div>
+        <div class="wkch">${st==='ok'?'<span class="wkok" title="En objetivo">✓</span>':''}${mov?`<span class="wkic" title="Movimiento">${ico('act-fuerza','mi')}</span>`:''}${ay.ok?'<span class="wkic" title="Ayuno">⏱</span>':''}${a?`<span class="wkic">${a[1]}</span>`:''}${l.nota?`<span class="wkic" title="Nota">${ico('notas','mi')}</span>`:''}${l.cerrado?'<span class="wkic" title="Día cerrado">🏁</span>':''}
+          <span class="wkkc"><b>${tt?fmt(tt):'—'}</b><small>/ ${fmt(tg)}</small></span></div></button>
+      <div class="wkbody"><div>${body}</div></div></section>`}).join('');
   const reg=days.filter(d=>u.logs[d]?.animo),cnt=k=>reg.filter(d=>u.logs[d].animo===k).length;
   const ok=days.filter(d=>dayStatus(u,d)==='ok').length,malos=days.filter(d=>['mal','muy_mal'].includes(u.logs[d]?.animo));
   const malOk=malos.filter(d=>dayStatus(u,d)==='ok').length;
   const resumen=`<div class="bsum">${ANIMOS.filter(a=>cnt(a[0])).map(a=>`<span class="apill sm" style="background:${a[3]};color:${a[4]}">${a[1]} ${cnt(a[0])}</span>`).join('')}<span class="apill sm" style="background:var(--mint);color:var(--base)">${ico('celebrar-trofeo','mi')} ${ok} ${ok===1?'día en objetivo':'días en objetivo'}</span></div>${malos.length?`<p class="tiny muted" style="margin-top:6px">De los días malos, ${malOk} en objetivo</p>`:''}${reg.length?'':'<p class="tiny muted" style="margin-top:6px">Aún no has valorado ningún día de esta semana.</p>'}`;
   const wsD=parse(ws),weD=parse(addDays(ws,6));
   return `${compact?'':`<div class="row between" style="margin-top:4px"><button class="ar" id="bwp">←</button><b class="small">${wsD.getDate()} ${MON[wsD.getMonth()]} – ${weD.getDate()} ${MON[weD.getMonth()]}</b><button class="ar" id="bwn" ${ws>=weekStart(today())?'disabled style="opacity:.3"':''}>→</button></div>`}
-    <div style="margin-top:12px">${resumen}</div><div class="blist bcal">${rows}</div>`;
+    <div style="margin-top:12px">${resumen}</div><div class="wkstack" style="margin-top:14px">${rows}</div>`;
 }
 function bindBalance(root,u,rerender){
+  root.querySelectorAll('.wkhd').forEach(b=>b.onclick=()=>{const sec=b.closest('.wkday'),d=sec.dataset.balwk,was=sec.classList.contains('open');root.querySelectorAll('.wkday').forEach(x=>{x.classList.remove('open');x.querySelector('.wkhd').setAttribute('aria-expanded','false')});if(!was){sec.classList.add('open');b.setAttribute('aria-expanded','true');BAL_OPEN=d}else BAL_OPEN=null});
   root.querySelectorAll('[data-anday]').forEach(b=>b.onclick=()=>preguntarDia(b.dataset.anday));
   const p=root.querySelector('#bwp'),n=root.querySelector('#bwn');
-  if(p)p.onclick=()=>{BAL_WS=addDays(BAL_WS,-7);rerender()};
-  if(n)n.onclick=()=>{if(BAL_WS<weekStart(today())){BAL_WS=addDays(BAL_WS,7);rerender()}};
+  if(p)p.onclick=()=>{BAL_WS=addDays(BAL_WS,-7);BAL_OPEN=null;rerender()};
+  if(n)n.onclick=()=>{if(BAL_WS<weekStart(today())){BAL_WS=addDays(BAL_WS,7);BAL_OPEN=null;rerender()}};
 }
 // El lunes (o al volver la semana siguiente) salta el balance de la semana pasada, una vez
 function maybeBalanceSemana(){
