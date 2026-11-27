@@ -1156,6 +1156,16 @@ html #balcard>p.eyebrow:first-child{font-size:20px!important;padding:0 8px}
 .macsplit{display:flex;height:10px;border-radius:999px;overflow:hidden;margin-top:16px;background:var(--seg)}.macsplit i{display:block;height:100%}
 .mcrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-top:1px solid var(--bd)}.mcrow:first-of-type{border-top:0}.mcrow .mhl{display:flex;align-items:center;gap:10px}.mcrow .mtx{display:flex;flex-direction:column}.mcrow small{color:var(--muted);font-size:12px}.mcrow .k{font-weight:700;white-space:nowrap}
 .ptabs button{font-size:11.5px;padding-left:6px;padding-right:6px;flex:1 1 auto}.ptabs button:first-child{flex:1 1 auto}
+
+/* Tu plan: info del enfoque sin tarjeta, encima del donut */
+.phero.fhero{padding:22px 18px 18px}
+.fhero .pp{background:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:none!important;padding:0 6px;border-radius:0}
+.fhero .fdn{position:relative;height:318px;margin:6px -18px 6px}
+@media(min-width:760px){.phero.fhero{display:block;padding:48px 48px;min-height:420px}.fhero .fdn{position:static;height:0;margin:0}.fhero .pp1{margin-bottom:14px}}
+
+.mdon{position:relative;width:260px;max-width:100%;aspect-ratio:1;margin:14px auto 16px}.mdon svg{width:100%;height:100%;display:block}
+.mdc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}.mdc small{font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:var(--muted)}.mdc b{font-size:52px;line-height:1;font-weight:800;letter-spacing:-2px;color:#551332}.mdc b i{font-style:normal;font-size:22px;letter-spacing:0}.mdc span{font-size:12px;color:var(--muted);margin-top:4px}
+.microcard .fmac{margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -2295,6 +2305,13 @@ function openMicros(u,log){
     ${(()=>{const ex=['vk','b1','b2','b3','b5','b6','bio','se','io','cu','o3'].filter(k=>d.vs[k]);return ex.length?`<p class="msub" style="margin-top:18px">De tus suplementos</p><div class="mgrid">${ex.map(row).join('')}</div>`:''})()}
     <p class="tiny muted" style="margin-top:14px">${cov<100?`Calculado con el ${cov}% de lo que has comido (en calorías). `:''}Referencias diarias de la UE para adultos (vitamina D: EFSA). Datos: USDA SR28 y Open Food Facts. Estimación orientativa.</p>`,'wide');
 }
+function microDonut(d){
+  const cov=ks=>ks.reduce((a,k)=>{const ref=microRefU(k,MICRO_REF[k][0]);return a+Math.min(1,(d.t[k]||0)/ref)},0)/ks.length;
+  const G=[['Fibra',['fib'],'#f2a15d','Fibra'],['Minerales',['ca','fe','mg','k','zn'],'#8d3d89','Minerales'],['Vitaminas',['va','vc','vd','ve','b12','fol'],'#711943','Vitaminas']].map(([n,ks,c])=>({n,c,v:cov(ks)}));
+  const tot=Math.round(G.reduce((a,g)=>a+g.v,0)/3*100),R=100,C=2*Math.PI*R,seg=C/3-10;
+  const arcs=G.map((g,i)=>{const rot=-90+i*120+(5/C*360);return `<circle cx="130" cy="130" r="${R}" fill="none" stroke="#eadee9" stroke-width="26" stroke-dasharray="${seg} ${C-seg}" transform="rotate(${rot} 130 130)"/>`+(g.v>0?`<circle cx="130" cy="130" r="${R}" fill="none" stroke="${g.c}" stroke-width="26" stroke-dasharray="${(seg*g.v).toFixed(1)} ${C}" transform="rotate(${rot} 130 130)"/>`:'')}).join('');
+  return `<div class="mdon"><svg viewBox="0 0 260 260" role="img" aria-label="Micronutrientes ${tot}%">${arcs}</svg><div class="mdc"><small>Cubierto</small><b>${tot}<i>%</i></b><span>de tu referencia</span></div></div>
+  <div class="fmac">${G.map(g=>`<div class="cmmac" style="--mc:${g.c}"><span class="l"><span class="lL">${g.n}</span><span class="lS">${g.n}</span></span><b>${Math.round(g.v*100)}%</b><div class="cmb"><i style="width:${Math.round(g.v*100)}%"></i></div></div>`).join('')}</div>`}
 function microCardHTML(u,log){
   const d=dayMicro(u,log.foods,log.sups);if(!log.foods.length&&!Object.keys(d.vs).length)return `<div class="card microcard"><p class="cj">Micronutrientes</p><h2 class="ct">Lo que te aporta ${UI.date===today()?'hoy':'este día'}</h2><p class="small muted" style="margin-top:10px">Aún no has registrado comidas. Añade tu primer alimento y empieza a sumar tu progreso.</p></div>`;
   const row=k=>{const [ref0,un,name,tipo]=MICRO_REF[k],ref=microRefU(k,ref0),v=d.t[k]||0,pc=v/ref*100,w=Math.min(pc,100);
@@ -2304,6 +2321,7 @@ function microCardHTML(u,log){
   const cov=Math.round(d.cov*100);
   return `<div class="card microcard"><p class="cj">Micronutrientes</p><h2 class="ct">Lo que te aporta ${UI.date===today()?'hoy':'este día'}</h2>
     ${sup?`<div class="row" style="margin-top:10px;flex-wrap:wrap;gap:6px">${sup}</div>`:''}
+    ${microDonut(d)}
     <p class="msub">A vigilar</p><div class="mgrid">${['fib','azu','sat','sal'].map(row).join('')}</div>
     <p class="msub" style="margin-top:18px">Minerales</p><div class="mgrid">${['ca','fe','mg','k','zn'].map(row).join('')}</div>
     <p class="msub" style="margin-top:18px">Vitaminas</p><div class="mgrid">${['va','vc','vd','ve','b12','fol'].map(row).join('')}</div>
@@ -5786,11 +5804,12 @@ function vPlan(el){
   V.innerHTML=(el?'':heroHTML('Mi plan','Tus números,','tu enfoque.'))+`
   ${(()=>{const T=targetFor(u,today()),six=!r.plan.normal,dt=six?(isTrainDay(u,today())?'entreno':'descanso'):'',pc=x=>T.kcal?Math.round(x/T.kcal*100):0;
     const tile=(col,lab,g,k)=>`<div class="cmmac" style="--mc:${col}"><span class="l"><span class="lL">${lab}</span><span class="lS">${lab==='Carbohidratos'?'Carbos':lab==='Proteínas'?'Proteína':lab}</span></span><b>${fmt(g)} g</b><small class="mk">${fmt(k)} kcal · ${pc(k)}%</small><div class="cmb"><i style="width:${Math.min(100,pc(k))}%"></i></div></div>`;
-    return `<div class="phero fhero">${macroArt(T,six?(dt==='entreno'?'KCAL · ENTRENO':'KCAL · DESCANSO'):'')}<div class="pp">
+    return `<div class="phero fhero"><div class="pp pp1">
       <p class="eyebrow">Tu enfoque</p>
       <div class="fenf"><span class="ic enf enf${pf.enfoque}">${e.ic}</span><div><b>${e.t}</b><small>${e.s}</small></div></div>
-      <div class="fc-t" style="margin-top:14px">${esc(ajusteLabel(pf))}</div><p class="fc-s">${r.ajuste.kgSem>0.03?'≈ −'+fmt1(r.ajuste.kgSem)+' kg por semana':r.ajuste.kgSem<-0.03?'≈ +'+fmt1(-r.ajuste.kgSem)+' kg por semana':'Mantenimiento'} · media ${fmt(r.ajuste.kcal)} kcal/día${T.ciclo?' · +100 kcal hoy por tu ciclo':''}</p>
-      <div class="fmac">${tile('var(--p)','Proteínas',T.p,T.p*4)}${tile('var(--c)','Carbohidratos',T.c,T.c*4)}${tile('var(--g)','Grasas',T.g,T.g*9)}</div>
+      <div class="fc-t" style="margin-top:14px">${esc(ajusteLabel(pf))}</div><p class="fc-s">${r.ajuste.kgSem>0.03?'≈ −'+fmt1(r.ajuste.kgSem)+' kg por semana':r.ajuste.kgSem<-0.03?'≈ +'+fmt1(-r.ajuste.kgSem)+' kg por semana':'Mantenimiento'} · media ${fmt(r.ajuste.kcal)} kcal/día${T.ciclo?' · +100 kcal hoy por tu ciclo':''}</p></div>
+      <div class="fdn">${macroArt(T,six?(dt==='entreno'?'KCAL · ENTRENO':'KCAL · DESCANSO'):'')}</div>
+      <div class="pp pp2"><div class="fmac">${tile('var(--p)','Proteínas',T.p,T.p*4)}${tile('var(--c)','Carbohidratos',T.c,T.c*4)}${tile('var(--g)','Grasas',T.g,T.g*9)}</div>
       ${six?`<p class="small muted" style="margin-top:10px">Hoy es día de ${dt}. Entreno: ${fmt(r.plan.entreno.kcal)} kcal · P ${r.plan.entreno.p} / C ${r.plan.entreno.c} / G ${r.plan.entreno.g} g. Descanso: ${fmt(r.plan.descanso.kcal)} kcal · P ${r.plan.descanso.p} / C ${r.plan.descanso.c} / G ${r.plan.descanso.g} g.</p>`:''}
       ${T.carbNeg?'<p class="small" style="color:var(--warn);margin-top:10px">'+ico('aviso','mi')+' Con estos datos, proteína y grasa ya superan las calorías objetivo; los carbohidratos se han fijado en 0 g. Revisa tus datos.</p>':''}
       <button class="btn block fc-btn" id="ajb">Ajustar calorías →</button>
