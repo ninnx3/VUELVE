@@ -4481,11 +4481,11 @@ function vDiario(){
   $('#view').innerHTML=head+`
   <div class="datenav"><button class="ar" id="dp">←</button><div class="t"><b>${dateTitle(UI.date)}</b><small>${UI.date===today()?'Tu resumen de hoy':'Tu resumen del día'}</small></div><button class="ar" id="dn">→</button></div>
   ${CT==='cal'&&UI.date===today()?juntasCardHTML(u):''}
-  ${CT==='cal'&&UI.date===today()?ayunoCardHTML(u):''}
   ${CT==='cal'?DAYC:CT==='mac'?MACC:''}
-  ${CT==='cal'?ayunoPromoHTML(u):''}
   ${CT==='mic'?microCardHTML(u,log):''}
   ${CT==='cal'?animoCardHTML(u,UI.date):''}
+  ${CT==='cal'?ayunoPromoHTML(u):''}
+  ${CT==='cal'&&UI.date===today()?ayunoCardHTML(u):''}
   ${cd}
   <p class="foot">Vuelve por encima de perfección. Cada registro cuenta.</p>`;
   {const mv=$('#microvm');if(mv)mv.onclick=()=>openMicros(u,peekLog(u,UI.date))}
