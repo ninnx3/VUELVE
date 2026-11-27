@@ -4594,6 +4594,10 @@ function tick(){
 function stickySync(){const h=document.querySelector('header.app'),hh=h?h.offsetHeight:84;document.documentElement.style.setProperty('--hh',hh+'px');
   document.querySelectorAll('#view>.seg').forEach(e=>e.classList.toggle('stuck',e.getBoundingClientRect().top<=hh+9))}
 addEventListener('scroll',stickySync,{passive:true});addEventListener('resize',stickySync);
+/* pestañas superiores: siempre encima del título, bajo la barra del logo */
+function tabsUp(){const V=document.getElementById('view');if(!V)return;const k=[...V.children];const i=k.findIndex(e=>e.classList.contains('seg'));
+  if(i>0&&i<=2){V.insertBefore(k[i],k[0]);k[i].style.marginTop='2px'}stickySync()}
+(function(){let q=0;new MutationObserver(()=>{if(q)return;q=1;requestAnimationFrame(()=>{q=0;tabsUp()})}).observe(document.body,{childList:true,subtree:true})})();
 function modal(html,cls=''){
   const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class="sheet ${cls}">${html}</div>`;
   m.onclick=e=>{if(e.target===m)m.remove()};
