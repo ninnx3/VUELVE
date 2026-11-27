@@ -1147,7 +1147,7 @@ html #balcard>p.eyebrow:first-child{font-size:20px!important;padding:0 8px}
 /* Pestañas de página pegadas bajo la cabecera */
 #view>.seg{position:sticky;top:calc(var(--hh,84px) + 12px);z-index:12}
 #view>.seg{--bp:20px;margin-top:12px!important;margin-bottom:18px}
-#view>.seg::before{content:'';position:absolute;z-index:-1;left:calc(var(--bp)*-1);right:calc(var(--bp)*-1);top:-12px;bottom:-12px;background:#fefdfc;border-bottom:1px solid var(--bd);box-shadow:0 10px 30px -22px rgba(60,30,55,.28);pointer-events:none}
+#view>.seg::before{content:'';position:absolute;z-index:-1;left:calc(var(--bp)*-1);right:calc(var(--bp)*-1);top:-17px;bottom:-17px;background:#fefdfc;border-bottom:1px solid var(--bd);box-shadow:0 10px 30px -22px rgba(60,30,55,.28);pointer-events:none}
 #view>.seg{background:transparent!important;border:0!important;box-shadow:none!important}
 #view>.seg::after{content:'';position:absolute;z-index:-1;inset:0;border-radius:999px;background:var(--seg);border:1px solid var(--bd);box-shadow:inset 0 1px 3px rgba(60,30,55,.10);pointer-events:none}
 @media(max-width:640px){#view>.seg{--bp:16px}}
@@ -1171,6 +1171,24 @@ html #balcard>p.eyebrow:first-child{font-size:20px!important;padding:0 8px}
 html nav.tabs button.on,html[data-tema] nav.tabs button.on{background:var(--plum)!important;color:#f4e8dc!important}
 html nav.tabs button.on svg,html nav.tabs button.on svg path{color:#f4e8dc;fill:#f4e8dc!important}
 #view>.seg::after{background:#fefdfc;border:1px solid var(--bd);box-shadow:0 3px 12px -4px rgba(60,30,55,.28)}
+
+/* ===== Escritorio: landing de Comidas en rejilla (maqueta) ===== */
+@media(min-width:1100px){
+  .v-diario .strip{display:inline-flex;gap:14px;width:auto;margin-top:12px;padding:9px 18px;border-radius:999px}.v-diario .strip small{display:none}
+  .v-diario .datenav{justify-content:center;gap:18px;margin-top:26px}.v-diario .datenav .t b{font-size:20px}.v-diario .datenav .t small{display:none}
+  .v-diario .daycard{margin-top:18px}
+  .v-diario .dcols,.v-diario .dcol{display:contents}
+  .v-diario .daycard{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,1fr);grid-template-areas:"sum meals" "energy plan";grid-template-columns:minmax(0,1.08fr) minmax(0,1fr);align-items:start;gap:24px}
+  .v-diario .dsum{grid-area:sum;margin:0}.v-diario .denergy{grid-area:energy;margin:0}.v-diario .dmeals{grid-area:meals;margin:0}.v-diario #dplan,.v-diario .plan2{grid-area:plan;margin:0}
+  .v-diario .dsum .sum{align-items:center}.v-diario .dsum .dside .ds:first-child,.v-diario .dsum .dside hr{display:none}
+  .v-diario .dbtns{display:flex;gap:12px;margin-top:6px}.v-diario .dbtns .btn{flex:1;margin-top:10px!important}
+  .v-diario .dmeals .meal .h{padding:10px 8px}.v-diario .dmeals .mhl{flex:1;display:flex;align-items:center;gap:12px}.v-diario .dmeals .mtx{flex:1;display:flex;flex-direction:row;justify-content:space-between;align-items:center;gap:12px}.v-diario .dmeals .mtx small{font-size:13px;color:var(--muted)}
+  .v-diario .dmeals .meal .h::before{content:'⌄';font-size:16px;color:var(--muted);margin-right:6px;transition:transform .2s}.v-diario .dmeals .meal.open .h::before{transform:rotate(180deg)}
+  .v-diario .plan2{align-self:start;min-height:190px;padding:26px 46% 26px 26px;text-align:left}
+}
+.remtile{background:var(--tile);border-radius:12px;padding:16px 10px 14px;text-align:center;border:1px solid var(--bd);background-image:linear-gradient(180deg,rgba(255,255,255,.7),rgba(255,255,255,.15));box-shadow:var(--hl),var(--s1);border-radius:18px;width:100%}
+.remtile b{font-size:30px;font-weight:800;letter-spacing:-1px}.remtile b small{font-size:14px;font-weight:500;color:var(--muted);letter-spacing:0}
+.remtile .l{font-size:12px;color:var(--muted)}.remtile .mb{height:4px;border-radius:4px;background:var(--line);margin:10px auto 0;max-width:140px;overflow:hidden;box-shadow:inset 0 1px 2px rgba(60,30,55,.12)}.remtile .mb i{display:block;height:100%;border-radius:4px}
 </style>
 </head>
 <body>
@@ -4445,10 +4463,7 @@ function vDiario(){
     <div class="card dsum">
     <div class="sum">
       <div class="ring">${ring(tt.k,tg.kcal)}<div class="ctr"><div><b>${fmt(tt.k)}</b><small>/ ${fmt(tg.kcal)} kcal</small></div></div></div>
-      <div class="dside">
-        <div class="ds"><span class="dsi">${ico('act-alta','mi')}</span><div><small>Gasto estimado</small><b>${fmt(gasto)} <i>kcal</i></b></div></div>
-        <hr>
-        <div class="ds"><span class="dsi">${ico('nav-plan','mi')}</span><div><small>${disp>=0?'Te quedan':'Te has pasado'}</small><b style="${disp<0?'color:var(--warn)':''}">${fmt(Math.abs(disp))} <i>kcal</i></b></div></div>
+      <div class="dside"><div class="remtile"><b style="${disp<0?'color:var(--warn)':'color:#285958'}">${fmt(Math.abs(disp))}<small> kcal</small></b><div class="l">${disp>=0?'Te quedan':'Te has pasado'}</div>${mb(tt.k,tg.kcal,disp<0?'var(--warn)':'#5e867d')}</div>
       </div>
     </div>
     <div class="mac3">
@@ -4457,8 +4472,8 @@ function vDiario(){
         <div><b style="color:var(--g)">${fmt1(tt.g)}g<small>/${tg.g}g</small></b><div class="l">Grasas</div>${mb(tt.g,tg.g,'var(--g)')}</div>
     </div>
     ${pf.enfoque==6?`<div class="daytype"><button data-t="entreno" class="${isTrainDay(u,UI.date)?'on':''}">${ico('act-fuerza','mi')} Día de entreno</button><button data-t="descanso" class="${!isTrainDay(u,UI.date)?'on':''}">${ico('act-descanso','mi')} Día de descanso</button></div>`:''}
-    <button class="btn block" style="margin-top:16px" id="add">+ Añadir alimento</button>
-    ${log.foods.length&&UI.date<=today()&&UI.date>=addDays(today(),-1)?`<button class="btn block cerrar ${log.cerrado?'done':''}" id="cerrar">${log.cerrado?'✓ Día cerrado · ver resultado':ico('cerrar-dia','mi')+' Cerrar mi día'}</button>`:''}
+    <div class="dbtns"><button class="btn block" style="margin-top:16px" id="add">+ Añadir alimento</button>
+    ${log.foods.length&&UI.date<=today()&&UI.date>=addDays(today(),-1)?`<button class="btn block cerrar ${log.cerrado?'done':''}" id="cerrar">${log.cerrado?'✓ Día cerrado · ver resultado':ico('cerrar-dia','mi')+' Cerrar mi día'}</button>`:''}</div>
     </div>
     <div class="card dmeals"><div class="dmh"><h2>Comidas de hoy</h2><b>${fmt(tt.k)} / ${fmt(tg.kcal)} kcal</b></div>
     <div id="meals">
@@ -4492,12 +4507,12 @@ function vDiario(){
   </div></div></div></div>`;
   $('#view').innerHTML=head+`
   ${CT==='mac'?'':`<div class="datenav"><button class="ar" id="dp">←</button><div class="t"><b>${dateTitle(UI.date)}</b><small>${UI.date===today()?'Tu resumen de hoy':'Tu resumen del día'}</small></div><button class="ar" id="dn">→</button></div>`}
-  ${CT==='cal'&&UI.date===today()?juntasCardHTML(u):''}
   ${CT==='cal'?DAYC:CT==='mac'?MACC:''}
   ${CT==='mic'?microCardHTML(u,log):''}
   ${CT==='cal'?animoCardHTML(u,UI.date):''}
   ${CT==='cal'?ayunoPromoHTML(u):''}
   ${CT==='cal'&&UI.date===today()?ayunoCardHTML(u):''}
+  ${CT==='cal'&&UI.date===today()?juntasCardHTML(u):''}
   ${cd}
   <p class="foot">Vuelve por encima de perfección. Cada registro cuenta.</p>`;
   {const mv=$('#microvm');if(mv)mv.onclick=()=>openMicros(u,peekLog(u,UI.date))}
