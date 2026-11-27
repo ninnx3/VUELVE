@@ -999,6 +999,17 @@ html .card.jhero{background-image:linear-gradient(135deg,#6a2e67 0%,#8d4769 55%,
 .auth .art .aimg{display:block;position:absolute;left:6%;right:6%;top:6%;bottom:150px;width:88%;height:calc(94% - 150px);object-fit:contain;object-position:center}
 .auth .art blockquote{z-index:1}
 }
+
+.wkday.hoy{background:color-mix(in srgb,var(--mint) 75%,#fefdfc)}.wkday.hoy.open{background:#fefdfc}
+.wklbl{color:var(--plum)!important;letter-spacing:1.8px!important;font-size:12px!important}
+.wksec.first{border-top:0;padding-top:0;margin-top:6px}
+.wknota{font-size:15px;line-height:1.55;white-space:pre-wrap;margin-top:10px;color:var(--ink)}
+.wkpill{display:flex;align-items:center;gap:12px;background:var(--tile,#f6f1f4);border-radius:16px;padding:6px 14px 6px 6px;font-size:15px;font-weight:600;margin-top:6px}
+.wkpill .wkpi{width:36px;height:36px;border-radius:12px;background:#fefdfc;display:grid;place-items:center;flex:none}.wkpill .wkpi .mi{width:22px;height:22px}
+.wkring{display:flex;justify-content:center;margin-top:16px;padding:18px;border-radius:22px;background:var(--tile,#f6f1f4)}
+.wkrg{position:relative;width:150px;height:150px}.wkrc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}.wkrc b{font-size:30px;font-weight:800;letter-spacing:-1px;line-height:1}.wkrc small{font-size:12px;color:var(--muted);font-weight:600;margin-top:4px}
+#balcard .bsum{justify-content:center}#balcard .bsum+.tiny,#balcard .tiny.muted{text-align:center}
+#balcard .bsum .apill.sm{font-size:15px;padding:7px 14px}#balcard .bsum .mi{width:22px;height:22px}
 </style>
 </head>
 <body>
@@ -4922,9 +4933,11 @@ let BAL_OPEN=null;let BAL_WS=null;
 function balanceHTML(u,ws,compact){
   const days=[...Array(7)].map((_,i)=>addDays(ws,i));
   const rows=days.map((d,i)=>{const l=u.logs[d]||{},st=dayStatus(u,d),tt=totals(l.foods||[]).k,tg=targetFor(u,d).kcal,a=animoOf(l.animo),mov=(l.mov||[]).length,pd=parse(d),ay=l.ayuno||{},fut=d>today(),open=d===BAL_OPEN;
-    const body=`${a?`<div class="wksec"><p class="wklbl">Cómo te fue</p><span class="apill" style="background:${a[3]};color:${a[4]}">${a[1]} ${a[2]}</span>${l.nota?`<p class="small" style="margin-top:8px;line-height:1.55;white-space:pre-wrap">${esc(l.nota)}</p>`:''}</div>`:(l.nota?`<div class="wksec"><p class="wklbl">Tu nota</p><p class="small" style="line-height:1.55;white-space:pre-wrap">${esc(l.nota)}</p></div>`:'')}
-      ${mov||l.pasos?`<div class="wksec"><p class="wklbl">Movimiento</p><p class="small">${[mov?`${mov} ${mov===1?'actividad':'actividades'}`:'',l.pasos?`${fmt(l.pasos)} pasos`:''].filter(Boolean).join(' · ')}</p></div>`:''}
-      ${st!=='none'?`<div class="wksec"><p class="wklbl">Comida</p><p class="small"><b>${fmt(tt)}</b> / ${fmt(tg)} kcal</p></div>`:''}
+    const pill=(ic,txt)=>`<div class="wkpill"><span class="wkpi">${ico(ic,'mi')}</span><span>${txt}</span></div>`;
+    const pct=tg>0?tt/tg:0;
+    const body=`${a?`<div class="wksec first"><p class="wklbl">Cómo te fue</p><span class="apill" style="background:${a[3]};color:${a[4]}">${a[1]} ${a[2]}</span>${l.nota?`<p class="wknota">${esc(l.nota)}</p>`:''}</div>`:(l.nota?`<div class="wksec first"><p class="wklbl">Tu nota</p><p class="wknota" style="margin-top:0">${esc(l.nota)}</p></div>`:'')}
+      ${mov||l.pasos?`<div class="wksec"><p class="wklbl">Movimiento</p>${mov?pill('act-fuerza',`${mov} ${mov===1?'actividad':'actividades'}`):''}${l.pasos?pill('act-pasos',`${fmt(l.pasos)} pasos`):''}</div>`:''}
+      ${st!=='none'?`<div class="wksec"><p class="wklbl">Comida</p>${pill('nav-menu',`<b>${fmt(tt)}</b> / ${fmt(tg)} kcal`)}<div class="wkring"><div class="wkrg">${ring(tt,tg)}<div class="wkrc"><b>${fmt(tt)}</b><small>de ${fmt(tg)} kcal</small></div></div></div></div>`:''}
       ${!a&&!l.nota&&!mov&&!l.pasos&&st==='none'?'<p class="small muted" style="margin-top:12px">Aún no hay nada registrado este día.</p>':''}
       ${fut?'':`<div class="grid2" style="margin-top:16px"><button class="btn soft sm" data-anday="${d}">${a||l.nota?'Editar nota':'Añadir nota'}</button><span></span></div>`}`;
     return `<section class="wkday ${open?'open':''} ${d===today()?'hoy':''}" data-balwk="${d}" style="--k:${i}">
