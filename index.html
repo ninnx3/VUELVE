@@ -1146,9 +1146,13 @@ html #balcard>p.eyebrow:first-child{font-size:20px!important;padding:0 8px}
 
 /* Pestañas de página pegadas bajo la cabecera */
 #view>.seg{position:sticky;top:calc(var(--hh,84px) + 8px);z-index:12}
-#view>.seg.stuck{box-shadow:inset 0 1px 3px rgba(60,30,55,.10),0 0 0 9px var(--bg),0 12px 18px -10px rgba(60,30,55,.28)}
+#view>.seg{--bp:20px;margin-top:8px!important;margin-bottom:14px}
+#view>.seg::before{content:'';position:absolute;z-index:-1;left:calc(var(--bp)*-1);right:calc(var(--bp)*-1);top:-8px;bottom:-8px;background:#fefdfc;border-bottom:1px solid var(--bd);box-shadow:0 10px 30px -22px rgba(60,30,55,.28);pointer-events:none}
+#view>.seg{background:transparent!important;border:0!important;box-shadow:none!important}
+#view>.seg::after{content:'';position:absolute;z-index:-1;inset:0;border-radius:999px;background:var(--seg);border:1px solid var(--bd);box-shadow:inset 0 1px 3px rgba(60,30,55,.10);pointer-events:none}
+@media(max-width:640px){#view>.seg{--bp:16px}}
+@media(min-width:1100px){#view>.seg{--bp:40px}}
 .mnutabs button{white-space:nowrap;min-width:0;padding:10px 6px}
-#view>.seg.mnutabs{margin-top:2px}
 </style>
 </head>
 <body>
@@ -4598,7 +4602,7 @@ function stickySync(){const h=document.querySelector('header.app'),hh=h?h.offset
 addEventListener('scroll',stickySync,{passive:true});addEventListener('resize',stickySync);
 /* pestañas superiores: siempre encima del título, bajo la barra del logo */
 function tabsUp(){const V=document.getElementById('view');if(!V)return;const k=[...V.children];const i=k.findIndex(e=>e.classList.contains('seg'));
-  if(i>0&&i<=2){V.insertBefore(k[i],k[0]);k[i].style.marginTop='2px'}stickySync()}
+  if(i>0&&i<=2){V.insertBefore(k[i],k[0]);0}stickySync()}
 (function(){let q=0;new MutationObserver(()=>{if(q)return;q=1;requestAnimationFrame(()=>{q=0;tabsUp()})}).observe(document.body,{childList:true,subtree:true})})();
 function modal(html,cls=''){
   const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class="sheet ${cls}">${html}</div>`;
