@@ -4427,9 +4427,9 @@ function vDiario(){
     </div>
     <details class="how"><summary>Cómo se calcula</summary>${calcTable(r,pf)}</details>
   </div></div></div></div>
+  ${UI.range==='dia'?ayunoPromoHTML(u):''}
   ${UI.range==='dia'?microCardHTML(u,log):''}
   ${UI.range==='dia'?animoCardHTML(u,UI.date):''}
-  ${UI.range==='dia'?ayunoPromoHTML(u):''}
   ${cd}
   <p class="foot">Vuelve por encima de perfección. Cada registro cuenta.</p>`;
   {const mv=$('#microvm');if(mv)mv.onclick=()=>openMicros(u,peekLog(u,UI.date))}
