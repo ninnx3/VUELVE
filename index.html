@@ -3066,7 +3066,6 @@ const TOUR_V={
     ['#rshare','Invita a alguien','Comparte el enlace de Vuelve con quien quieras.']
   ],
   progreso:[
-    ['#openplan','Tu plan','Tus calorías, macros y tu enfoque de composición corporal. Puedes cambiarlo desde aquí.'],
     ['#fpcard','Fotos de progreso','Sube fotos para ver tu cambio. Solo las ves tú.'],
     ['#balcard','Tu semana en notas','Un resumen de cómo ha ido tu semana.']
   ],
@@ -5738,7 +5737,6 @@ function vProgreso(){
   {const mt=$('#medtog');if(mt)mt.onclick=()=>{UI.medOpen=!UI.medOpen;vProgreso();setTimeout(()=>$('.mtit')&&$('.mtit').scrollIntoView({block:'start'}),0)}}
   $$('[data-dm]').forEach(b=>b.onclick=()=>{u.medidas=(u.medidas||[]).filter(x=>x.date!==b.dataset.dm);save();vProgreso()});
   $$('[data-dw]').forEach(b=>b.onclick=()=>{u.weights=u.weights.filter(w=>w.date!==b.dataset.dw);save();vProgreso()});
-  if(PT==='masa')$('#view').insertAdjacentHTML('beforeend',`<button class="card planbtn" id="openplan"><span class="ic enf enf${u.profile.enfoque}">${ENFOQUES[u.profile.enfoque].ic}</span><div><p class="cj">Plan</p><b>Tus calorías, macros y enfoque</b><small>${fmt(targetFor(u,today()).kcal)} kcal · ${esc(ENFOQUES[u.profile.enfoque].t)}</small></div><span class="cgo">›</span></button>`);
   if($('#openplan'))$('#openplan').onclick=openPlan;
   {const pm=$('#planm');if(pm)vPlan(pm)}
 }
