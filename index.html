@@ -545,7 +545,7 @@ textarea.in{min-height:90px;resize:vertical;font-size:11px;font-family:ui-monosp
 @media(min-width:1500px){main.wrap{max-width:1280px;margin-left:max(272px,calc((100vw - 1280px)/2 + 116px))}}
 
 /* ===== Más contraste y títulos más claros ===== */
-:root{--base:#285958;--ink:#3a3538;--muted:#5d4a59;--soft:#8d4769;--line:#e3d1d9;--bg:#faf6ef;--tile:#f1e8f1;--lilac:#eadee9}
+:root{--ex:#f2a15d;--food:#c69dc3;--base:#285958;--ink:#3a3538;--muted:#5d4a59;--soft:#8d4769;--line:#e3d1d9;--bg:#faf6ef;--tile:#f1e8f1;--lilac:#eadee9}
 body{font-size:15px;color:var(--ink)}
 .small{font-size:13px}.tiny{font-size:11px}
 .eyebrow{font-size:11px;letter-spacing:2.6px;color:#8d4769;font-weight:800}
@@ -4478,7 +4478,7 @@ function vDiario(){
         <div class="mk" style="left:${tg.kcal/W*100}%"><span>Objetivo ${fmt(tg.kcal)} kcal</span></div>
       </div>
       <div class="row between tiny muted" style="margin-top:6px"><span>0 kcal</span><span>${fmt(W)} kcal</span></div>
-      <div class="legend"><span><i style="background:var(--base)"></i>Base diaria ${fmt(r.get)} kcal</span><span><i style="background:var(--ex)"></i>Ejercicio${log.pasos?' y pasos':''} ${fmt(ex)} kcal</span><span><i style="background:var(--food)"></i>Comida ${fmt(tt.k)} kcal</span></div>
+      <div class="legend"><span><i style="background:var(--base)"></i>Base diaria ${fmt(r.get)} kcal</span><span><i style="background:var(--ex)"></i>Ejercicio ${fmt(ex)} kcal</span><span><i style="background:var(--food)"></i>Comida ${fmt(tt.k)} kcal</span></div>
       <div class="deficit"><span class="small">${def>=0?'Déficit estimado':'Superávit estimado'}</span><b>${fmt(Math.abs(def))} kcal</b></div>
       <p class="small" style="margin-top:12px;font-weight:600">Disponibles para tu objetivo: ${fmt(disp)} kcal</p>
       <p class="tiny muted" style="margin-top:6px">Balance provisional según las comidas registradas. El ejercicio se añade al gasto; no aumenta tu objetivo de comida.</p>
