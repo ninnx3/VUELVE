@@ -1011,7 +1011,6 @@ html .card.jhero{background-image:linear-gradient(135deg,#6a2e67 0%,#8d4769 55%,
 #balcard .bsum{justify-content:center}#balcard .bsum+.tiny,#balcard .tiny.muted{text-align:center}
 #balcard .bsum .apill.sm{font-size:15px;padding:7px 14px}#balcard .bsum .mi{width:22px;height:22px}
 
-.mtabs{grid-template-columns:repeat(2,minmax(0,1fr));max-width:420px}
 .gdl{display:grid;gap:8px;margin-top:10px}.gdl>div{display:flex;align-items:center;gap:10px}.gdl span{width:26px;height:26px;border-radius:50%;background:#711943;color:#fefdfc;font-size:12px;font-weight:800;display:grid;place-items:center;flex:none}.gdl b{font-size:15px}
 body.gpo{overflow:hidden}
 .gplay{position:fixed;inset:0;z-index:400;background:#fefdfc;display:flex;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch}
@@ -1039,6 +1038,10 @@ body.gpo{overflow:hidden}
 .mquick{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}.mquick button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:16px 4px 12px;border-radius:20px;background:#fefdfc;border:1px solid #f1e6ec;box-shadow:0 10px 24px -16px rgba(113,25,67,.45);color:#3a3538;font:inherit;font-size:12.5px;font-weight:700;min-width:0}.mquick .mi{width:32px;height:32px;color:#711943}.mdots{font-size:22px;letter-spacing:3px;color:#711943;line-height:32px}
 .mact{margin-top:14px}.mver{border:0;background:none;color:#711943;font:inherit;font-size:14px;font-weight:800;padding:4px}
 .mitem{width:100%;display:flex;align-items:center;gap:12px;text-align:left;font:inherit;color:inherit;background:none;border:0;border-top:1px solid #f1e6ec;padding:12px 0;margin-top:0}.mact .row+.mitem{border-top:0;margin-top:6px}.mitem>div{flex:1;min-width:0}.mitem b{display:block;font-size:16px}.mitem small{display:block;color:var(--muted);font-size:14px;margin-top:2px}.mitem>i{font-style:normal;font-size:22px;color:#3a3538}
+
+.seg[id=rtabs] button,.seg.mvtabs button{display:flex;align-items:center;justify-content:center;gap:6px;min-width:0;white-space:nowrap}
+.seg .rdot{font-style:normal;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#711943;color:#f4e8dc;font-size:10.5px;font-weight:800;display:inline-grid;place-items:center}
+.seg button.on .rdot{background:#f4e8dc;color:#711943}
 </style>
 </head>
 <body>
@@ -2392,7 +2395,7 @@ function rNotifs(){const u=me(),n={mis:0,com:0,inv:0};try{
   if(JT.loaded){n.mis+=jNuevos().length+juntasInv(u).length}}catch(e){}return n}
 const RTABS=[['mis','Mis retos','compartido'],['com','Comunidad','corazon'],['inv','Invitar','menu-invitar']];
 function rtabsHTML(){const n=rNotifs(),ord=RTABS.slice().sort((a,b)=>(n[b[0]]>0)-(n[a[0]]>0));
-  return ord.map(([k,t,i])=>`<button class="rtab ${UI.rtab===k?'on':''} ${n[k]?'nt':''}" data-rt="${k}"><span>${t}</span>${n[k]?`<i class="rdot">${n[k]>9?'9+':n[k]}</i>`:''}</button>`).join('')}
+  return ord.map(([k,t,i])=>`<button class="${UI.rtab===k?'on':''}" data-rt="${k}"><span>${t}</span>${n[k]?`<i class="rdot">${n[k]>9?'9+':n[k]}</i>`:''}</button>`).join('')}
 function rtabsRefresh(){const b=document.querySelector('#rtabs');if(!b)return;b.innerHTML=rtabsHTML();b.querySelectorAll('[data-rt]').forEach(x=>x.onclick=()=>{UI.rtab=x.dataset.rt;vRetosPage();scrollTo(0,0)})}
 function vRetosPage(){
   visTrack('retos/'+(UI.rtab||'mis'));
@@ -2404,7 +2407,7 @@ function vRetosPage(){
   vJuntas();
   const J=[...V.children],hero2=J.shift();const jfrag=document.createDocumentFragment();J.forEach(n=>jfrag.appendChild(n));
   const conPareja=JT.loaded&&!!juntasDe(u);
-  hero2.insertAdjacentHTML('afterend','<div class="rtabs" id="rtabs"></div><div id="rpane"></div>');
+  hero2.insertAdjacentHTML('afterend','<div class="seg" id="rtabs"></div><div id="rpane"></div>');
   const P=V.querySelector('#rpane'),t=UI.rtab;
   if(t==='mis'){
     P.insertAdjacentHTML('beforeend',pushBannerHTML());
@@ -5178,7 +5181,7 @@ const guiaImg=(g,k)=>`<div class="gi"><span class="gin">${k}</span><img src="img
 function guiaFases(g){const F=[{k:'ent',n:'Entra en calor',tx:'Mueve hombros, cadera y rodillas con suavidad. Respira hondo.',s:60,ex:0}];
   for(let r=1;r<=g.rondas;r++)g.ej.forEach((x,i)=>{F.push({k:'tra',n:x[0],s:30,r,ex:i});F.push({k:'des',n:'Descansa',tx:i<g.ej.length-1?'Siguiente: '+g.ej[i+1][0]:(r<g.rondas?'Siguiente ronda: '+g.ej[0][0]:'Ya casi'),s:10,ex:i<g.ej.length-1?i+1:(r<g.rondas?0:i)})});
   F.push({k:'fin',n:'Suelta el cuerpo',tx:'Estira piernas y brazos y respira lento. Lo has hecho.',s:60,ex:g.ej.length-1});return F}
-function movTabs(){const t=UI.movtab==='ej'?'ej':'reg';return `<div class="rtabs mtabs" id="mtabs">${[['reg','Registrar'],['ej','Ejercicios']].map(([k,l])=>`<button class="rtab ${t===k?'on':''}" data-mt="${k}">${l}</button>`).join('')}</div>`}
+function movTabs(){const t=UI.movtab==='ej'?'ej':'reg';return `<div class="seg mvtabs" id="mvtabs">${[['reg','Registrar'],['ej','Ejercicios']].map(([k,l])=>`<button class="${t===k?'on':''}" data-mt="${k}">${l}</button>`).join('')}</div>`}
 function bindMovTabs(){$$('[data-mt]').forEach(b=>b.onclick=()=>{UI.movtab=b.dataset.mt;vMov();scrollTo(0,0)})}
 function vEjercicios(){
   visTrack('movimiento/ejercicios');
