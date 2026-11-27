@@ -2321,7 +2321,6 @@ function microCardHTML(u,log){
   const cov=Math.round(d.cov*100);
   return `<div class="card microcard"><p class="cj">Micronutrientes</p><h2 class="ct">Lo que te aporta ${UI.date===today()?'hoy':'este día'}</h2>
     ${sup?`<div class="row" style="margin-top:10px;flex-wrap:wrap;gap:6px">${sup}</div>`:''}
-    ${microDonut(d)}
     <p class="msub">A vigilar</p><div class="mgrid">${['fib','azu','sat','sal'].map(row).join('')}</div>
     <p class="msub" style="margin-top:18px">Minerales</p><div class="mgrid">${['ca','fe','mg','k','zn'].map(row).join('')}</div>
     <p class="msub" style="margin-top:18px">Vitaminas</p><div class="mgrid">${['va','vc','vd','ve','b12','fol'].map(row).join('')}</div>
@@ -4435,19 +4434,7 @@ function vDiario(){
   let cd='';
   const mb=(v,t,col)=>`<div class="mb"><i style="width:${Math.min(v/t*100||0,100)}%;background:${col}"></i></div>`;
   const kp=tt.p*4,kc=tt.c*4,kg=tt.g*9,ks=(kp+kc+kg)||1;
-  const MACC=`<div class="card macpg"><div class="dmh"><h2>Macronutrientes</h2><b>${fmt(tt.k)} kcal</b></div>
-    <div class="mac3">
-      <div><b style="color:var(--p)">${fmt1(tt.p)}g<small>/${tg.p}g</small></b><div class="l">Proteínas</div>${mb(tt.p,tg.p,'var(--p)')}</div>
-      <div><b style="color:var(--c)">${fmt1(tt.c)}g<small>/${tg.c}g</small></b><div class="l">Carbohidratos</div>${mb(tt.c,tg.c,'var(--c)')}</div>
-      <div><b style="color:var(--g)">${fmt1(tt.g)}g<small>/${tg.g}g</small></b><div class="l">Grasas</div>${mb(tt.g,tg.g,'var(--g)')}</div>
-    </div>
-    <div class="macsplit"><i style="width:${kp/ks*100}%;background:var(--p)"></i><i style="width:${kc/ks*100}%;background:var(--c)"></i><i style="width:${kg/ks*100}%;background:var(--g)"></i></div>
-    <p class="small muted" style="margin-top:8px">Reparto de calorías: proteínas ${Math.round(kp/ks*100)}%, carbohidratos ${Math.round(kc/ks*100)}%, grasas ${Math.round(kg/ks*100)}%</p></div>
-  <div class="card dmeals"><div class="dmh"><h2>Por comida</h2></div>
-    ${MEAL_NAMES.map(m=>{const it=log.foods.filter(f=>f.meal===m||(m==='Snack'&&!MEAL_NAMES.includes(f.meal))),mt=totals(it);
-      return `<div class="mcrow"><span class="mhl">${MEALS.find(x=>x[0]===m)[1]}<span class="mtx"><b>${m}</b><small>P ${fmt1(mt.p)} · C ${fmt1(mt.c)} · G ${fmt1(mt.g)} g</small></span></span><span class="k">${fmt(mt.k)} kcal</span></div>`}).join('')}
-  </div>
-  <button class="btn block" id="add" style="margin-top:14px">+ Añadir alimento</button>`;
+  const MACC=`<div id="planm" class="planm"></div>`;
   const DAYC=`
   <div class="daycard"><div class="dcols"><div class="dcol dl">
     <div class="card dsum">
@@ -4499,7 +4486,7 @@ function vDiario(){
     <details class="how"><summary>Cómo se calcula</summary>${calcTable(r,pf)}</details>
   </div></div></div></div>`;
   $('#view').innerHTML=head+`
-  <div class="datenav"><button class="ar" id="dp">←</button><div class="t"><b>${dateTitle(UI.date)}</b><small>${UI.date===today()?'Tu resumen de hoy':'Tu resumen del día'}</small></div><button class="ar" id="dn">→</button></div>
+  ${CT==='mac'?'':`<div class="datenav"><button class="ar" id="dp">←</button><div class="t"><b>${dateTitle(UI.date)}</b><small>${UI.date===today()?'Tu resumen de hoy':'Tu resumen del día'}</small></div><button class="ar" id="dn">→</button></div>`}
   ${CT==='cal'&&UI.date===today()?juntasCardHTML(u):''}
   ${CT==='cal'?DAYC:CT==='mac'?MACC:''}
   ${CT==='mic'?microCardHTML(u,log):''}
@@ -4517,10 +4504,11 @@ function vDiario(){
       5:['Come para fortalecerte.',`Mantén ${fmt(T.kcal)} kcal y ${fmt(T.p)} g de proteína, y suma fuerza: huesos y músculos te lo agradecen.`],
       6:ent?['Hoy es día de entreno.',`Más carbohidratos (${fmt(T.c)} g) para rendir y recuperar el glucógeno.`]:['Hoy es día de descanso.',`Menos carbohidratos y algo más de grasa buena: ${fmt(T.kcal)} kcal para oxidar grasa.`]}[en]||['Tu plan de hoy',`${fmt(T.kcal)} kcal · P ${fmt(T.p)} g · C ${fmt(T.c)} g · G ${fmt(T.g)} g`];
     const l1=disp<0?'Hoy te has pasado, y no pasa nada.':PL[0],l2=disp<0?'Un día no define nada: mañana, vuelve a tu plan.':PL[1];
-    dp.outerHTML=`<button class="card planbtn plan2" id="openplan2"><div class="p2t"><div class="p2h"><span class="p2i">${ico('consejo','mi')}</span><b>Tu plan de hoy</b></div><p class="p2l1">${l1}</p><p class="p2l2">${l2}</p></div><img class="p2img" src="img/plan-hoy.webp" alt="" onerror="this.parentNode.style.paddingRight='';this.remove()"></button>`;$('#openplan2').onclick=openPlan}}
+    dp.outerHTML=`<button class="card planbtn plan2" id="openplan2"><div class="p2t"><div class="p2h"><span class="p2i">${ico('consejo','mi')}</span><b>Tu plan de hoy</b></div><p class="p2l1">${l1}</p><p class="p2l2">${l2}</p></div><img class="p2img" src="img/plan-hoy.webp" alt="" onerror="this.parentNode.style.paddingRight='';this.remove()"></button>`;$('#openplan2').onclick=()=>{UI.ctab='mac';vDiario();scrollTo(0,0)}}}
   ayBind(u);bindCiclo(u);bindJuntas(u);if(SERVER&&!JT.loaded&&!JT.loading)jLoad().then(()=>{if(UI.view==='diario')vDiario()});
   bindRange();
-  bindArrows(()=>UI.date=addDays(UI.date,-1),()=>UI.date=addDays(UI.date,1),vDiario);
+  if($('#dp'))bindArrows(()=>UI.date=addDays(UI.date,-1),()=>UI.date=addDays(UI.date,1),vDiario);
+  if(CT==='mac')vPlan($('#planm'));
   if($('#add'))$('#add').onclick=()=>openAdd(null);
   $$('#meals .meal .h').forEach(h=>{const tg=()=>{const m=h.dataset.mt;UI.om=UI.om||{};UI.om[m]=!UI.om[m];const el=h.closest('.meal');el.classList.toggle('open',UI.om[m]);h.setAttribute('aria-expanded',UI.om[m])};h.onclick=e=>{if(e.target.closest('.plus'))return;tg()};h.onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&!e.target.closest('.plus')){e.preventDefault();tg()}}});
   if($('#aned'))$('#aned').onclick=()=>preguntarDia(UI.date);
@@ -5819,7 +5807,7 @@ function vPlan(el){
     ${Object.entries(ENFOQUES).map(([k,x])=>`<button class="opt ${pf.enfoque==k?'on':''}" data-en="${k}"><span class="ic enf enf${k}">${x.ic}</span><div style="flex:1;min-width:0"><b>${x.t}</b><small>${x.s}</small>${enfMacros(pf,k)}</div></button>`).join('')}
   </div></div>
   <button class="btn soft block" style="margin-top:14px" id="redo">Repetir la configuración inicial</button>`;
-  V.querySelectorAll('[data-en]').forEach(b=>b.onclick=()=>{pf.enfoque=+b.dataset.en;save();toast('Enfoque actualizado ✓');vPlan(el);if(el&&UI.view==='progreso'){const sc=el.closest('.sheet');const st=sc&&sc.scrollTop;vProgreso();if(sc)sc.scrollTop=st}});
+  V.querySelectorAll('[data-en]').forEach(b=>b.onclick=()=>{pf.enfoque=+b.dataset.en;save();toast('Enfoque actualizado ✓');vPlan(el);if(el&&UI.view==='diario'&&!el.closest('.sheet')){vDiario();return}if(el&&UI.view==='progreso'){const sc=el.closest('.sheet');const st=sc&&sc.scrollTop;vProgreso();if(sc)sc.scrollTop=st}});
   V.querySelector('#redo').onclick=()=>{$$('.modal').forEach(m=>m.remove());startOnboarding(true)};
   V.querySelector('#ajb').onclick=openAjuste;
   V.querySelector('#enfgo').onclick=()=>V.querySelector('.enfcard').scrollIntoView({behavior:'smooth',block:'start'});
