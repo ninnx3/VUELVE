@@ -1154,7 +1154,7 @@ html #balcard>p.eyebrow:first-child{font-size:20px!important;padding:0 8px}
 @media(min-width:1100px){#view>.seg{--bp:40px}}
 .mnutabs button{white-space:nowrap;min-width:0;padding:10px 6px}
 .macsplit{display:flex;height:10px;border-radius:999px;overflow:hidden;margin-top:16px;background:var(--seg)}.macsplit i{display:block;height:100%}
-.mrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-top:1px solid var(--bd)}.mrow:first-of-type{border-top:0}.mrow .mhl{display:flex;align-items:center;gap:10px}.mrow .mtx{display:flex;flex-direction:column}.mrow small{color:var(--muted);font-size:12px}.mrow .k{font-weight:700;white-space:nowrap}
+.mcrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-top:1px solid var(--bd)}.mcrow:first-of-type{border-top:0}.mcrow .mhl{display:flex;align-items:center;gap:10px}.mcrow .mtx{display:flex;flex-direction:column}.mcrow small{color:var(--muted);font-size:12px}.mcrow .k{font-weight:700;white-space:nowrap}
 .ptabs button{font-size:11.5px;padding-left:6px;padding-right:6px;flex:1 1 auto}.ptabs button:first-child{flex:1 1 auto}
 </style>
 </head>
@@ -2296,7 +2296,7 @@ function openMicros(u,log){
     <p class="tiny muted" style="margin-top:14px">${cov<100?`Calculado con el ${cov}% de lo que has comido (en calorías). `:''}Referencias diarias de la UE para adultos (vitamina D: EFSA). Datos: USDA SR28 y Open Food Facts. Estimación orientativa.</p>`,'wide');
 }
 function microCardHTML(u,log){
-  const d=dayMicro(u,log.foods,log.sups);if(!log.foods.length&&!Object.keys(d.vs).length)return '';
+  const d=dayMicro(u,log.foods,log.sups);if(!log.foods.length&&!Object.keys(d.vs).length)return `<div class="card microcard"><p class="cj">Micronutrientes</p><h2 class="ct">Lo que te aporta ${UI.date===today()?'hoy':'este día'}</h2><p class="small muted" style="margin-top:10px">Aún no has registrado comidas. Añade tu primer alimento y empieza a sumar tu progreso.</p></div>`;
   const row=k=>{const [ref0,un,name,tipo]=MICRO_REF[k],ref=microRefU(k,ref0),v=d.t[k]||0,pc=v/ref*100,w=Math.min(pc,100);
     const cls=tipo==='max'?(pc>100?'over':pc>80?'near':'ok'):(pc>=100?'full':'');
     return `<div class="mrow ${cls}"><div class="mtop"><span class="mn">${name}</span><span class="mv"><b>${microFmt(v)}</b> ${un} <small>/ ${tipo==='max'?'máx. ':''}${dec(ref)} ${un}</small></span></div><div class="mbar"><i style="width:${w}%"></i></div></div>`};
@@ -2305,7 +2305,9 @@ function microCardHTML(u,log){
   return `<div class="card microcard"><p class="cj">Micronutrientes</p><h2 class="ct">Lo que te aporta ${UI.date===today()?'hoy':'este día'}</h2>
     ${sup?`<div class="row" style="margin-top:10px;flex-wrap:wrap;gap:6px">${sup}</div>`:''}
     <p class="msub">A vigilar</p><div class="mgrid">${['fib','azu','sat','sal'].map(row).join('')}</div>
-    <button class="btn soft block" id="microvm" style="margin-top:16px">${ico('consejo','mi')} Ver vitaminas y minerales</button>
+    <p class="msub" style="margin-top:18px">Minerales</p><div class="mgrid">${['ca','fe','mg','k','zn'].map(row).join('')}</div>
+    <p class="msub" style="margin-top:18px">Vitaminas</p><div class="mgrid">${['va','vc','vd','ve','b12','fol'].map(row).join('')}</div>
+    ${(()=>{const ex=['vk','b1','b2','b3','b5','b6','bio','se','io','cu','o3'].filter(k=>d.vs[k]);return ex.length?`<p class="msub" style="margin-top:18px">De tus suplementos</p><div class="mgrid">${ex.map(row).join('')}</div>`:''})()}
     <p class="tiny muted" style="margin-top:12px">${cov<100?`Calculado con el ${cov}% de lo que has comido (en calorías): las entradas rápidas y algunos productos escaneados no traen micronutrientes. `:''}Valores de referencia diarios de la UE para adultos (vitamina D: EFSA). Datos: USDA SR28 y etiquetas de Open Food Facts. Es una estimación orientativa.</p></div>`;
 }
 
@@ -4425,7 +4427,7 @@ function vDiario(){
     <p class="small muted" style="margin-top:8px">Reparto de calorías: proteínas ${Math.round(kp/ks*100)}%, carbohidratos ${Math.round(kc/ks*100)}%, grasas ${Math.round(kg/ks*100)}%</p></div>
   <div class="card dmeals"><div class="dmh"><h2>Por comida</h2></div>
     ${MEAL_NAMES.map(m=>{const it=log.foods.filter(f=>f.meal===m||(m==='Snack'&&!MEAL_NAMES.includes(f.meal))),mt=totals(it);
-      return `<div class="mrow"><span class="mhl">${MEALS.find(x=>x[0]===m)[1]}<span class="mtx"><b>${m}</b><small>P ${fmt1(mt.p)} · C ${fmt1(mt.c)} · G ${fmt1(mt.g)} g</small></span></span><span class="k">${fmt(mt.k)} kcal</span></div>`}).join('')}
+      return `<div class="mcrow"><span class="mhl">${MEALS.find(x=>x[0]===m)[1]}<span class="mtx"><b>${m}</b><small>P ${fmt1(mt.p)} · C ${fmt1(mt.c)} · G ${fmt1(mt.g)} g</small></span></span><span class="k">${fmt(mt.k)} kcal</span></div>`}).join('')}
   </div>
   <button class="btn block" id="add" style="margin-top:14px">+ Añadir alimento</button>`;
   const DAYC=`
