@@ -1212,6 +1212,7 @@ html .card.jhero,html[data-tema=ciruela] .card.jhero{background-image:none!impor
 .mvsh{justify-content:space-between}.mvsh b{flex:1;text-align:center;font-size:16px}.mvsh .ar{border-radius:50%!important;width:38px;height:38px;font-size:17px;flex:none;color:#711943;background:#fefdfc;border:1px solid var(--bd);box-shadow:0 2px 8px -3px rgba(60,30,55,.3)}
 @media(max-width:700px){.modal .sheet:has(#apt){height:calc(100dvh - 24px);max-height:none}}
 .mver{white-space:nowrap;flex:none}.mact .row.between{gap:10px;align-items:flex-start}
+.mvedit{display:flex;gap:8px;align-items:center}.mvchk.pen{background:#eadee9;color:#711943;font-size:18px;border:1px solid #e3d1d9}
 </style>
 </head>
 <body>
@@ -5499,7 +5500,7 @@ ${esSilla(u.profile)?`  <div class="card" style="padding:18px">
   </div>
 `:`  <div class="card mvpas" id="pcard" role="button" tabindex="0">
     <div class="row between"><span class="mvpt">${ico('act-pasos','mi')}<b>Pasos del día</b></span><button class="mvpo" id="pobj">Objetivo: ${fmt(objP)}</button></div>
-    <div class="mvpb"><div class="mvpn"><b>${fmt(pasos)}</b><small> pasos</small></div>${pasos>=objP?'<span class="mvchk on">✓</span>':''}</div>
+    <div class="mvpb"><div class="mvpn"><b>${fmt(pasos)}</b><small> pasos</small></div><span class="mvedit">${pasos>=objP?'<span class="mvchk on">✓</span>':''}<span class="mvchk pen" aria-hidden="true">✎</span></span></div>
     <div class="minibar"><i style="width:${Math.min(pasos/objP*100,100)}%;background:${pasos>=objP?'var(--base)':'var(--plum)'}"></i></div>
     <p class="small muted" style="margin-top:8px">${pasos?`${fmt1(pasosKm(u,pasos))} km · ${fmt(pasosKcal(u,log))} kcal${pasos>=objP?'':` · te faltan ${fmt(objP-pasos)}`}`:'Toca para apuntar tus pasos'}</p>
   </div>
