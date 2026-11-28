@@ -5498,7 +5498,7 @@ ${esSilla(u.profile)?`  <div class="card" style="padding:18px">
   </div>
 `:`  <div class="card mvpas" id="pcard" role="button" tabindex="0">
     <div class="row between"><span class="mvpt">${ico('act-pasos','mi')}<b>Pasos del día</b></span><button class="mvpo" id="pobj">Objetivo: ${fmt(objP)}</button></div>
-    <div class="mvpb"><div class="mvpn"><b>${fmt(pasos)}</b><small> pasos</small></div><span class="mvchk ${pasos>=objP?'on':''}">${pasos>=objP?'✓':''}</span></div>
+    <div class="mvpb"><div class="mvpn"><b>${fmt(pasos)}</b><small> pasos</small></div>${pasos>=objP?'<span class="mvchk on">✓</span>':''}</div>
     <div class="minibar"><i style="width:${Math.min(pasos/objP*100,100)}%;background:${pasos>=objP?'var(--base)':'var(--plum)'}"></i></div>
     <p class="small muted" style="margin-top:8px">${pasos?`${fmt1(pasosKm(u,pasos))} km · ${fmt(pasosKcal(u,log))} kcal${pasos>=objP?'':` · te faltan ${fmt(objP-pasos)}`}`:'Toca para apuntar tus pasos'}</p>
   </div>
